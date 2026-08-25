@@ -11,10 +11,10 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.4.1
+// @version      1.4.2
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动采集、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
-// @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動採集、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
+// @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
 // @description:ja 現在のDiscordチャンネルから閲覧可能なメッセージをエクスポート。日付範囲の自動スクロール、TXT/JSON/CSV/HTML、添付、埋め込み、返信、リアクション、多言語UIに対応。データはブラウザ内だけで処理します。
 // @description:ko 현재 Discord 채널에서 계정이 볼 수 있는 메시지를 내보냅니다. 날짜 범위 자동 스크롤, TXT/JSON/CSV/HTML, 첨부 파일, 임베드, 답글, 반응, 다국어 패널을 지원하며 데이터는 브라우저에서만 처리됩니다.
 // @description:es Exporta los mensajes visibles para tu cuenta del canal actual. Incluye desplazamiento automático por fechas, TXT/JSON/CSV/HTML, adjuntos, incrustaciones, respuestas, reacciones y panel multilingüe. Los datos permanecen en el navegador.
@@ -55,7 +55,7 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.4.1';
+  const VERSION = '1.4.2';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -197,11 +197,11 @@
       delayNormal: '標準（700 毫秒）',
       delaySafe: '較慢（1200 毫秒）',
       scan: '掃描可見訊息',
-      fetch: '採集日期範圍',
+      fetch: '擷取日期範圍',
       cancel: '取消',
       copy: '複製',
       download: '下載',
-      clear: '清除已採集資料',
+      clear: '清除已擷取資料',
       minimize: '最小化',
       close: '隱藏',
       timezone: '日期依瀏覽器本地時區計算：{zone}',
@@ -209,20 +209,20 @@
       idle: '面板就緒，正在觀察目前頻道。',
       scanning: '正在掃描可見訊息…',
       seeking: '正在雙向定位日期邊界… 第 {step} 步',
-      collecting: '正在採集所選範圍… {percent}% · 第 {step} 步',
+      collecting: '正在擷取所選範圍… {percent}% · 第 {step} 步',
       done: '完成，可匯出 {count} 則訊息。',
-      cancelled: '已取消自動採集。',
+      cancelled: '已取消自動擷取。',
       noChannel: '請先開啟 Discord 文字頻道。',
       noScroller: '找不到訊息清單，請重新整理 Discord 後再試。',
       badDates: '請選擇有效的開始與結束日期，且開始日期不得晚於結束日期。',
-      noMessages: '已採集內容中沒有符合此日期範圍的訊息。',
+      noMessages: '已擷取內容中沒有符合此日期範圍的訊息。',
       copied: '已複製 {count} 則訊息。',
       copyFailed: '無法寫入剪貼簿，請改用「下載」。',
       downloaded: '已下載 {count} 則訊息。',
-      clearConfirm: '清除目前頻道已採集的全部訊息？',
+      clearConfirm: '清除目前頻道已擷取的全部訊息？',
       cleared: '已清除目前頻道資料。',
-      routeChanged: '偵測到頻道已切換，自動採集已停止。',
-      stalled: 'Discord 未繼續載入訊息，已保留目前採集內容。',
+      routeChanged: '偵測到頻道已切換，自動擷取已停止。',
+      stalled: 'Discord 未繼續載入訊息，已保留目前擷取內容。',
       txt: '純文字（TXT）',
       json: '結構化資料（JSON）',
       csv: '試算表（CSV）',
@@ -265,7 +265,7 @@
       close: '非表示',
       timezone: '日付はローカルタイムゾーンを使用：{zone}',
       shortcut: '表示/非表示：Alt + Shift + D',
-      idle: 'パネルは準備完了。現在のチャンネルを観察中。',
+      idle: 'パネルは準備完了。現在のチャンネルを待機中。',
       scanning: '表示中のメッセージをスキャン中…',
       seeking: '日付境界を双方向に検索中… {step} ステップ',
       collecting: '選択範囲を収集中… {percent}% · {step} ステップ',
@@ -281,7 +281,7 @@
       clearConfirm: '現在のチャンネルの収集データを消去しますか？',
       cleared: '収集データを消去しました。',
       routeChanged: 'チャンネルが変わったため収集を停止しました。',
-      stalled: 'Discordの読み込みが停止しました。到達済みの内容を保持します。',
+      stalled: 'Discordの読み込みが停止しました。取得済みの履歴を保持します。',
       txt: 'テキスト（TXT）',
       json: '構造化データ（JSON）',
       csv: '表計算（CSV）',
@@ -311,9 +311,9 @@
       format: '형식',
       delay: '스크롤 간격',
       autoDownload: '완료 후 자동 다운로드',
-      delayFast: '빠름(400ms)',
-      delayNormal: '보통(700ms)',
-      delaySafe: '느림(1200ms)',
+      delayFast: '빠른 속도 (400ms)',
+      delayNormal: '보통 속도 (700ms)',
+      delaySafe: '느린 속도 (1200ms)',
       scan: '보이는 메시지 스캔',
       fetch: '날짜 범위 수집',
       cancel: '취소',
@@ -383,7 +383,7 @@
       close: 'Ocultar',
       timezone: 'Las fechas usan tu zona local: {zone}',
       shortcut: 'Mostrar/ocultar: Alt + Mayús + D',
-      idle: 'Panel listo; observando el canal actual.',
+      idle: 'Panel listo — esperando en el canal actual.',
       scanning: 'Escaneando mensajes visibles…',
       seeking: 'Localizando el límite de fecha en ambas direcciones… paso {step}',
       collecting: 'Recopilando el rango… {percent}% · paso {step}',
@@ -442,7 +442,7 @@
       close: 'Masquer',
       timezone: 'Dates selon votre fuseau local : {zone}',
       shortcut: 'Afficher/masquer : Alt + Maj + D',
-      idle: 'Panneau prêt ; observation du salon actuel.',
+      idle: 'Panneau prêt — salon actuel prêt pour la collecte.',
       scanning: 'Analyse des messages visibles…',
       seeking: 'Recherche bidirectionnelle de la limite de date… étape {step}',
       collecting: 'Collecte de la période… {percent}% · étape {step}',
@@ -501,7 +501,7 @@
       close: 'Ausblenden',
       timezone: 'Datumsangaben verwenden Ihre lokale Zeitzone: {zone}',
       shortcut: 'Ein-/ausblenden: Alt + Umschalt + D',
-      idle: 'Panel bereit – aktueller Kanal wird beobachtet.',
+      idle: 'Panel bereit – aktueller Kanal steht zur Erfassung bereit.',
       scanning: 'Sichtbare Nachrichten werden erfasst…',
       seeking: 'Datumsgrenze wird in beide Richtungen gesucht… Schritt {step}',
       collecting: 'Zeitraum wird erfasst… {percent}% · Schritt {step}',
@@ -560,7 +560,7 @@
       close: 'Ocultar',
       timezone: 'As datas usam seu fuso local: {zone}',
       shortcut: 'Mostrar/ocultar: Alt + Shift + D',
-      idle: 'Painel pronto; observando o canal atual.',
+      idle: 'Painel pronto — aguardando no canal atual.',
       scanning: 'Lendo mensagens visíveis…',
       seeking: 'Localizando o limite de data nas duas direções… etapa {step}',
       collecting: 'Coletando o período… {percent}% · etapa {step}',
@@ -619,7 +619,7 @@
       close: 'Скрыть',
       timezone: 'Даты используют ваш часовой пояс: {zone}',
       shortcut: 'Показать/скрыть: Alt + Shift + D',
-      idle: 'Панель готова; наблюдение за текущим каналом.',
+      idle: 'Панель готова — ожидание в текущем канале.',
       scanning: 'Сканирование видимых сообщений…',
       seeking: 'Двунаправленный поиск границы даты… шаг {step}',
       collecting: 'Сбор диапазона… {percent}% · шаг {step}',
@@ -635,13 +635,13 @@
       clearConfirm: 'Удалить собранные сообщения текущего канала?',
       cleared: 'Данные текущего канала удалены.',
       routeChanged: 'Канал изменился, сбор остановлен.',
-      stalled: 'Discord перестал загружать. Всё достигнутое сохранено.',
+      stalled: 'Discord перестал загружать. Все полученные сообщения сохранены.',
       txt: 'Текст (TXT)',
       json: 'Структурированные данные (JSON)',
       csv: 'Таблица (CSV)',
       html: 'Веб-страница (HTML)',
       reply: 'Ответ',
-      embeds: 'Встраивания',
+      embeds: 'Встроенный контент',
       attachments: 'Вложения',
       reactions: 'Реакции',
       stickers: 'Стикеры',
@@ -678,7 +678,7 @@
       close: 'إخفاء',
       timezone: 'تستخدم التواريخ منطقتك الزمنية: {zone}',
       shortcut: 'إظهار/إخفاء: Alt + Shift + D',
-      idle: 'اللوحة جاهزة — جارٍ متابعة القناة الحالية.',
+      idle: 'اللوحة جاهزة — في انتظار القناة الحالية.',
       scanning: 'جارٍ مسح الرسائل الظاهرة…',
       seeking: 'جارٍ تحديد حد التاريخ في الاتجاهين… الخطوة {step}',
       collecting: 'جارٍ جمع النطاق… {percent}% · الخطوة {step}',
