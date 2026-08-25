@@ -24,7 +24,7 @@ Discord 私有 API，也不会上传聊天内容。
 ## 使用
 
 打开 Discord 网页版目标文字频道，选择日期范围和导出格式，点击
-**自动刷取日期范围**。自动采集期间不要手动滚动，也不要切换频道。按
+**采集日期范围**。自动采集期间不要手动滚动，也不要切换频道。按
 **Alt/Option + Shift + D** 可显示/隐藏面板。
 
 日期按浏览器本地时区计算，结束日期包含当天全部消息。
@@ -36,3 +36,8 @@ Discord 尚未加载的历史。HTML 中的媒体保留远程
 URL，因此链接未来可能过期、被删除或需要权限。
 
 请只导出你有权处理的聊天内容，并遵守服务器规则、适用法律和参与者隐私。
+
+## 源码与支持
+
+- [GitHub 仓库](https://github.com/laipeng101/discord-chat-exporter)
+- [反馈问题](https://github.com/laipeng101/discord-chat-exporter/issues)

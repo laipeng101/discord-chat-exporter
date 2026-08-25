@@ -26,7 +26,7 @@ script não chama APIs privadas do Discord nem envia o conteúdo do chat.
 ## Uso
 
 Abra um canal de texto no Discord Web, escolha o período e o formato e
-clique em **Fetch date range**. Não role manualmente nem troque de canal
+clique em **Coletar período**. Não role manualmente nem troque de canal
 durante a coleta automática. **Alt/Option + Shift + D** mostra ou oculta
 o painel.
 
@@ -40,3 +40,8 @@ Discord já carregou. Não contorna permissões, não recupera mensagens
 excluídas e não acessa diretamente histórico ainda não carregado. A
 mídia no HTML continua referenciada por URL remota e pode expirar ou
 exigir permissão.
+
+## Código-fonte e suporte
+
+- [Repositório no GitHub](https://github.com/laipeng101/discord-chat-exporter)
+- [Relatar um problema](https://github.com/laipeng101/discord-chat-exporter/issues)

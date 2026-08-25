@@ -27,7 +27,7 @@ no usa APIs privadas de Discord ni sube el contenido del chat.
 ## Uso
 
 Abre un canal de texto en Discord Web, elige el intervalo y el formato y
-pulsa **Fetch date range / Obtener intervalo**. No desplaces manualmente
+pulsa **Recopilar rango de fechas**. No desplaces manualmente
 ni cambies de canal durante la recopilación automática. **Alt/Option +
 Shift + D** muestra u oculta el panel.
 
@@ -40,3 +40,8 @@ Solo puede leer mensajes que la cuenta actual puede ver y que Discord ya
 haya renderizado. No evita permisos, no recupera mensajes borrados ni
 accede directamente a historial aún no cargado. Los medios del HTML
 siguen usando URLs remotas, que pueden caducar o requerir permisos.
+
+## Código fuente y soporte
+
+- [Repositorio de GitHub](https://github.com/laipeng101/discord-chat-exporter)
+- [Reportar un problema](https://github.com/laipeng101/discord-chat-exporter/issues)

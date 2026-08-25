@@ -29,7 +29,7 @@ Chat-Inhalte werden nicht hochgeladen.
 ## Verwendung
 
 Öffnen Sie einen Textkanal in Discord Web, wählen Sie Zeitraum und
-Format und starten Sie **Fetch date range**. Während der automatischen
+Format und starten Sie **Zeitraum erfassen**. Während der automatischen
 Erfassung nicht manuell scrollen oder den Kanal wechseln. **Alt/Option +
 Shift + D** blendet das Panel ein oder aus.
 
@@ -43,3 +43,8 @@ und von Discord tatsächlich geladen wurden. Es umgeht keine
 Berechtigungen, stellt keine gelöschten Nachrichten wieder her und liest
 keinen noch nicht geladenen Verlauf direkt. Medien im HTML bleiben
 externe URLs und können später ablaufen oder Zugriffsrechte benötigen.
+
+## Quellcode und Support
+
+- [GitHub-Repository](https://github.com/laipeng101/discord-chat-exporter)
+- [Problem melden](https://github.com/laipeng101/discord-chat-exporter/issues)

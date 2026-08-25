@@ -31,7 +31,7 @@ tab and does not call Discord private APIs or upload chat content.
 ## Use
 
 Open a Discord text channel in the browser, choose the date range and
-export format, then click **Fetch date range**. Do not manually scroll
+export format, then click **Collect date range**. Do not manually scroll
 or switch channels while automatic collection is running. Press
 **Alt/Option + Shift + D** to show or hide the panel.
 
@@ -47,3 +47,8 @@ referenced by URL, so remote media may later expire or require access.
 
 Use the exporter only for conversations you are authorized to handle and
 respect server rules, applicable law, and participant privacy.
+
+## Source and support
+
+- [GitHub repository](https://github.com/laipeng101/discord-chat-exporter)
+- [Report an issue](https://github.com/laipeng101/discord-chat-exporter/issues)

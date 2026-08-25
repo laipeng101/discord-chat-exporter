@@ -29,7 +29,7 @@ discussion n'est envoyé ailleurs.
 ## Utilisation
 
 Ouvrez un salon texte dans Discord Web, choisissez la période et le
-format, puis lancez **Fetch date range**. Ne faites pas défiler
+format, puis lancez **Collecter la période**. Ne faites pas défiler
 manuellement et ne changez pas de salon pendant la collecte automatique.
 **Alt/Option + Shift + D** affiche ou masque le panneau.
 
@@ -43,3 +43,8 @@ réellement chargés par Discord. Il ne contourne pas les permissions, ne
 restaure pas les messages supprimés et n'accède pas directement à
 l'historique non chargé. Les médias HTML restent référencés par URL
 distante et peuvent expirer ou nécessiter des droits.
+
+## Code source et assistance
+
+- [Dépôt GitHub](https://github.com/laipeng101/discord-chat-exporter)
+- [Signaler un problème](https://github.com/laipeng101/discord-chat-exporter/issues)

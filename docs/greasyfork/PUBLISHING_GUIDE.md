@@ -47,6 +47,8 @@ For a future `vX.Y.Z`:
 After each release, check:
 
 ```bash
+node --check discord-chat-exporter.user.js
+node scripts/check-locales.mjs
 gh release list --repo laipeng101/discord-chat-exporter
 gh release view vX.Y.Z --repo laipeng101/discord-chat-exporter --json url,tagName,assets
 curl -sSL https://raw.githubusercontent.com/laipeng101/discord-chat-exporter/main/discord-chat-exporter.user.js | grep -m1 '^// @version'

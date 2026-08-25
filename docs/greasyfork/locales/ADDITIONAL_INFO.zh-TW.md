@@ -22,7 +22,7 @@ Discord 私有 API，也不會上傳聊天內容。
 ## 使用
 
 開啟 Discord 網頁版目標文字頻道，選擇日期範圍與匯出格式，按下
-**自動擷取日期範圍**。自動擷取期間請勿手動捲動或切換頻道。按
+**採集日期範圍**。自動擷取期間請勿手動捲動或切換頻道。按
 **Alt/Option + Shift + D** 可顯示或隱藏面板。
 
 日期依瀏覽器本地時區計算，結束日期包含當天全部訊息。
@@ -33,3 +33,8 @@ Discord 私有 API，也不會上傳聊天內容。
 中的媒體仍使用遠端 URL，因此未來可能失效或需要權限。
 
 請只匯出你有權處理的內容，並遵守伺服器規則、適用法律與參與者隱私。
+
+## 原始碼與支援
+
+- [GitHub 存放庫](https://github.com/laipeng101/discord-chat-exporter)
+- [回報問題](https://github.com/laipeng101/discord-chat-exporter/issues)

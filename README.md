@@ -36,7 +36,7 @@ If the panel is hidden, press `Alt/Option + Shift + D` to show it again.
 
 1. Open the target channel, thread, or DM in Discord Web.
 2. Choose a start date, an end date, and an export format.
-3. Click **Fetch date range**.
+3. Click **Collect date range**.
 4. Do not manually scroll or switch channels while automatic collection runs.
 5. When it finishes, copy or download the result.
 6. Press `Alt/Option + Shift + D` to show or hide the panel.
