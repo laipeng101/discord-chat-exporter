@@ -10,11 +10,12 @@
 - 定位阶段直接跳到当前已加载消息列表的顶部或底部，触发 Discord 加载下一批内容；越过边界后自动回到边界前方再顺序采集。
 - 日期按浏览器本地时区解释，结束日期包含当天全部消息。
 - 使用 Discord Snowflake 消息 ID 还原时间，避免受到 Discord 界面语言和时间显示格式影响。
-- 自动去重并按消息 ID 恢复聊天顺序。
+- 自动按消息 ID 去重并恢复聊天顺序；同一 Discord 附件的 CDN 原图、媒体代理和缩略图会合并为一项，优先保留原图地址。
 - 尽可能采集作者、正文、回复摘要、嵌入内容、贴纸、图片、视频、音频、附件地址、反应和编辑状态。
 - 导出 TXT、JSON、CSV、HTML。
 - CSV 含 UTF-8 BOM，可直接用 Excel 等表格软件打开。
-- HTML 为单文件可阅读归档页面：直接展示可识别的图片，提供视频和音频播放器，并保留文件链接；页面自动适配明暗主题。
+- HTML 为单文件可阅读归档页面：按日期分组，连续作者消息紧凑显示，正文 URL 可点击，代码块单独排版，并提供全文/作者搜索。
+- HTML 直接展示可识别的图片，提供视频和音频播放器，并保留文件链接；页面支持明暗主题、移动端和打印布局。
 - 可选“完成后自动下载”，一次操作完成刷取和导出。
 - 面板语言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский、العربية。
 - 支持 `Alt/Option + Shift + D` 显示或隐藏面板。
@@ -67,6 +68,8 @@
 ### HTML
 
 适合阅读和浏览媒体。生成单个 HTML 文件，其中可识别的图片会直接显示，视频和音频使用浏览器播放器，其他附件显示为链接。
+
+页面顶部包含日期范围、消息数量、时区、导出时间和搜索栏；消息按浏览器本地日期分组。五分钟内同一作者的连续消息会使用紧凑布局，但每条消息仍保留独立时间、来源链接和消息 ID。长归档使用延迟图片加载及浏览器内容可见性优化，减少初次打开时的渲染负担。
 
 HTML 文件只保存消息文本、结构和媒体 URL，不会把媒体二进制数据打包进 HTML。打开 HTML 时需要联网读取 Discord CDN 或原始站点；临时、已删除、需要登录或已经过期的媒体 URL 可能无法显示。每项媒体下方都会保留原始链接，加载失败时仍可检查链接。
 
@@ -143,6 +146,16 @@ window.__discordChatExporter.hide();       // 隐藏面板
 
 ## 更新记录
 
+### 1.2.0
+
+- 根据 514 条消息的实际月度导出样本重做 HTML 信息层级和排版。
+- 修复作者名混入“服务器标签”、公会标签和部分角色徽章文字的问题。
+- 合并同一 Discord 附件的 CDN 原图、媒体代理、缩略图和 GIF/WebP 派生版本；样本中的 118 个媒体项可合并为约 60 个独立媒体。
+- 过滤嵌入卡片的作者/提供方小图标，避免把站点头像作为正文大图展示。
+- 新增日期分组、连续消息紧凑布局、作者首字母头像、本地化时间、搜索过滤、结果计数和返回顶部。
+- 回复、嵌入、反应、代码块、长链接和媒体说明改为独立且更紧凑的视觉样式。
+- 对长归档使用 `content-visibility`，并完善移动端、暗色模式和打印样式。
+
 ### 1.1.0
 
 - HTML 导出新增图片预览、视频播放器、音频播放器和普通文件链接。
@@ -158,7 +171,7 @@ Greasy Fork 要求脚本具有准确说明、代码可检查、至少一个 `@ma
 
 ## English quick guide
 
-Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script detects whether the boundary is older or newer than the current viewport, seeks in the correct direction, then scans forward through the selected period. HTML exports render recognized images, video, and audio from their original URLs. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
+Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script detects whether the boundary is older or newer than the current viewport, seeks in the correct direction, then scans forward through the selected period. HTML exports group messages by local date, compact consecutive posts, deduplicate media variants, render recognized images/video/audio, and include instant text/author search. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
 
 The script reads only messages rendered in the current tab, never calls Discord's private API, loads no external code, and sends no chat data anywhere.
 

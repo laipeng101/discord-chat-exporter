@@ -11,7 +11,7 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.1.0
+// @version      1.2.0
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动抓取、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
 // @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
@@ -53,7 +53,7 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.1.0';
+  const VERSION = '1.2.0';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -61,7 +61,8 @@
 
   const translations = {
     en: {
-      title: 'Discord Chat Exporter', collected: '{selected} in range · {total} seen',
+      title: 'Discord Chat Exporter', collected: '{selected} in range · {total} seen', messages: 'messages',
+      searchPlaceholder: 'Search messages or authors…', showing: 'Showing {visible} of {total}', backToTop: 'Back to top',
       language: 'Language', startDate: 'Start date', endDate: 'End date', format: 'Format',
       delay: 'Scroll delay', autoDownload: 'Download automatically when finished', delayFast: 'Fast (400 ms)', delayNormal: 'Normal (700 ms)',
       delaySafe: 'Safe (1200 ms)', scan: 'Scan visible', fetch: 'Fetch date range',
@@ -82,7 +83,8 @@
       emptyText: '[No text content]', edited: 'edited', source: 'Source', messageId: 'Message ID'
     },
     'zh-CN': {
-      title: 'Discord 聊天导出器', collected: '范围内 {selected} 条 · 已见 {total} 条',
+      title: 'Discord 聊天导出器', collected: '范围内 {selected} 条 · 已见 {total} 条', messages: '条消息',
+      searchPlaceholder: '搜索消息或作者…', showing: '显示 {visible} / {total}', backToTop: '返回顶部',
       language: '语言', startDate: '开始日期', endDate: '结束日期', format: '导出格式',
       delay: '滚动等待', autoDownload: '完成后自动下载', delayFast: '快速（400 毫秒）', delayNormal: '标准（700 毫秒）',
       delaySafe: '稳妥（1200 毫秒）', scan: '扫描当前画面', fetch: '自动刷取日期范围',
@@ -103,7 +105,8 @@
       emptyText: '[无文字内容]', edited: '已编辑', source: '来源', messageId: '消息 ID'
     },
     'zh-TW': {
-      title: 'Discord 聊天匯出器', collected: '範圍內 {selected} 則 · 已見 {total} 則',
+      title: 'Discord 聊天匯出器', collected: '範圍內 {selected} 則 · 已見 {total} 則', messages: '則訊息',
+      searchPlaceholder: '搜尋訊息或作者…', showing: '顯示 {visible} / {total}', backToTop: '返回頂端',
       language: '語言', startDate: '開始日期', endDate: '結束日期', format: '匯出格式',
       delay: '捲動等待', autoDownload: '完成後自動下載', delayFast: '快速（400 毫秒）', delayNormal: '標準（700 毫秒）',
       delaySafe: '穩妥（1200 毫秒）', scan: '掃描目前畫面', fetch: '自動擷取日期範圍',
@@ -124,7 +127,8 @@
       emptyText: '[無文字內容]', edited: '已編輯', source: '來源', messageId: '訊息 ID'
     },
     ja: {
-      title: 'Discord チャットエクスポーター', collected: '範囲内 {selected} 件 · 検出 {total} 件',
+      title: 'Discord チャットエクスポーター', collected: '範囲内 {selected} 件 · 検出 {total} 件', messages: '件のメッセージ',
+      searchPlaceholder: 'メッセージまたは投稿者を検索…', showing: '{total} 件中 {visible} 件を表示', backToTop: '先頭へ戻る',
       language: '言語', startDate: '開始日', endDate: '終了日', format: '形式', delay: '待機時間', autoDownload: '完了時に自動ダウンロード',
       delayFast: '高速（400 ms）', delayNormal: '標準（700 ms）', delaySafe: '安全（1200 ms）',
       scan: '表示分をスキャン', fetch: '日付範囲を自動取得', cancel: 'キャンセル', copy: 'コピー',
@@ -145,7 +149,8 @@
       emptyText: '[本文なし]', edited: '編集済み', source: 'ソース', messageId: 'メッセージID'
     },
     ko: {
-      title: 'Discord 채팅 내보내기', collected: '범위 {selected}개 · 확인 {total}개',
+      title: 'Discord 채팅 내보내기', collected: '범위 {selected}개 · 확인 {total}개', messages: '개 메시지',
+      searchPlaceholder: '메시지 또는 작성자 검색…', showing: '{total}개 중 {visible}개 표시', backToTop: '맨 위로',
       language: '언어', startDate: '시작 날짜', endDate: '종료 날짜', format: '형식', delay: '스크롤 대기', autoDownload: '완료 후 자동 다운로드',
       delayFast: '빠름(400ms)', delayNormal: '보통(700ms)', delaySafe: '안전(1200ms)',
       scan: '보이는 내용 스캔', fetch: '날짜 범위 자동 수집', cancel: '취소', copy: '복사', download: '다운로드',
@@ -164,7 +169,8 @@
       emptyText: '[텍스트 없음]', edited: '수정됨', source: '출처', messageId: '메시지 ID'
     },
     es: {
-      title: 'Exportador de chats de Discord', collected: '{selected} en el rango · {total} vistos',
+      title: 'Exportador de chats de Discord', collected: '{selected} en el rango · {total} vistos', messages: 'mensajes',
+      searchPlaceholder: 'Buscar mensajes o autores…', showing: 'Mostrando {visible} de {total}', backToTop: 'Volver arriba',
       language: 'Idioma', startDate: 'Fecha inicial', endDate: 'Fecha final', format: 'Formato', delay: 'Espera al desplazar', autoDownload: 'Descargar automáticamente al terminar',
       delayFast: 'Rápida (400 ms)', delayNormal: 'Normal (700 ms)', delaySafe: 'Segura (1200 ms)',
       scan: 'Escanear visibles', fetch: 'Obtener rango de fechas', cancel: 'Cancelar', copy: 'Copiar', download: 'Descargar',
@@ -183,7 +189,8 @@
       emptyText: '[Sin texto]', edited: 'editado', source: 'Origen', messageId: 'ID del mensaje'
     },
     fr: {
-      title: 'Exportateur de discussions Discord', collected: '{selected} dans la période · {total} vus',
+      title: 'Exportateur de discussions Discord', collected: '{selected} dans la période · {total} vus', messages: 'messages',
+      searchPlaceholder: 'Rechercher des messages ou auteurs…', showing: '{visible} sur {total} affichés', backToTop: 'Retour en haut',
       language: 'Langue', startDate: 'Date de début', endDate: 'Date de fin', format: 'Format', delay: 'Délai de défilement', autoDownload: 'Télécharger automatiquement à la fin',
       delayFast: 'Rapide (400 ms)', delayNormal: 'Normal (700 ms)', delaySafe: 'Prudent (1200 ms)',
       scan: 'Analyser l’écran', fetch: 'Récupérer la période', cancel: 'Annuler', copy: 'Copier', download: 'Télécharger',
@@ -202,7 +209,8 @@
       emptyText: '[Aucun texte]', edited: 'modifié', source: 'Source', messageId: 'ID du message'
     },
     de: {
-      title: 'Discord-Chat-Exporter', collected: '{selected} im Zeitraum · {total} gesehen',
+      title: 'Discord-Chat-Exporter', collected: '{selected} im Zeitraum · {total} gesehen', messages: 'Nachrichten',
+      searchPlaceholder: 'Nachrichten oder Autoren suchen…', showing: '{visible} von {total} angezeigt', backToTop: 'Nach oben',
       language: 'Sprache', startDate: 'Startdatum', endDate: 'Enddatum', format: 'Format', delay: 'Scroll-Wartezeit', autoDownload: 'Nach Abschluss automatisch herunterladen',
       delayFast: 'Schnell (400 ms)', delayNormal: 'Normal (700 ms)', delaySafe: 'Sicher (1200 ms)',
       scan: 'Sichtbares scannen', fetch: 'Zeitraum abrufen', cancel: 'Abbrechen', copy: 'Kopieren', download: 'Herunterladen',
@@ -221,7 +229,8 @@
       emptyText: '[Kein Text]', edited: 'bearbeitet', source: 'Quelle', messageId: 'Nachrichten-ID'
     },
     'pt-BR': {
-      title: 'Exportador de chat do Discord', collected: '{selected} no período · {total} vistos',
+      title: 'Exportador de chat do Discord', collected: '{selected} no período · {total} vistos', messages: 'mensagens',
+      searchPlaceholder: 'Buscar mensagens ou autores…', showing: 'Mostrando {visible} de {total}', backToTop: 'Voltar ao topo',
       language: 'Idioma', startDate: 'Data inicial', endDate: 'Data final', format: 'Formato', delay: 'Espera da rolagem', autoDownload: 'Baixar automaticamente ao concluir',
       delayFast: 'Rápida (400 ms)', delayNormal: 'Normal (700 ms)', delaySafe: 'Segura (1200 ms)',
       scan: 'Ler mensagens visíveis', fetch: 'Buscar período', cancel: 'Cancelar', copy: 'Copiar', download: 'Baixar',
@@ -240,7 +249,8 @@
       emptyText: '[Sem texto]', edited: 'editado', source: 'Origem', messageId: 'ID da mensagem'
     },
     ru: {
-      title: 'Экспорт чата Discord', collected: 'В диапазоне: {selected} · просмотрено: {total}',
+      title: 'Экспорт чата Discord', collected: 'В диапазоне: {selected} · просмотрено: {total}', messages: 'сообщений',
+      searchPlaceholder: 'Поиск сообщений или авторов…', showing: 'Показано {visible} из {total}', backToTop: 'Наверх',
       language: 'Язык', startDate: 'Начальная дата', endDate: 'Конечная дата', format: 'Формат', delay: 'Задержка прокрутки', autoDownload: 'Скачать автоматически после завершения',
       delayFast: 'Быстро (400 мс)', delayNormal: 'Обычно (700 мс)', delaySafe: 'Надёжно (1200 мс)',
       scan: 'Сканировать видимое', fetch: 'Собрать диапазон', cancel: 'Отмена', copy: 'Копировать', download: 'Скачать',
@@ -259,7 +269,8 @@
       emptyText: '[Нет текста]', edited: 'изменено', source: 'Источник', messageId: 'ID сообщения'
     },
     ar: {
-      title: 'مُصدِّر محادثات Discord', collected: '{selected} ضمن النطاق · شوهد {total}',
+      title: 'مُصدِّر محادثات Discord', collected: '{selected} ضمن النطاق · شوهد {total}', messages: 'رسالة',
+      searchPlaceholder: 'البحث في الرسائل أو الكتّاب…', showing: 'عرض {visible} من {total}', backToTop: 'العودة للأعلى',
       language: 'اللغة', startDate: 'تاريخ البدء', endDate: 'تاريخ الانتهاء', format: 'الصيغة', delay: 'مهلة التمرير', autoDownload: 'تنزيل تلقائي عند الاكتمال',
       delayFast: 'سريع (400 مللي ثانية)', delayNormal: 'عادي (700 مللي ثانية)', delaySafe: 'آمن (1200 مللي ثانية)',
       scan: 'مسح الظاهر', fetch: 'جمع نطاق التاريخ', cancel: 'إلغاء', copy: 'نسخ', download: 'تنزيل',
@@ -347,6 +358,19 @@
       .trim();
   }
 
+  function cleanAuthorLabel(value) {
+    let author = clean(value).replace(/\u00A0/g, ' ');
+    const serverTagPattern = /(?:,\s*)?(?:server\s*tag|服务器标签|伺服器標籤|サーバータグ|서버\s*태그|etiqueta\s+del\s+servidor|balise\s+du\s+serveur|server-tag|tag\s+do\s+servidor|тег\s+сервера|علامة\s+الخادم)\s*[:：].*$/i;
+    const containedServerTag = serverTagPattern.test(author);
+    author = author.replace(serverTagPattern, '').trim();
+
+    if (containedServerTag) {
+      author = author.replace(/\s*\[[^\]\n]{1,24}\]\s*,?\s*$/, '').trim();
+    }
+
+    return author;
+  }
+
   function uniqueStrings(values) {
     return [...new Set(values.map(clean).filter(Boolean))];
   }
@@ -355,12 +379,18 @@
     const match = location.pathname.match(/^\/channels\/([^/]+)\/([^/?#]+)/);
     if (!match) return null;
 
+    const title = clean(document.title)
+      .replace(/^\(\d+\)\s*/, '')
+      .replace(/\s*[–-]\s*Discord\s*$/i, '');
+    const titleParts = title.split(/\s*[|｜]\s*/).map(clean).filter(Boolean);
+    if (/^discord$/i.test(titleParts[0] || '')) titleParts.shift();
+
     return {
       guildId: match[1],
       channelId: match[2],
       key: `${match[1]}:${match[2]}`,
       url: `${location.origin}/channels/${match[1]}/${match[2]}`,
-      label: clean(document.title.replace(/\s*[|–-]\s*Discord\s*$/i, '')) || match[2]
+      label: titleParts.join(' · ') || title || match[2]
     };
   }
 
@@ -389,14 +419,32 @@
   function getAuthor(item) {
     if (!item) return '';
 
-    const username = item.querySelector('[id^="message-username-"]') ||
-      item.querySelector('h3 [class*="username"]') ||
+    const username = item.querySelector('h3 [class*="username"]') ||
+      item.querySelector('[id^="message-username-"]') ||
       item.querySelector('[class*="headerText"] [class*="username"]');
 
-    if (username) return clean(username.textContent);
+    if (username) {
+      const clone = username.cloneNode(true);
+      clone.querySelectorAll(
+        '[class*="clanTag"], [class*="guildTag"], [class*="chiplet"], [class*="roleIcon"], [class*="botTag"]'
+      ).forEach((node) => node.remove());
+      clone.querySelectorAll('[aria-label]').forEach((node) => {
+        if (cleanAuthorLabel(node.getAttribute('aria-label')) !== clean(node.getAttribute('aria-label'))) node.remove();
+      });
+
+      const directText = [...clone.childNodes]
+        .filter((node) => node.nodeType === Node.TEXT_NODE)
+        .map((node) => node.textContent)
+        .join(' ');
+      const author = cleanAuthorLabel(directText || clone.textContent);
+      if (author) return author;
+    }
 
     const avatar = item.querySelector('img[class*="avatar"][alt]');
-    return avatar ? clean(avatar.alt) : '';
+    return avatar ? cleanAuthorLabel(avatar.alt).replace(
+      /,?\s*(?:avatar|头像|頭像|アバター|아바타|avatar\s+del\s+usuario|аватар)\s*$/i,
+      ''
+    ).trim() : '';
   }
 
   function getReply(item) {
@@ -451,6 +499,38 @@
     return fallback;
   }
 
+  function mediaIdentity(url) {
+    try {
+      const parsed = new URL(url, location.href);
+      const attachment = parsed.pathname.match(
+        /\/(?:ephemeral-)?attachments\/(\d+)\/(\d+)\/([^/?]+)/i
+      );
+
+      if (attachment) {
+        return `discord:${attachment.slice(1).map((part) => decodeURIComponent(part).toLowerCase()).join(':')}`;
+      }
+
+      ['width', 'height', 'quality', 'format'].forEach((key) => parsed.searchParams.delete(key));
+      return `${parsed.hostname.toLowerCase()}${parsed.pathname}?${parsed.searchParams.toString()}`;
+    } catch (_) {
+      return String(url || '');
+    }
+  }
+
+  function mediaPreference(entry) {
+    let score = entry.type === 'image' ? 10 : entry.type === 'video' ? 8 : entry.type === 'audio' ? 6 : 0;
+    try {
+      const parsed = new URL(entry.url, location.href);
+      if (/^cdn\.discordapp\.com$/i.test(parsed.hostname)) score += 100;
+      else if (/^media\.discordapp\.net$/i.test(parsed.hostname)) score += 60;
+      else if (/discordapp\.net$/i.test(parsed.hostname)) score += 40;
+      if (/\.[a-z0-9]{2,5}$/i.test(parsed.pathname)) score += 5;
+    } catch (_) {
+      // Keep the type-only score.
+    }
+    return score;
+  }
+
   function getMedia(item, attachments = []) {
     if (!item) return [];
 
@@ -466,6 +546,8 @@
 
       if (tag === 'img') {
         if (node.closest('[class*="avatar"], [class*="emoji"], [class*="reaction"]')) return;
+        if (node.closest('[class*="embedAuthorIcon"], [class*="embedProvider"], [class*="authorIcon"]')) return;
+        if (/\/icon-default\.[^/?]+\.png(?:[?#]|$)/i.test(url)) return;
 
         const isMessageMedia = node.closest(
           '[class*="attachment"], [class*="embed"], [class*="imageWrapper"], [class*="media"], [class*="sticker"]'
@@ -496,7 +578,9 @@
   function getReactions(item) {
     if (!item) return [];
     const reactions = [...item.querySelectorAll('[class*="reaction"]')];
-    return uniqueStrings(reactions.map((reaction) => reaction.getAttribute('aria-label') || reaction.innerText));
+    return uniqueStrings(reactions.map((reaction) =>
+      clean(reaction.getAttribute('aria-label') || reaction.innerText).replace(/\s+/g, ' ')
+    ));
   }
 
   function findMessageRoot() {
@@ -530,6 +614,18 @@
     return next.length ? uniqueStrings([...(old || []), ...next]) : (old || []);
   }
 
+  function mergeAttachments(next, old) {
+    const merged = new Map();
+    for (const url of [...(old || []), ...(next || [])]) {
+      if (!/^https?:\/\//i.test(url || '')) continue;
+      const identity = mediaIdentity(url);
+      const candidate = { url, type: mediaTypeFromUrl(url, 'file') };
+      const existing = merged.get(identity);
+      if (!existing || mediaPreference(candidate) > mediaPreference(existing)) merged.set(identity, candidate);
+    }
+    return [...merged.values()].map((entry) => entry.url);
+  }
+
   function mergeMedia(next, old) {
     const ranks = { file: 0, audio: 1, video: 2, image: 3 };
     const merged = new Map();
@@ -542,12 +638,20 @@
         alt: clean(entry.alt),
         poster: /^https?:\/\//i.test(entry.poster || '') ? String(entry.poster) : ''
       };
-      const existing = merged.get(normalized.url);
+      const identity = mediaIdentity(normalized.url);
+      const existing = merged.get(identity);
 
-      if (!existing || ranks[normalized.type] > ranks[existing.type]) {
-        merged.set(normalized.url, { ...existing, ...normalized });
+      if (!existing ||
+          ranks[normalized.type] > ranks[existing.type] ||
+          (ranks[normalized.type] === ranks[existing.type] && mediaPreference(normalized) > mediaPreference(existing))) {
+        merged.set(identity, {
+          ...existing,
+          ...normalized,
+          alt: normalized.alt || existing?.alt || '',
+          poster: normalized.poster || existing?.poster || ''
+        });
       } else if (!existing.alt && normalized.alt) {
-        merged.set(normalized.url, { ...existing, alt: normalized.alt });
+        merged.set(identity, { ...existing, alt: normalized.alt });
       }
     }
 
@@ -598,7 +702,7 @@
         text: text || old.text || '',
         reply: reply || old.reply || '',
         embeds: mergeArrays(embeds, old.embeds),
-        attachments: mergeArrays(attachments, old.attachments),
+        attachments: mergeAttachments(attachments, old.attachments),
         media: mergeMedia(media, old.media),
         stickers: mergeArrays(stickers, old.stickers),
         reactions: mergeArrays(reactions, old.reactions),
@@ -741,10 +845,48 @@
     })[character]);
   }
 
-  function htmlSection(title, values) {
+  function linkifyPlainText(value) {
+    const source = String(value || '');
+    const urlPattern = /https?:\/\/[^\s<>"']+/gi;
+    let result = '';
+    let cursor = 0;
+
+    for (const match of source.matchAll(urlPattern)) {
+      let url = match[0];
+      let trailing = '';
+      while (/[),.;!?]$/.test(url)) {
+        trailing = url.slice(-1) + trailing;
+        url = url.slice(0, -1);
+      }
+
+      result += escapeHtml(source.slice(cursor, match.index));
+      result += `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>${escapeHtml(trailing)}`;
+      cursor = match.index + match[0].length;
+    }
+
+    return result + escapeHtml(source.slice(cursor));
+  }
+
+  function formatMessageText(value) {
+    return String(value || '').split(/(```[\s\S]*?```)/g).map((part) => {
+      if (part.startsWith('```') && part.endsWith('```')) {
+        return `<pre><code>${escapeHtml(part.slice(3, -3).replace(/^\n|\n$/g, ''))}</code></pre>`;
+      }
+      return linkifyPlainText(part);
+    }).join('');
+  }
+
+  function htmlSection(title, values, className = '') {
     if (!values?.length) return '';
-    const body = values.map((value) => `<div>${escapeHtml(value)}</div>`).join('');
-    return `<section><h3>${escapeHtml(title)}</h3>${body}</section>`;
+    const body = values.map((value) => `<div>${formatMessageText(value)}</div>`).join('');
+    return `<section class="detail-section ${className}"><h3>${escapeHtml(title)}</h3>${body}</section>`;
+  }
+
+  function htmlReactionsSection(reactions) {
+    if (!reactions?.length) return '';
+    return `<div class="reaction-row" aria-label="${escapeHtml(t('reactions'))}">${reactions.map((reaction) =>
+      `<span class="reaction-chip">${escapeHtml(clean(reaction).replace(/\s+/g, ' '))}</span>`
+    ).join('')}</div>`;
   }
 
   function htmlMediaSection(media, attachments) {
@@ -756,11 +898,12 @@
 
     const body = items.map((entry) => {
       const url = escapeHtml(entry.url);
-      const label = escapeHtml(entry.alt || entry.url.split('/').pop()?.split('?')[0] || entry.type);
-      const link = `<a class="media-link" href="${url}" rel="noreferrer">${label}</a>`;
+      const rawLabel = entry.alt || entry.url.split('/').pop()?.split('?')[0] || entry.type;
+      const label = escapeHtml(rawLabel);
+      const link = `<a class="media-link" href="${url}" target="_blank" rel="noreferrer">${label}</a>`;
 
       if (entry.type === 'image') {
-        return `<figure class="media-item"><a href="${url}" rel="noreferrer"><img src="${url}" alt="${escapeHtml(entry.alt)}" loading="lazy" decoding="async"></a><figcaption>${link}</figcaption></figure>`;
+        return `<figure class="media-item"><a href="${url}" target="_blank" rel="noreferrer"><img src="${url}" alt="${escapeHtml(entry.alt || rawLabel)}" loading="lazy" decoding="async"></a><figcaption>${link}</figcaption></figure>`;
       }
 
       if (entry.type === 'video') {
@@ -775,22 +918,90 @@
       return `<div class="file-item">${link}</div>`;
     }).join('');
 
-    return `<section class="media-section"><h3>${escapeHtml(t('attachments'))}</h3><div class="media-grid">${body}</div></section>`;
+    return `<section class="detail-section media-section"><h3>${escapeHtml(t('attachments'))}</h3><div class="media-grid">${body}</div></section>`;
+  }
+
+  function authorInitial(author) {
+    return Array.from(clean(author || '?'))[0]?.toLocaleUpperCase() || '?';
+  }
+
+  function authorHue(author) {
+    let hash = 0;
+    for (const character of String(author || '')) hash = ((hash << 5) - hash + character.codePointAt(0)) | 0;
+    return Math.abs(hash) % 360;
+  }
+
+  function localDayKey(timestamp) {
+    const date = new Date(timestamp);
+    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+  }
+
+  function localDayLabel(timestamp) {
+    return new Intl.DateTimeFormat(resolveLanguage(), {
+      year: 'numeric', month: 'long', day: 'numeric', weekday: 'short'
+    }).format(new Date(timestamp));
+  }
+
+  function localTimeLabel(timestamp) {
+    return new Intl.DateTimeFormat(resolveLanguage(), {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    }).format(new Date(timestamp));
   }
 
   function htmlExport(messages) {
     const route = getRoute();
-    const cards = messages.map((message) => `
-      <article class="message">
-        <header><strong>${escapeHtml(message.author || '—')}</strong><time>${escapeHtml(message.timestamp)}</time></header>
-        <div class="body">${escapeHtml(message.text || t('emptyText')).replace(/\n/g, '<br>')}</div>
-        ${message.reply ? htmlSection(t('reply'), [message.reply]) : ''}
-        ${htmlSection(t('embeds'), message.embeds)}
-        ${htmlSection('Stickers', message.stickers)}
-        ${htmlMediaSection(message.media, message.attachments)}
-        ${htmlSection(t('reactions'), message.reactions)}
-        <footer><a href="${escapeHtml(message.url)}" rel="noreferrer">${escapeHtml(t('source'))}</a> · ${escapeHtml(message.id)}${message.edited ? ` · ${escapeHtml(t('edited'))}` : ''}</footer>
-      </article>`).join('');
+    const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
+    const generatedAt = new Intl.DateTimeFormat(resolveLanguage(), {
+      dateStyle: 'medium', timeStyle: 'short'
+    }).format(new Date());
+    const groups = [];
+    let currentGroup = null;
+    let previousMessage = null;
+
+    for (const message of messages) {
+      const dayKey = localDayKey(message.timestamp);
+      if (!currentGroup || currentGroup.key !== dayKey) {
+        currentGroup = { key: dayKey, label: localDayLabel(message.timestamp), messages: [] };
+        groups.push(currentGroup);
+      }
+
+      const author = cleanAuthorLabel(message.author || '—');
+      const compact = previousMessage &&
+        cleanAuthorLabel(previousMessage.author) === author &&
+        localDayKey(previousMessage.timestamp) === dayKey &&
+        new Date(message.timestamp).getTime() - new Date(previousMessage.timestamp).getTime() <= 5 * 60 * 1000;
+      const hasVisibleContent = message.text || message.reply || message.embeds?.length ||
+        message.stickers?.length || message.media?.length || message.attachments?.length;
+      const body = message.text || (!hasVisibleContent ? t('emptyText') : '');
+
+      currentGroup.messages.push(`
+        <article class="message${compact ? ' compact' : ''}" aria-label="${escapeHtml(`${author}, ${localTimeLabel(message.timestamp)}`)}">
+          <div class="avatar" style="--author-hue:${authorHue(author)}" aria-hidden="true">${escapeHtml(authorInitial(author))}</div>
+          <div class="message-content">
+            <header class="message-header">
+              <strong class="message-author">${escapeHtml(author)}</strong>
+              <time datetime="${escapeHtml(message.timestamp)}" title="${escapeHtml(message.timestamp)}">${escapeHtml(localTimeLabel(message.timestamp))}</time>
+              ${message.edited ? `<span class="edited-badge">${escapeHtml(t('edited'))}</span>` : ''}
+            </header>
+            ${body ? `<div class="message-body${message.text ? '' : ' empty'}">${formatMessageText(body)}</div>` : ''}
+            ${message.reply ? htmlSection(t('reply'), [message.reply], 'reply-card') : ''}
+            ${htmlSection(t('embeds'), message.embeds, 'embed-card')}
+            ${htmlSection('Stickers', message.stickers, 'sticker-card')}
+            ${htmlMediaSection(message.media, message.attachments)}
+            ${htmlReactionsSection(message.reactions)}
+            <footer class="message-footer"><a href="${escapeHtml(message.url)}" target="_blank" rel="noreferrer">↗ ${escapeHtml(t('source'))}</a><code>${escapeHtml(message.id)}</code></footer>
+          </div>
+        </article>`);
+
+      previousMessage = message;
+    }
+
+    const timeline = groups.map((group) => `
+      <section class="day-group" data-day="${escapeHtml(group.key)}">
+        <h2 class="day-divider"><span>${escapeHtml(group.label)}</span><small>${group.messages.length}</small></h2>
+        <div class="day-messages">${group.messages.join('')}</div>
+      </section>`).join('');
+    const showingTemplate = t('showing', { visible: '__VISIBLE__', total: '__TOTAL__' });
 
     return `<!doctype html>
 <html lang="${escapeHtml(resolveLanguage())}" dir="${resolveLanguage() === 'ar' ? 'rtl' : 'ltr'}">
@@ -800,22 +1011,63 @@
   <meta name="referrer" content="no-referrer">
   <title>${escapeHtml(route?.label || t('title'))}</title>
   <style>
-    :root{color-scheme:light dark;font-family:system-ui,-apple-system,sans-serif;background:#f2f3f5;color:#1e1f22}
-    body{max-width:900px;margin:0 auto;padding:32px 18px;background:#f2f3f5}
-    h1{margin:0 0 8px;font-size:26px}.meta{color:#5c5e66;margin-bottom:24px}
-    .message{background:#fff;border:1px solid #d9dadd;border-radius:10px;padding:16px;margin:12px 0;box-shadow:0 1px 2px #0000000d}
-    header{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}time,footer{color:#6d6f78;font-size:12px}
-    .body{white-space:normal;margin-top:8px;line-height:1.45;overflow-wrap:anywhere}
-    section{border-left:3px solid #5865f2;margin-top:12px;padding-left:10px;overflow-wrap:anywhere}section h3{font-size:12px;margin:0 0 4px;text-transform:uppercase;color:#5c5e66}section div{white-space:pre-wrap}
-    .media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:12px;margin-top:8px}.media-item{min-width:0;margin:0;padding:8px;border-radius:8px;background:#f2f3f5}.media-item img,.media-item video{display:block;width:100%;max-height:520px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;font-size:11px;overflow-wrap:anywhere}.media-link{word-break:break-all}.file-item{padding:8px;border-radius:6px;background:#f2f3f5}
-    footer{margin-top:12px}a{color:#4752c4}
-    @media(prefers-color-scheme:dark){:root,body{background:#1e1f22;color:#dbdee1}.message{background:#2b2d31;border-color:#3f4147}.media-item,.file-item{background:#1e1f22}.meta,time,footer,section h3{color:#aeb1b8}a{color:#8ea1e1}}
+    :root{color-scheme:light dark;--bg:#f4f5f7;--surface:#fff;--surface-2:#f0f1f4;--text:#24252a;--muted:#656872;--border:#dfe1e6;--accent:#5865f2;--accent-soft:#eef0ff;--reply:#d6d9e0;--shadow:0 8px 28px #1f23290d;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{max-width:1040px;margin:0 auto;padding:36px 20px 80px;background:var(--bg);line-height:1.5}a{color:#4752c4;text-underline-offset:2px;overflow-wrap:anywhere}button,input{font:inherit}
+    .archive-hero{padding:28px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}.eyebrow{margin:0 0 6px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.archive-hero h1{margin:0;font-size:clamp(25px,4vw,38px);line-height:1.18;overflow-wrap:anywhere}.archive-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.meta-pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--muted);font-size:12px}
+    .toolbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;gap:12px;margin:18px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(12px)}.search{min-width:0;flex:1;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);padding:9px 11px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}.result-count{color:var(--muted);font-size:12px;white-space:nowrap}
+    .day-group{margin:24px 0}.day-divider{position:sticky;top:78px;z-index:10;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto 10px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 2px 10px #0000000a;color:var(--muted);font-size:12px;font-weight:750;backdrop-filter:blur(10px)}.day-divider small{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--surface-2);font-size:10px}.day-messages{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
+    .message{content-visibility:auto;contain-intrinsic-size:auto 140px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}.message:last-child{border-bottom:0}.message:hover{background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.message.compact{padding-top:8px;padding-bottom:8px}.avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:hsl(var(--author-hue) 55% 36%);color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px #ffffff26}.message.compact .avatar{visibility:hidden}.message-content{min-width:0}.message-header{display:flex;align-items:baseline;gap:8px;min-height:22px}.message-author{font-size:14px;font-weight:760;overflow-wrap:anywhere}.message.compact .message-author{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.message-header time,.edited-badge{color:var(--muted);font-size:11px}.edited-badge{font-style:italic}
+    .message-body{margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.62}.message-body.empty{color:var(--muted);font-style:italic}.message-body pre{max-width:100%;margin:10px 0;padding:12px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#17181c;color:#e7e9ee;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.detail-section{margin-top:10px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--surface-2);overflow-wrap:anywhere}.detail-section h3{margin:0 0 4px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.detail-section>div{white-space:pre-wrap;font-size:13px;line-height:1.52}.reply-card{border-left-color:var(--reply)}.embed-card{background:var(--accent-soft)}
+    .reaction-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.reaction-chip{display:inline-flex;align-items:center;min-height:26px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px;margin-top:8px}.media-item{min-width:0;margin:0;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.media-item img,.media-item video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.media-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-item{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}
+    .message-footer{display:flex;align-items:center;gap:8px;margin-top:9px;opacity:.58;color:var(--muted);font-size:10px;transition:opacity .15s}.message:hover .message-footer,.message:focus-within .message-footer{opacity:1}.message-footer code{overflow:hidden;text-overflow:ellipsis}.back-top{position:fixed;right:18px;bottom:18px;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:12px;text-decoration:none}[hidden]{display:none!important}
+    @media(max-width:620px){body{padding:18px 8px 70px}.archive-hero{padding:20px 16px;border-radius:14px}.toolbar{top:6px}.result-count{display:none}.day-divider{top:70px}.message{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:12px 10px}.avatar{width:34px;height:34px;font-size:13px}.media-grid{grid-template-columns:1fr}.message-footer{opacity:.65}}
+    @media(prefers-color-scheme:dark){:root{--bg:#191a1e;--surface:#24262b;--surface-2:#2d3036;--text:#e4e6eb;--muted:#a7abb4;--border:#3a3d45;--accent:#8ea1e1;--accent-soft:#2b3044;--reply:#5d626d;--shadow:0 10px 34px #0004}a{color:#aab7f0}.meta-pill{background:#24262bd9}}
+    @media print{.toolbar,.back-top{display:none}.day-divider{position:static}.message{content-visibility:visible;break-inside:avoid}.message-footer{opacity:1}body{max-width:none;padding:0}}
   </style>
 </head>
 <body>
-  <h1>${escapeHtml(route?.label || t('title'))}</h1>
-  <div class="meta">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)} · ${messages.length} messages · ${escapeHtml(new Date().toISOString())}</div>
-  ${cards}
+  <header class="archive-hero">
+    <p class="eyebrow">Discord Chat Export</p>
+    <h1>${escapeHtml(route?.label || t('title'))}</h1>
+    <div class="archive-meta">
+      <span class="meta-pill">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)}</span>
+      <span class="meta-pill">${messages.length} ${escapeHtml(t('messages'))}</span>
+      <span class="meta-pill">${escapeHtml(timeZone)}</span>
+      <span class="meta-pill">${escapeHtml(generatedAt)}</span>
+    </div>
+  </header>
+  <div class="toolbar" role="search">
+    <input id="archive-search" class="search" type="search" placeholder="${escapeHtml(t('searchPlaceholder'))}" aria-label="${escapeHtml(t('searchPlaceholder'))}">
+    <span id="result-count" class="result-count">${escapeHtml(t('showing', { visible: messages.length, total: messages.length }))}</span>
+  </div>
+  <main class="timeline">${timeline}</main>
+  <a class="back-top" href="#" aria-label="${escapeHtml(t('backToTop'))}">↑ ${escapeHtml(t('backToTop'))}</a>
+  <script>
+    (() => {
+      const input = document.getElementById('archive-search');
+      const counter = document.getElementById('result-count');
+      const messages = [...document.querySelectorAll('.message')];
+      const groups = [...document.querySelectorAll('.day-group')];
+      const template = ${JSON.stringify(showingTemplate)};
+      const update = () => {
+        const query = input.value.trim().toLocaleLowerCase();
+        let visible = 0;
+        for (const message of messages) {
+          const match = !query || message.textContent.toLocaleLowerCase().includes(query);
+          message.hidden = !match;
+          if (match) visible += 1;
+        }
+        for (const group of groups) {
+          const groupVisible = group.querySelectorAll('.message:not([hidden])').length;
+          group.hidden = groupVisible === 0;
+          const badge = group.querySelector('.day-divider small');
+          if (badge) badge.textContent = String(groupVisible);
+        }
+        counter.textContent = template.replace('__VISIBLE__', String(visible)).replace('__TOTAL__', String(messages.length));
+      };
+      input.addEventListener('input', update);
+    })();
+  </script>
 </body>
 </html>`;
   }
@@ -831,7 +1083,9 @@
     const route = getRoute();
     const channel = clean(route?.label || route?.channelId || 'channel')
       .replace(/[\\/:*?"<>|]+/g, '-')
-      .replace(/\s+/g, '-')
+      .replace(/[^\p{L}\p{N}._#-]+/gu, '-')
+      .replace(/-{2,}/g, '-')
+      .replace(/^-|-$/g, '')
       .slice(0, 70) || 'channel';
     return `discord-chat-${channel}-${settings.startDate}_${settings.endDate}.${extension}`;
   }
