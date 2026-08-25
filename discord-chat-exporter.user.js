@@ -11,7 +11,7 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.2.0
+// @version      1.3.0
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动抓取、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
 // @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
@@ -53,7 +53,7 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.2.0';
+  const VERSION = '1.3.0';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -291,6 +291,7 @@
 
   const supportedLanguages = Object.keys(translations);
   const records = new Map();
+  const authorAssets = new Map();
   let settings = loadSettings();
   let host = null;
   let shadow = null;
@@ -447,6 +448,75 @@
     ).trim() : '';
   }
 
+  function normalizeAssetUrl(value) {
+    if (!/^https?:\/\//i.test(value || '')) return '';
+
+    try {
+      const parsed = new URL(value, location.href);
+      if (/discordapp\.(?:com|net)$/i.test(parsed.hostname)) {
+        ['size', 'width', 'height', 'quality'].forEach((key) => parsed.searchParams.delete(key));
+      }
+      return parsed.href;
+    } catch (_) {
+      return String(value);
+    }
+  }
+
+  function getAvatar(item) {
+    if (!item) return '';
+    const image = item.querySelector(
+      'img[class*="avatar"][src], img[src*="cdn.discordapp.com/avatars/"], img[src*="cdn.discordapp.com/embed/avatars/"]'
+    );
+    return normalizeAssetUrl(image?.currentSrc || image?.src || '');
+  }
+
+  function getContentParts(content) {
+    if (!content) return [];
+    const parts = [];
+    let foundEmoji = false;
+
+    const appendText = (value) => {
+      if (!value) return;
+      if (typeof parts[parts.length - 1] === 'string') parts[parts.length - 1] += value;
+      else parts.push(value);
+    };
+
+    const walk = (node) => {
+      if (node.nodeType === Node.TEXT_NODE) {
+        appendText(node.textContent || '');
+        return;
+      }
+      if (node.nodeType !== Node.ELEMENT_NODE) return;
+
+      if (node.tagName === 'BR') {
+        appendText('\n');
+        return;
+      }
+
+      if (node.tagName === 'IMG' && (
+        /emoji/i.test(node.className || '') ||
+        /\/emojis\//i.test(node.currentSrc || node.src || '')
+      )) {
+        const name = clean(node.alt || node.getAttribute('aria-label') || '');
+        const url = normalizeAssetUrl(node.currentSrc || node.src || '');
+        foundEmoji = true;
+
+        if (/\/emojis\//i.test(url)) parts.push({ type: 'emoji', name: name || ':emoji:', url });
+        else appendText(name);
+        return;
+      }
+
+      node.childNodes.forEach(walk);
+    };
+
+    content.childNodes.forEach(walk);
+    if (!foundEmoji) return [];
+
+    while (typeof parts[0] === 'string' && !parts[0]) parts.shift();
+    while (typeof parts[parts.length - 1] === 'string' && !parts[parts.length - 1]) parts.pop();
+    return parts;
+  }
+
   function getReply(item) {
     if (!item) return '';
     const reply = item.querySelector('[class*="repliedMessage"]') ||
@@ -577,10 +647,33 @@
 
   function getReactions(item) {
     if (!item) return [];
-    const reactions = [...item.querySelectorAll('[class*="reaction"]')];
-    return uniqueStrings(reactions.map((reaction) =>
-      clean(reaction.getAttribute('aria-label') || reaction.innerText).replace(/\s+/g, ' ')
-    ));
+
+    let roots = [...item.querySelectorAll('button[class*="reaction"], [class*="reaction"][role="button"]')];
+    if (!roots.length) roots = [...item.querySelectorAll('[class*="reactionInner"]')];
+    roots = roots.filter((node, index) => roots.indexOf(node) === index);
+
+    const addReactionPattern = /(?:add|添加|新增|追加|추가|agregar|ajouter|hinzufügen|adicionar|добавить|إضافة).*?(?:reaction|反应|反應|リアクション|반응|reacción|réaction|reaktion|reação|реакц|تفاعل)/i;
+    const reactions = [];
+
+    for (const root of roots) {
+      const label = clean(root.getAttribute('aria-label') || '').replace(/\s+/g, ' ');
+      if (addReactionPattern.test(label)) continue;
+
+      const image = root.querySelector('img[class*="emoji"], img[alt]');
+      const countNode = root.querySelector('[class*="reactionCount"], [class*="count"]');
+      const directCount = clean(countNode?.textContent || '').replace(/[,\s]/g, '').match(/\d+/);
+      const labelledCount = label.match(/[,，]\s*([\d,.]+)\s*(?:reactions?|个反应|個反應|件のリアクション|개의 반응|reacciones?|réactions?|reaktionen?|reações?|реакц|تفاعل)/i);
+      const count = Number((directCount?.[0] || labelledCount?.[1] || '1').replace(/[,\s]/g, '')) || 1;
+      const emoji = clean(image?.alt || label.split(/[,，]\s*\d/)[0] || root.textContent)
+        .replace(/^:+|:+$/g, '')
+        .replace(/\s+/g, ' ');
+      const url = normalizeAssetUrl(image?.currentSrc || image?.src || '');
+
+      if (!emoji && !url) continue;
+      reactions.push({ emoji: emoji || 'reaction', count: Number.isFinite(count) ? count : 1, url, me: root.getAttribute('aria-pressed') === 'true' });
+    }
+
+    return mergeReactions(reactions, []);
   }
 
   function findMessageRoot() {
@@ -658,6 +751,32 @@
     return [...merged.values()];
   }
 
+  function mergeReactions(next, old) {
+    const merged = new Map();
+
+    for (const entry of [...(old || []), ...(next || [])]) {
+      const normalized = typeof entry === 'string'
+        ? { emoji: clean(entry), count: 1, url: '', me: false }
+        : {
+            emoji: clean(entry?.emoji || 'reaction'),
+            count: Math.max(1, Number(entry?.count) || 1),
+            url: normalizeAssetUrl(entry?.url || ''),
+            me: Boolean(entry?.me)
+          };
+      const identity = normalized.url || normalized.emoji.toLocaleLowerCase();
+      if (!identity) continue;
+      const existing = merged.get(identity);
+      merged.set(identity, existing ? {
+        emoji: normalized.emoji || existing.emoji,
+        count: Math.max(existing.count, normalized.count),
+        url: normalized.url || existing.url,
+        me: existing.me || normalized.me
+      } : normalized);
+    }
+
+    return [...merged.values()];
+  }
+
   function scanVisible() {
     const route = getRoute();
     const root = findMessageRoot();
@@ -670,6 +789,7 @@
     const contents = [...root.querySelectorAll('[id^="message-content-"]')];
     const ids = [];
     let activeAuthor = '';
+    let activeAvatar = '';
 
     for (const content of contents) {
       const item = getMessageItem(content);
@@ -681,9 +801,18 @@
       const old = records.get(recordKey) || {};
       const foundAuthor = getAuthor(item);
       const author = foundAuthor || old.author || activeAuthor || '';
-      if (author) activeAuthor = author;
+      const foundAvatar = getAvatar(item);
+      const assetKey = `${route.key}:${author}`;
+      if (author && foundAvatar) authorAssets.set(assetKey, foundAvatar);
+      const avatar = foundAvatar || old.avatar || authorAssets.get(assetKey) || (author === activeAuthor ? activeAvatar : '') || '';
+      if (author) {
+        activeAuthor = author;
+        if (avatar) activeAvatar = avatar;
+      }
 
-      const text = clean(content.innerText || content.textContent);
+      const contentParts = getContentParts(content);
+      const richText = clean(contentParts.map((part) => typeof part === 'string' ? part : part.name).join(''));
+      const text = richText || clean(content.innerText || content.textContent);
       const reply = getReply(item);
       const embeds = getEmbeds(item);
       const attachments = getAttachments(item);
@@ -697,15 +826,17 @@
         channelId: route.channelId,
         channelLabel: route.label || old.channelLabel || route.channelId,
         author,
+        avatar,
         timestamp: new Date(timestampMs).toISOString(),
         timestampMs,
         text: text || old.text || '',
+        contentParts: contentParts.length ? contentParts : (old.contentParts || []),
         reply: reply || old.reply || '',
         embeds: mergeArrays(embeds, old.embeds),
         attachments: mergeAttachments(attachments, old.attachments),
         media: mergeMedia(media, old.media),
         stickers: mergeArrays(stickers, old.stickers),
-        reactions: mergeArrays(reactions, old.reactions),
+        reactions: mergeReactions(reactions, old.reactions),
         edited: Boolean(item?.querySelector('[class*="edited"]')) || Boolean(old.edited),
         url: `${route.url}/${id}`
       });
@@ -765,9 +896,15 @@
       .sort(compareSnowflakes);
 
     let activeAuthor = '';
+    let activeAvatar = '';
     return result.map((record) => {
+      const groupedContinuation = !record.author && Boolean(activeAuthor);
       if (record.author) activeAuthor = record.author;
-      return record.author || !activeAuthor ? { ...record } : { ...record, author: activeAuthor };
+      const author = record.author || activeAuthor;
+      const avatar = record.avatar || authorAssets.get(`${route.key}:${author}`) || (groupedContinuation ? activeAvatar : '') || '';
+      if (avatar) activeAvatar = avatar;
+      else if (record.author) activeAvatar = '';
+      return { ...record, author, avatar };
     });
   }
 
@@ -786,6 +923,12 @@
     elements.count.textContent = t('collected', { selected, total });
   }
 
+  function reactionText(reaction) {
+    if (typeof reaction === 'string') return reaction;
+    const symbol = clean(reaction?.emoji || 'reaction');
+    return `${symbol} × ${Math.max(1, Number(reaction?.count) || 1)}${reaction?.me ? ' ✓' : ''}`;
+  }
+
   function textExport(messages) {
     return messages.map((message) => {
       const flags = message.edited ? ` · ${t('edited')}` : '';
@@ -798,7 +941,7 @@
       if (message.embeds.length) lines.push(`\n${t('embeds')}:\n${message.embeds.join('\n\n')}`);
       if (message.stickers.length) lines.push(`\nStickers:\n${message.stickers.join('\n')}`);
       if (message.attachments.length) lines.push(`\n${t('attachments')}:\n${message.attachments.join('\n')}`);
-      if (message.reactions.length) lines.push(`\n${t('reactions')}:\n${message.reactions.join('\n')}`);
+      if (message.reactions.length) lines.push(`\n${t('reactions')}:\n${message.reactions.map(reactionText).join('\n')}`);
       lines.push(`\n${t('source')}: ${message.url}`);
 
       return lines.join('\n');
@@ -829,11 +972,11 @@
   }
 
   function csvExport(messages) {
-    const header = ['id', 'timestamp', 'author', 'edited', 'text', 'reply', 'embeds', 'stickers', 'attachments', 'media', 'reactions', 'url'];
+    const header = ['id', 'timestamp', 'author', 'avatar', 'edited', 'text', 'reply', 'embeds', 'stickers', 'attachments', 'media', 'reactions', 'url'];
     const rows = messages.map((message) => [
-      message.id, message.timestamp, message.author, message.edited, message.text,
+      message.id, message.timestamp, message.author, message.avatar, message.edited, message.text,
       message.reply, message.embeds, message.stickers, message.attachments,
-      (message.media || []).map((entry) => `[${entry.type}] ${entry.url}`), message.reactions, message.url
+      (message.media || []).map((entry) => `[${entry.type}] ${entry.url}`), message.reactions.map(reactionText), message.url
     ].map(csvCell).join(','));
 
     return `\uFEFF${header.map(csvCell).join(',')}\n${rows.join('\n')}`;
@@ -845,237 +988,317 @@
     })[character]);
   }
 
-  function linkifyPlainText(value) {
-    const source = String(value || '');
-    const urlPattern = /https?:\/\/[^\s<>"']+/gi;
-    let result = '';
-    let cursor = 0;
+  function buildArchiveDatabase(messages) {
+    const assets = [];
+    const assetLookup = new Map();
+    const authors = [];
+    const authorLookup = new Map();
 
-    for (const match of source.matchAll(urlPattern)) {
-      let url = match[0];
-      let trailing = '';
-      while (/[),.;!?]$/.test(url)) {
-        trailing = url.slice(-1) + trailing;
-        url = url.slice(0, -1);
+    const assetIndex = (entry) => {
+      const url = normalizeAssetUrl(entry?.url || '');
+      if (!url) return -1;
+      const type = entry.type || mediaTypeFromUrl(url, 'file');
+      const identity = `${mediaIdentity(url)}:${type}`;
+      if (assetLookup.has(identity)) return assetLookup.get(identity);
+      const index = assets.length;
+      assets.push([url, type, clean(entry.alt), normalizeAssetUrl(entry.poster || '')]);
+      assetLookup.set(identity, index);
+      return index;
+    };
+
+    const authorIndex = (message) => {
+      const name = cleanAuthorLabel(message.author || '—');
+      const avatar = assetIndex({ url: message.avatar, type: 'avatar', alt: name });
+      const identity = `${name}\u0000${avatar}`;
+      if (authorLookup.has(identity)) return authorLookup.get(identity);
+      const index = authors.length;
+      authors.push([name, avatar]);
+      authorLookup.set(identity, index);
+      return index;
+    };
+
+    const rows = messages.map((message) => {
+      const media = mergeMedia(
+        message.media || [],
+        (message.attachments || []).map((url) => ({ url, type: mediaTypeFromUrl(url, 'file'), alt: '', poster: '' }))
+      );
+      const parts = (message.contentParts || []).map((part) => typeof part === 'string'
+        ? part
+        : [clean(part.name || ':emoji:'), assetIndex({ url: part.url, type: 'emoji', alt: part.name })]
+      );
+      const reactions = mergeReactions(message.reactions || [], []).map((reaction) => [
+        reaction.emoji,
+        reaction.count,
+        assetIndex({ url: reaction.url, type: 'emoji', alt: reaction.emoji }),
+        reaction.me ? 1 : 0
+      ]);
+
+      return [
+        message.id,
+        message.timestamp,
+        authorIndex(message),
+        message.text || '',
+        parts,
+        message.reply || '',
+        message.embeds || [],
+        media.map(assetIndex),
+        message.stickers || [],
+        reactions,
+        message.edited ? 1 : 0,
+        message.url || ''
+      ];
+    });
+
+    return { v: 1, a: assets, u: authors, m: rows };
+  }
+
+  function bytesToBase64(bytes) {
+    let binary = '';
+    const chunkSize = 0x8000;
+    for (let index = 0; index < bytes.length; index += chunkSize) {
+      binary += String.fromCharCode(...bytes.subarray(index, index + chunkSize));
+    }
+    return btoa(binary);
+  }
+
+  async function encodeArchiveDatabase(database) {
+    const raw = new TextEncoder().encode(JSON.stringify(database));
+    let bytes = raw;
+    let encoding = 'base64';
+
+    if (typeof CompressionStream === 'function') {
+      try {
+        const stream = new Blob([raw]).stream().pipeThrough(new CompressionStream('gzip'));
+        bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+        encoding = 'gzip-base64';
+      } catch (_) {
+        bytes = raw;
       }
-
-      result += escapeHtml(source.slice(cursor, match.index));
-      result += `<a href="${escapeHtml(url)}" target="_blank" rel="noreferrer">${escapeHtml(url)}</a>${escapeHtml(trailing)}`;
-      cursor = match.index + match[0].length;
     }
 
-    return result + escapeHtml(source.slice(cursor));
+    return { data: bytesToBase64(bytes), encoding, rawBytes: raw.byteLength, storedBytes: bytes.byteLength };
   }
 
-  function formatMessageText(value) {
-    return String(value || '').split(/(```[\s\S]*?```)/g).map((part) => {
-      if (part.startsWith('```') && part.endsWith('```')) {
-        return `<pre><code>${escapeHtml(part.slice(3, -3).replace(/^\n|\n$/g, ''))}</code></pre>`;
-      }
-      return linkifyPlainText(part);
-    }).join('');
+  function archiveBootstrapSource() {
+    return String.raw`(() => {
+      const payloadNode = document.getElementById('archive-data');
+      const timeline = document.getElementById('timeline');
+      const loading = document.getElementById('archive-loading');
+      const input = document.getElementById('archive-search');
+      const counter = document.getElementById('result-count');
+      const labels = JSON.parse(document.documentElement.dataset.labels);
+      const locale = document.documentElement.lang || 'en';
+
+      const esc = (value) => String(value == null ? '' : value).replace(/[&<>"']/g, (character) => ({
+        '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+      })[character]);
+
+      const linkify = (value) => {
+        const source = String(value || '');
+        const pattern = /https?:\/\/[^\s<>"']+/gi;
+        let result = '';
+        let cursor = 0;
+        for (const match of source.matchAll(pattern)) {
+          let url = match[0];
+          let trailing = '';
+          while (/[),.;!?]$/.test(url)) {
+            trailing = url.slice(-1) + trailing;
+            url = url.slice(0, -1);
+          }
+          result += esc(source.slice(cursor, match.index));
+          result += '<a href="' + esc(url) + '" target="_blank" rel="noreferrer">' + esc(url) + '</a>' + esc(trailing);
+          cursor = match.index + match[0].length;
+        }
+        return result + esc(source.slice(cursor));
+      };
+
+      const formatText = (value) => String(value || '').split(/(\x60{3}[\s\S]*?\x60{3})/g).map((part) => {
+        if (part.startsWith('\x60\x60\x60') && part.endsWith('\x60\x60\x60')) {
+          return '<pre><code>' + esc(part.slice(3, -3).replace(/^\n|\n$/g, '')) + '</code></pre>';
+        }
+        return linkify(part);
+      }).join('');
+
+      const bytesFromBase64 = (value) => {
+        const binary = atob(value.replace(/\s+/g, ''));
+        const bytes = new Uint8Array(binary.length);
+        for (let index = 0; index < binary.length; index += 1) bytes[index] = binary.charCodeAt(index);
+        return bytes;
+      };
+
+      const loadDatabase = async () => {
+        let bytes = bytesFromBase64(payloadNode.textContent);
+        if (payloadNode.dataset.encoding === 'gzip-base64') {
+          if (typeof DecompressionStream !== 'function') throw new Error('This browser cannot decompress the archive.');
+          const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('gzip'));
+          bytes = new Uint8Array(await new Response(stream).arrayBuffer());
+        }
+        return JSON.parse(new TextDecoder().decode(bytes));
+      };
+
+      const dayKey = (timestamp) => {
+        const date = new Date(timestamp);
+        return date.getFullYear() + '-' + String(date.getMonth() + 1).padStart(2, '0') + '-' + String(date.getDate()).padStart(2, '0');
+      };
+      const dayLabel = (timestamp) => new Intl.DateTimeFormat(locale, {
+        year: 'numeric', month: 'long', day: 'numeric', weekday: 'short'
+      }).format(new Date(timestamp));
+      const timeLabel = (timestamp) => new Intl.DateTimeFormat(locale, {
+        hour: '2-digit', minute: '2-digit', second: '2-digit'
+      }).format(new Date(timestamp));
+      const initial = (author) => Array.from(String(author || '?'))[0]?.toLocaleUpperCase() || '?';
+      const hue = (author) => {
+        let hash = 0;
+        for (const character of String(author || '')) hash = ((hash << 5) - hash + character.codePointAt(0)) | 0;
+        return Math.abs(hash) % 360;
+      };
+
+      const section = (title, values, className) => values && values.length
+        ? '<section class="detail-section ' + className + '"><h3>' + esc(title) + '</h3>' + values.map((value) => '<div>' + formatText(value) + '</div>').join('') + '</section>'
+        : '';
+
+      const renderArchive = (db) => {
+        const asset = (index) => index >= 0 ? db.a[index] : null;
+        const richText = (parts, fallback) => {
+          if (!parts || !parts.length) return formatText(fallback);
+          return parts.map((part) => {
+            if (typeof part === 'string') return formatText(part);
+            const item = asset(part[1]);
+            return item
+              ? '<img class="inline-emoji" src="' + esc(item[0]) + '" alt="' + esc(part[0]) + '" title="' + esc(part[0]) + '" loading="lazy" decoding="async">'
+              : esc(part[0]);
+          }).join('');
+        };
+        const reactions = (items) => !items || !items.length ? '' : '<div class="reaction-row" aria-label="' + esc(labels.reactions) + '">' + items.map((item) => {
+          const icon = asset(item[2]);
+          const symbol = icon
+            ? '<img class="reaction-emoji" src="' + esc(icon[0]) + '" alt="' + esc(item[0]) + '" loading="lazy" decoding="async">'
+            : '<span class="reaction-symbol">' + esc(item[0]) + '</span>';
+          return '<span class="reaction-chip' + (item[3] ? ' mine' : '') + '" title="' + esc(item[0]) + '">' + symbol + '<strong>' + Number(item[1] || 1) + '</strong></span>';
+        }).join('') + '</div>';
+        const media = (refs) => {
+          if (!refs || !refs.length) return '';
+          const body = refs.map((reference) => {
+            const item = asset(reference);
+            if (!item) return '';
+            const url = esc(item[0]);
+            const rawLabel = item[2] || item[0].split('/').pop().split('?')[0] || item[1];
+            const label = esc(rawLabel);
+            const link = '<a class="media-link" href="' + url + '" target="_blank" rel="noreferrer">' + label + '</a>';
+            if (item[1] === 'image') return '<figure class="media-item"><a href="' + url + '" target="_blank" rel="noreferrer"><img src="' + url + '" alt="' + label + '" loading="lazy" decoding="async"></a><figcaption>' + link + '</figcaption></figure>';
+            if (item[1] === 'video') return '<figure class="media-item"><video controls preload="metadata" playsinline' + (item[3] ? ' poster="' + esc(item[3]) + '"' : '') + '><source src="' + url + '"></video><figcaption>' + link + '</figcaption></figure>';
+            if (item[1] === 'audio') return '<figure class="media-item audio"><audio controls preload="metadata" src="' + url + '"></audio><figcaption>' + link + '</figcaption></figure>';
+            return '<div class="file-item">' + link + '</div>';
+          }).join('');
+          return '<section class="detail-section media-section"><h3>' + esc(labels.attachments) + '</h3><div class="media-grid">' + body + '</div></section>';
+        };
+
+        const groups = [];
+        let group = null;
+        let previous = null;
+        for (const row of db.m) {
+          const key = dayKey(row[1]);
+          if (!group || group.key !== key) {
+            group = { key, label: dayLabel(row[1]), rows: [] };
+            groups.push(group);
+          }
+          const author = db.u[row[2]] || ['—', -1];
+          const compact = previous && previous[2] === row[2] && dayKey(previous[1]) === key && new Date(row[1]) - new Date(previous[1]) <= 300000;
+          const avatarAsset = asset(author[1]);
+          const avatar = avatarAsset
+            ? '<img class="avatar-image" src="' + esc(avatarAsset[0]) + '" alt="" loading="lazy" decoding="async">'
+            : '<span>' + esc(initial(author[0])) + '</span>';
+          const visible = row[3] || row[5] || row[6].length || row[7].length || row[8].length;
+          const body = row[3] || (!visible ? labels.emptyText : '');
+          group.rows.push('<article class="message' + (compact ? ' compact' : '') + '" aria-label="' + esc(author[0] + ', ' + timeLabel(row[1])) + '">' +
+            '<div class="avatar" style="--author-hue:' + hue(author[0]) + '" aria-hidden="true">' + avatar + '</div>' +
+            '<div class="message-content"><header class="message-header"><strong class="message-author">' + esc(author[0]) + '</strong>' +
+            '<time datetime="' + esc(row[1]) + '" title="' + esc(row[1]) + '">' + esc(timeLabel(row[1])) + '</time>' +
+            (row[10] ? '<span class="edited-badge">' + esc(labels.edited) + '</span>' : '') + '</header>' +
+            (body ? '<div class="message-body' + (row[3] ? '' : ' empty') + '">' + richText(row[4], body) + '</div>' : '') +
+            (row[5] ? section(labels.reply, [row[5]], 'reply-card') : '') + section(labels.embeds, row[6], 'embed-card') +
+            section('Stickers', row[8], 'sticker-card') + media(row[7]) + reactions(row[9]) +
+            '<footer class="message-footer"><a href="' + esc(row[11]) + '" target="_blank" rel="noreferrer">↗ ' + esc(labels.source) + '</a><code>' + esc(row[0]) + '</code></footer></div></article>');
+          previous = row;
+        }
+
+        timeline.innerHTML = groups.map((item) => '<section class="day-group" data-day="' + esc(item.key) + '"><h2 class="day-divider"><span>' + esc(item.label) + '</span><small>' + item.rows.length + '</small></h2><div class="day-messages">' + item.rows.join('') + '</div></section>').join('');
+        loading.remove();
+
+        const messages = [...document.querySelectorAll('.message')];
+        const dayGroups = [...document.querySelectorAll('.day-group')];
+        const update = () => {
+          const query = input.value.trim().toLocaleLowerCase();
+          let visibleCount = 0;
+          for (const message of messages) {
+            const match = !query || message.textContent.toLocaleLowerCase().includes(query);
+            message.hidden = !match;
+            if (match) visibleCount += 1;
+          }
+          for (const item of dayGroups) {
+            const count = item.querySelectorAll('.message:not([hidden])').length;
+            item.hidden = count === 0;
+            const badge = item.querySelector('.day-divider small');
+            if (badge) badge.textContent = String(count);
+          }
+          counter.textContent = labels.showing.replace('__VISIBLE__', String(visibleCount)).replace('__TOTAL__', String(messages.length));
+        };
+        input.addEventListener('input', update);
+      };
+
+      loadDatabase().then(renderArchive).catch((error) => {
+        loading.classList.add('error');
+        loading.textContent = labels.loadFailed + ' ' + error.message;
+      });
+    })();`;
   }
 
-  function htmlSection(title, values, className = '') {
-    if (!values?.length) return '';
-    const body = values.map((value) => `<div>${formatMessageText(value)}</div>`).join('');
-    return `<section class="detail-section ${className}"><h3>${escapeHtml(title)}</h3>${body}</section>`;
+  function formatBytes(bytes) {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
-  function htmlReactionsSection(reactions) {
-    if (!reactions?.length) return '';
-    return `<div class="reaction-row" aria-label="${escapeHtml(t('reactions'))}">${reactions.map((reaction) =>
-      `<span class="reaction-chip">${escapeHtml(clean(reaction).replace(/\s+/g, ' '))}</span>`
-    ).join('')}</div>`;
-  }
-
-  function htmlMediaSection(media, attachments) {
-    const items = mergeMedia(
-      media || [],
-      (attachments || []).map((url) => ({ url, type: mediaTypeFromUrl(url, 'file'), alt: '', poster: '' }))
-    );
-    if (!items.length) return '';
-
-    const body = items.map((entry) => {
-      const url = escapeHtml(entry.url);
-      const rawLabel = entry.alt || entry.url.split('/').pop()?.split('?')[0] || entry.type;
-      const label = escapeHtml(rawLabel);
-      const link = `<a class="media-link" href="${url}" target="_blank" rel="noreferrer">${label}</a>`;
-
-      if (entry.type === 'image') {
-        return `<figure class="media-item"><a href="${url}" target="_blank" rel="noreferrer"><img src="${url}" alt="${escapeHtml(entry.alt || rawLabel)}" loading="lazy" decoding="async"></a><figcaption>${link}</figcaption></figure>`;
-      }
-
-      if (entry.type === 'video') {
-        const poster = entry.poster ? ` poster="${escapeHtml(entry.poster)}"` : '';
-        return `<figure class="media-item"><video controls preload="metadata" playsinline${poster}><source src="${url}"></video><figcaption>${link}</figcaption></figure>`;
-      }
-
-      if (entry.type === 'audio') {
-        return `<figure class="media-item audio"><audio controls preload="metadata" src="${url}"></audio><figcaption>${link}</figcaption></figure>`;
-      }
-
-      return `<div class="file-item">${link}</div>`;
-    }).join('');
-
-    return `<section class="detail-section media-section"><h3>${escapeHtml(t('attachments'))}</h3><div class="media-grid">${body}</div></section>`;
-  }
-
-  function authorInitial(author) {
-    return Array.from(clean(author || '?'))[0]?.toLocaleUpperCase() || '?';
-  }
-
-  function authorHue(author) {
-    let hash = 0;
-    for (const character of String(author || '')) hash = ((hash << 5) - hash + character.codePointAt(0)) | 0;
-    return Math.abs(hash) % 360;
-  }
-
-  function localDayKey(timestamp) {
-    const date = new Date(timestamp);
-    return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-  }
-
-  function localDayLabel(timestamp) {
-    return new Intl.DateTimeFormat(resolveLanguage(), {
-      year: 'numeric', month: 'long', day: 'numeric', weekday: 'short'
-    }).format(new Date(timestamp));
-  }
-
-  function localTimeLabel(timestamp) {
-    return new Intl.DateTimeFormat(resolveLanguage(), {
-      hour: '2-digit', minute: '2-digit', second: '2-digit'
-    }).format(new Date(timestamp));
-  }
-
-  function htmlExport(messages) {
+  async function compactHtmlExport(messages) {
     const route = getRoute();
+    const language = resolveLanguage();
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
-    const generatedAt = new Intl.DateTimeFormat(resolveLanguage(), {
-      dateStyle: 'medium', timeStyle: 'short'
-    }).format(new Date());
-    const groups = [];
-    let currentGroup = null;
-    let previousMessage = null;
-
-    for (const message of messages) {
-      const dayKey = localDayKey(message.timestamp);
-      if (!currentGroup || currentGroup.key !== dayKey) {
-        currentGroup = { key: dayKey, label: localDayLabel(message.timestamp), messages: [] };
-        groups.push(currentGroup);
-      }
-
-      const author = cleanAuthorLabel(message.author || '—');
-      const compact = previousMessage &&
-        cleanAuthorLabel(previousMessage.author) === author &&
-        localDayKey(previousMessage.timestamp) === dayKey &&
-        new Date(message.timestamp).getTime() - new Date(previousMessage.timestamp).getTime() <= 5 * 60 * 1000;
-      const hasVisibleContent = message.text || message.reply || message.embeds?.length ||
-        message.stickers?.length || message.media?.length || message.attachments?.length;
-      const body = message.text || (!hasVisibleContent ? t('emptyText') : '');
-
-      currentGroup.messages.push(`
-        <article class="message${compact ? ' compact' : ''}" aria-label="${escapeHtml(`${author}, ${localTimeLabel(message.timestamp)}`)}">
-          <div class="avatar" style="--author-hue:${authorHue(author)}" aria-hidden="true">${escapeHtml(authorInitial(author))}</div>
-          <div class="message-content">
-            <header class="message-header">
-              <strong class="message-author">${escapeHtml(author)}</strong>
-              <time datetime="${escapeHtml(message.timestamp)}" title="${escapeHtml(message.timestamp)}">${escapeHtml(localTimeLabel(message.timestamp))}</time>
-              ${message.edited ? `<span class="edited-badge">${escapeHtml(t('edited'))}</span>` : ''}
-            </header>
-            ${body ? `<div class="message-body${message.text ? '' : ' empty'}">${formatMessageText(body)}</div>` : ''}
-            ${message.reply ? htmlSection(t('reply'), [message.reply], 'reply-card') : ''}
-            ${htmlSection(t('embeds'), message.embeds, 'embed-card')}
-            ${htmlSection('Stickers', message.stickers, 'sticker-card')}
-            ${htmlMediaSection(message.media, message.attachments)}
-            ${htmlReactionsSection(message.reactions)}
-            <footer class="message-footer"><a href="${escapeHtml(message.url)}" target="_blank" rel="noreferrer">↗ ${escapeHtml(t('source'))}</a><code>${escapeHtml(message.id)}</code></footer>
-          </div>
-        </article>`);
-
-      previousMessage = message;
-    }
-
-    const timeline = groups.map((group) => `
-      <section class="day-group" data-day="${escapeHtml(group.key)}">
-        <h2 class="day-divider"><span>${escapeHtml(group.label)}</span><small>${group.messages.length}</small></h2>
-        <div class="day-messages">${group.messages.join('')}</div>
-      </section>`).join('');
-    const showingTemplate = t('showing', { visible: '__VISIBLE__', total: '__TOTAL__' });
+    const generatedAt = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
+    const payload = await encodeArchiveDatabase(buildArchiveDatabase(messages));
+    const labels = JSON.stringify({
+      reply: t('reply'), embeds: t('embeds'), attachments: t('attachments'), reactions: t('reactions'),
+      emptyText: t('emptyText'), edited: t('edited'), source: t('source'),
+      showing: t('showing', { visible: '__VISIBLE__', total: '__TOTAL__' }),
+      loadFailed: t('stalled')
+    }).replace(/</g, '\\u003c');
 
     return `<!doctype html>
-<html lang="${escapeHtml(resolveLanguage())}" dir="${resolveLanguage() === 'ar' ? 'rtl' : 'ltr'}">
+<html lang="${escapeHtml(language)}" dir="${language === 'ar' ? 'rtl' : 'ltr'}" data-labels="${escapeHtml(labels)}">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="referrer" content="no-referrer">
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
   <title>${escapeHtml(route?.label || t('title'))}</title>
   <style>
     :root{color-scheme:light dark;--bg:#f4f5f7;--surface:#fff;--surface-2:#f0f1f4;--text:#24252a;--muted:#656872;--border:#dfe1e6;--accent:#5865f2;--accent-soft:#eef0ff;--reply:#d6d9e0;--shadow:0 8px 28px #1f23290d;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
-    *{box-sizing:border-box}html{scroll-behavior:smooth}body{max-width:1040px;margin:0 auto;padding:36px 20px 80px;background:var(--bg);line-height:1.5}a{color:#4752c4;text-underline-offset:2px;overflow-wrap:anywhere}button,input{font:inherit}
-    .archive-hero{padding:28px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}.eyebrow{margin:0 0 6px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.archive-hero h1{margin:0;font-size:clamp(25px,4vw,38px);line-height:1.18;overflow-wrap:anywhere}.archive-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.meta-pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--muted);font-size:12px}
-    .toolbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;gap:12px;margin:18px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(12px)}.search{min-width:0;flex:1;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);padding:9px 11px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}.result-count{color:var(--muted);font-size:12px;white-space:nowrap}
-    .day-group{margin:24px 0}.day-divider{position:sticky;top:78px;z-index:10;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto 10px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 2px 10px #0000000a;color:var(--muted);font-size:12px;font-weight:750;backdrop-filter:blur(10px)}.day-divider small{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--surface-2);font-size:10px}.day-messages{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}
-    .message{content-visibility:auto;contain-intrinsic-size:auto 140px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}.message:last-child{border-bottom:0}.message:hover{background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.message.compact{padding-top:8px;padding-bottom:8px}.avatar{display:grid;place-items:center;width:40px;height:40px;border-radius:50%;background:hsl(var(--author-hue) 55% 36%);color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px #ffffff26}.message.compact .avatar{visibility:hidden}.message-content{min-width:0}.message-header{display:flex;align-items:baseline;gap:8px;min-height:22px}.message-author{font-size:14px;font-weight:760;overflow-wrap:anywhere}.message.compact .message-author{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.message-header time,.edited-badge{color:var(--muted);font-size:11px}.edited-badge{font-style:italic}
-    .message-body{margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.62}.message-body.empty{color:var(--muted);font-style:italic}.message-body pre{max-width:100%;margin:10px 0;padding:12px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#17181c;color:#e7e9ee;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.detail-section{margin-top:10px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--surface-2);overflow-wrap:anywhere}.detail-section h3{margin:0 0 4px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.detail-section>div{white-space:pre-wrap;font-size:13px;line-height:1.52}.reply-card{border-left-color:var(--reply)}.embed-card{background:var(--accent-soft)}
-    .reaction-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.reaction-chip{display:inline-flex;align-items:center;min-height:26px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px;margin-top:8px}.media-item{min-width:0;margin:0;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.media-item img,.media-item video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.media-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-item{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}
-    .message-footer{display:flex;align-items:center;gap:8px;margin-top:9px;opacity:.58;color:var(--muted);font-size:10px;transition:opacity .15s}.message:hover .message-footer,.message:focus-within .message-footer{opacity:1}.message-footer code{overflow:hidden;text-overflow:ellipsis}.back-top{position:fixed;right:18px;bottom:18px;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:12px;text-decoration:none}[hidden]{display:none!important}
-    @media(max-width:620px){body{padding:18px 8px 70px}.archive-hero{padding:20px 16px;border-radius:14px}.toolbar{top:6px}.result-count{display:none}.day-divider{top:70px}.message{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:12px 10px}.avatar{width:34px;height:34px;font-size:13px}.media-grid{grid-template-columns:1fr}.message-footer{opacity:.65}}
-    @media(prefers-color-scheme:dark){:root{--bg:#191a1e;--surface:#24262b;--surface-2:#2d3036;--text:#e4e6eb;--muted:#a7abb4;--border:#3a3d45;--accent:#8ea1e1;--accent-soft:#2b3044;--reply:#5d626d;--shadow:0 10px 34px #0004}a{color:#aab7f0}.meta-pill{background:#24262bd9}}
-    @media print{.toolbar,.back-top{display:none}.day-divider{position:static}.message{content-visibility:visible;break-inside:avoid}.message-footer{opacity:1}body{max-width:none;padding:0}}
+    *{box-sizing:border-box}html{scroll-behavior:smooth}body{max-width:1040px;margin:0 auto;padding:36px 20px 80px;background:var(--bg);line-height:1.5}a{color:#4752c4;text-underline-offset:2px;overflow-wrap:anywhere}button,input{font:inherit}.archive-hero{padding:28px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}.eyebrow{margin:0 0 6px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.archive-hero h1{margin:0;font-size:clamp(25px,4vw,38px);line-height:1.18;overflow-wrap:anywhere}.archive-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.meta-pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--muted);font-size:12px}.toolbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;gap:12px;margin:18px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(12px)}.search{min-width:0;flex:1;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);padding:9px 11px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}.result-count{color:var(--muted);font-size:12px;white-space:nowrap}.archive-loading{padding:28px;text-align:center;color:var(--muted)}.archive-loading.error{color:#c8323d}
+    .day-group{margin:24px 0}.day-divider{position:sticky;top:78px;z-index:10;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto 10px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 2px 10px #0000000a;color:var(--muted);font-size:12px;font-weight:750;backdrop-filter:blur(10px)}.day-divider small{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--surface-2);font-size:10px}.day-messages{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}.message{content-visibility:auto;contain-intrinsic-size:auto 140px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}.message:last-child{border-bottom:0}.message:hover{background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.message.compact{padding-top:8px;padding-bottom:8px}.avatar{display:grid;place-items:center;width:40px;height:40px;overflow:hidden;border-radius:50%;background:hsl(var(--author-hue) 55% 36%);color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px #ffffff26}.avatar-image{width:100%;height:100%;object-fit:cover}.message.compact .avatar{visibility:hidden}.message-content{min-width:0}.message-header{display:flex;align-items:baseline;gap:8px;min-height:22px}.message-author{font-size:14px;font-weight:760;overflow-wrap:anywhere}.message.compact .message-author{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.message-header time,.edited-badge{color:var(--muted);font-size:11px}.edited-badge{font-style:italic}.message-body{margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.62}.message-body.empty{color:var(--muted);font-style:italic}.inline-emoji{display:inline-block;width:1.35em;height:1.35em;margin:0 .06em;vertical-align:-.28em;object-fit:contain}.message-body pre{max-width:100%;margin:10px 0;padding:12px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#17181c;color:#e7e9ee;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.detail-section{margin-top:10px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--surface-2);overflow-wrap:anywhere}.detail-section h3{margin:0 0 4px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.detail-section>div{white-space:pre-wrap;font-size:13px;line-height:1.52}.reply-card{border-left-color:var(--reply)}.embed-card{background:var(--accent-soft)}
+    .reaction-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.reaction-chip{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px}.reaction-chip.mine{border-color:var(--accent);background:var(--accent-soft)}.reaction-emoji{width:18px;height:18px;object-fit:contain}.reaction-symbol{font-size:15px}.reaction-chip strong{font-size:11px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px;margin-top:8px}.media-item{min-width:0;margin:0;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.media-item img,.media-item video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.media-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-item{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}.message-footer{display:flex;align-items:center;gap:8px;margin-top:9px;opacity:.58;color:var(--muted);font-size:10px;transition:opacity .15s}.message:hover .message-footer,.message:focus-within .message-footer{opacity:1}.message-footer code{overflow:hidden;text-overflow:ellipsis}.back-top{position:fixed;right:18px;bottom:18px;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:12px;text-decoration:none}[hidden]{display:none!important}
+    @media(max-width:620px){body{padding:18px 8px 70px}.archive-hero{padding:20px 16px;border-radius:14px}.toolbar{top:6px}.result-count{display:none}.day-divider{top:70px}.message{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:12px 10px}.avatar{width:34px;height:34px;font-size:13px}.media-grid{grid-template-columns:1fr}.message-footer{opacity:.65}}@media(prefers-color-scheme:dark){:root{--bg:#191a1e;--surface:#24262b;--surface-2:#2d3036;--text:#e4e6eb;--muted:#a7abb4;--border:#3a3d45;--accent:#8ea1e1;--accent-soft:#2b3044;--reply:#5d626d;--shadow:0 10px 34px #0004}a{color:#aab7f0}.meta-pill{background:#24262bd9}}@media print{.toolbar,.back-top{display:none}.day-divider{position:static}.message{content-visibility:visible;break-inside:avoid}.message-footer{opacity:1}body{max-width:none;padding:0}}
   </style>
 </head>
 <body>
-  <header class="archive-hero">
-    <p class="eyebrow">Discord Chat Export</p>
-    <h1>${escapeHtml(route?.label || t('title'))}</h1>
-    <div class="archive-meta">
-      <span class="meta-pill">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)}</span>
-      <span class="meta-pill">${messages.length} ${escapeHtml(t('messages'))}</span>
-      <span class="meta-pill">${escapeHtml(timeZone)}</span>
-      <span class="meta-pill">${escapeHtml(generatedAt)}</span>
-    </div>
-  </header>
-  <div class="toolbar" role="search">
-    <input id="archive-search" class="search" type="search" placeholder="${escapeHtml(t('searchPlaceholder'))}" aria-label="${escapeHtml(t('searchPlaceholder'))}">
-    <span id="result-count" class="result-count">${escapeHtml(t('showing', { visible: messages.length, total: messages.length }))}</span>
-  </div>
-  <main class="timeline">${timeline}</main>
-  <a class="back-top" href="#" aria-label="${escapeHtml(t('backToTop'))}">↑ ${escapeHtml(t('backToTop'))}</a>
-  <script>
-    (() => {
-      const input = document.getElementById('archive-search');
-      const counter = document.getElementById('result-count');
-      const messages = [...document.querySelectorAll('.message')];
-      const groups = [...document.querySelectorAll('.day-group')];
-      const template = ${JSON.stringify(showingTemplate)};
-      const update = () => {
-        const query = input.value.trim().toLocaleLowerCase();
-        let visible = 0;
-        for (const message of messages) {
-          const match = !query || message.textContent.toLocaleLowerCase().includes(query);
-          message.hidden = !match;
-          if (match) visible += 1;
-        }
-        for (const group of groups) {
-          const groupVisible = group.querySelectorAll('.message:not([hidden])').length;
-          group.hidden = groupVisible === 0;
-          const badge = group.querySelector('.day-divider small');
-          if (badge) badge.textContent = String(groupVisible);
-        }
-        counter.textContent = template.replace('__VISIBLE__', String(visible)).replace('__TOTAL__', String(messages.length));
-      };
-      input.addEventListener('input', update);
-    })();
-  </script>
+  <header class="archive-hero"><p class="eyebrow">Discord Chat Export</p><h1>${escapeHtml(route?.label || t('title'))}</h1><div class="archive-meta"><span class="meta-pill">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)}</span><span class="meta-pill">${messages.length} ${escapeHtml(t('messages'))}</span><span class="meta-pill">${escapeHtml(timeZone)}</span><span class="meta-pill">${escapeHtml(generatedAt)}</span><span class="meta-pill">${escapeHtml(payload.encoding === 'gzip-base64' ? `GZIP ${formatBytes(payload.storedBytes)} · raw ${formatBytes(payload.rawBytes)}` : `Data ${formatBytes(payload.storedBytes)}`)}</span></div></header>
+  <div class="toolbar" role="search"><input id="archive-search" class="search" type="search" placeholder="${escapeHtml(t('searchPlaceholder'))}" aria-label="${escapeHtml(t('searchPlaceholder'))}"><span id="result-count" class="result-count">${escapeHtml(t('showing', { visible: messages.length, total: messages.length }))}</span></div>
+  <main id="timeline" class="timeline"><div id="archive-loading" class="archive-loading">${escapeHtml(t('scanning'))}</div></main><a class="back-top" href="#" aria-label="${escapeHtml(t('backToTop'))}">↑ ${escapeHtml(t('backToTop'))}</a>
+  <script id="archive-data" type="application/octet-stream" data-encoding="${payload.encoding}">${payload.data}</script>
+  <script>${archiveBootstrapSource()}</script>
 </body>
 </html>`;
   }
 
-  function buildExport(format, messages) {
+  async function buildExport(format, messages) {
     if (format === 'json') return { content: jsonExport(messages), mime: 'application/json;charset=utf-8', extension: 'json' };
     if (format === 'csv') return { content: csvExport(messages), mime: 'text/csv;charset=utf-8', extension: 'csv' };
-    if (format === 'html') return { content: htmlExport(messages), mime: 'text/html;charset=utf-8', extension: 'html' };
+    if (format === 'html') return { content: await compactHtmlExport(messages), mime: 'text/html;charset=utf-8', extension: 'html' };
     return { content: textExport(messages), mime: 'text/plain;charset=utf-8', extension: 'txt' };
   }
 
@@ -1116,13 +1339,13 @@
       return false;
     }
 
-    const output = buildExport(settings.format, messages);
+    const output = await buildExport(settings.format, messages);
     const success = await copyToClipboard(output.content);
     setStatus(success ? 'copied' : 'copyFailed', { count: messages.length }, success ? 'success' : 'error');
     return success;
   }
 
-  function downloadExport() {
+  async function downloadExport() {
     scanVisible();
     if (!getDateBounds(true)) return false;
     const messages = selectedRecords();
@@ -1131,7 +1354,7 @@
       return false;
     }
 
-    const output = buildExport(settings.format, messages);
+    const output = await buildExport(settings.format, messages);
     const blob = new Blob([output.content], { type: output.mime });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
@@ -1189,6 +1412,22 @@
     elements.delay.disabled = running;
   }
 
+  function initialTraversalDirection(scan, bounds) {
+    if (scan.maxMs < bounds.startMs) return 1;
+    if (scan.minMs >= bounds.endExclusiveMs) return -1;
+
+    const missingStart = scan.minMs > bounds.startMs;
+    const missingEnd = scan.maxMs < bounds.endExclusiveMs;
+    if (missingStart && missingEnd) {
+      const distanceToStart = scan.minMs - bounds.startMs;
+      const distanceToEnd = bounds.endExclusiveMs - scan.maxMs;
+      return distanceToStart <= distanceToEnd ? -1 : 1;
+    }
+    if (missingStart) return -1;
+    if (missingEnd) return 1;
+    return 0;
+  }
+
   async function startAutomaticCollection() {
     if (activeJob) return;
 
@@ -1211,21 +1450,22 @@
     activeJob = job;
     setRunning(true);
 
-    let phase = 'locate';
     let step = 0;
-    let stallCount = 0;
+    let direction = 0;
+    let reachedStart = false;
+    let reachedEnd = false;
+    let observedMin = Infinity;
+    let observedMax = -Infinity;
     let edgeWaits = 0;
-    let collectBottomWaits = 0;
-    let lastSeekDirection = 0;
-    let aligningAfterForwardJump = false;
+    let stallCount = 0;
     let previousSignature = '';
-    const maximumSteps = 3000;
+    const maximumSteps = 5000;
 
-    const finish = () => {
+    const finish = async () => {
       scanVisible();
       const count = selectedRecords().length;
       setStatus('done', { count }, 'success');
-      if (settings.autoDownload && count) downloadExport();
+      if (settings.autoDownload && count) await downloadExport();
     };
 
     try {
@@ -1244,128 +1484,85 @@
           continue;
         }
 
-        if (phase === 'locate') {
-          setStatus('seeking', { step });
-          const direction = directionToStart(scan, bounds.startMs);
+        observedMin = Math.min(observedMin, scan.minMs);
+        observedMax = Math.max(observedMax, scan.maxMs);
+        if (scan.minMs <= bounds.startMs) reachedStart = true;
+        if (scan.maxMs >= bounds.endExclusiveMs) reachedEnd = true;
 
-          if (direction === 0) {
-            phase = 'collect';
-            stallCount = 0;
+        if (reachedStart && reachedEnd) {
+          await finish();
+          return;
+        }
+
+        if (!direction) direction = initialTraversalDirection(scan, bounds);
+        if (direction < 0 && reachedStart) {
+          direction = 1;
+          edgeWaits = 0;
+          stallCount = 0;
+          previousSignature = '';
+        } else if (direction > 0 && reachedEnd) {
+          direction = -1;
+          edgeWaits = 0;
+          stallCount = 0;
+          previousSignature = '';
+        }
+
+        if (!direction) {
+          await finish();
+          return;
+        }
+
+        const clippedStart = Math.max(bounds.startMs, Math.min(observedMin, bounds.endExclusiveMs));
+        const clippedEnd = Math.min(bounds.endExclusiveMs, Math.max(observedMax, bounds.startMs));
+        const covered = Math.max(0, clippedEnd - clippedStart);
+        const percent = Math.max(0, Math.min(100, Math.round(
+          (covered / (bounds.endExclusiveMs - bounds.startMs)) * 100
+        )));
+        const overlapsRange = scan.maxMs >= bounds.startMs && scan.minMs < bounds.endExclusiveMs;
+        setStatus(overlapsRange ? 'collecting' : 'seeking', overlapsRange ? { percent, step } : { step });
+
+        const atEdge = direction < 0 ? isAtTop(scroller) : isAtBottom(scroller);
+        if (atEdge) {
+          const previousBoundary = direction < 0 ? scan.minMs : scan.maxMs;
+          await jumpToLoadedEdge(scroller, direction);
+          const retry = scanVisible();
+          const changed = direction < 0
+            ? Number.isFinite(retry.minMs) && retry.minMs < previousBoundary
+            : Number.isFinite(retry.maxMs) && retry.maxMs > previousBoundary;
+
+          if (changed) {
             edgeWaits = 0;
-            previousSignature = '';
             continue;
           }
 
-          if (lastSeekDirection && direction !== lastSeekDirection) {
-            if (lastSeekDirection < 0 && direction > 0) {
-              // We crossed the start boundary while seeking older messages.
-              // Starting before the boundary lets the collection pass scan every
-              // in-range message in chronological order.
-              phase = 'collect';
-              stallCount = 0;
-              edgeWaits = 0;
-              previousSignature = '';
-              continue;
-            }
+          edgeWaits += 1;
+          if (edgeWaits < 3) continue;
 
-            // A fast jump toward newer messages may land after the boundary.
-            // Walk back by overlapping viewports until the start is bracketed.
-            aligningAfterForwardJump = true;
-          }
-
-          const atRequestedEdge = direction < 0 ? isAtTop(scroller) : isAtBottom(scroller);
-          if (atRequestedEdge) {
-            const previousBoundary = direction < 0 ? scan.minMs : scan.maxMs;
-            await jumpToLoadedEdge(scroller, direction);
-            await sleep(Number(settings.delay) || 700);
-            const retry = scanVisible();
-            const boundaryChanged = direction < 0
-              ? Number.isFinite(retry.minMs) && retry.minMs < previousBoundary
-              : Number.isFinite(retry.maxMs) && retry.maxMs > previousBoundary;
-
-            if (boundaryChanged) {
-              edgeWaits = 0;
-              lastSeekDirection = direction;
-              continue;
-            }
-
-            edgeWaits += 1;
-            if (edgeWaits < 3) continue;
-
-            if (direction < 0) {
-              // The selected start predates the channel's reachable beginning.
-              phase = 'collect';
-              stallCount = 0;
-              edgeWaits = 0;
-              previousSignature = '';
-              continue;
-            }
-
-            // The selected start is newer than the latest reachable message.
-            finish();
-            return;
-          }
-
+          if (direction < 0) reachedStart = true;
+          else reachedEnd = true;
+          direction = direction < 0 ? 1 : -1;
           edgeWaits = 0;
-          if (aligningAfterForwardJump) {
-            await moveScroller(scroller, direction);
-          } else {
-            await jumpToLoadedEdge(scroller, direction);
-          }
-          lastSeekDirection = direction;
-        } else {
-          const timeReached = Math.min(Math.max(scan.maxMs, bounds.startMs), bounds.endExclusiveMs);
-          const percent = Math.max(0, Math.min(100, Math.round(
-            ((timeReached - bounds.startMs) / (bounds.endExclusiveMs - bounds.startMs)) * 100
-          )));
-          setStatus('collecting', { percent, step });
+          stallCount = 0;
+          previousSignature = '';
 
-          if (scan.maxMs >= bounds.endExclusiveMs) {
-            finish();
+          if (reachedStart && reachedEnd) {
+            await finish();
             return;
           }
-
-          if (isAtBottom(scroller)) {
-            const previousMaximum = scan.maxMs;
-            await jumpToLoadedEdge(scroller, 1);
-            await sleep(Number(settings.delay) || 700);
-            const retry = scanVisible();
-
-            if (Number.isFinite(retry.maxMs) && retry.maxMs > previousMaximum) {
-              collectBottomWaits = 0;
-              continue;
-            }
-
-            collectBottomWaits += 1;
-            if (collectBottomWaits < 3) continue;
-
-            finish();
-            return;
-          }
-
-          collectBottomWaits = 0;
-          await moveScroller(scroller, 1);
+          continue;
         }
+
+        edgeWaits = 0;
+        await moveScroller(scroller, direction);
 
         const nextScan = scanVisible();
         const signature = scrollSignature(scroller, nextScan);
         stallCount = signature === previousSignature ? stallCount + 1 : 0;
         previousSignature = signature;
 
-        if (stallCount === 5 && phase === 'locate') {
-          await jumpToLoadedEdge(scroller, lastSeekDirection || -1);
-          await sleep(Number(settings.delay) || 700);
-        }
-
-        if (stallCount >= 10) {
-          if (phase === 'locate' && (lastSeekDirection || -1) < 0) {
-            phase = 'collect';
-            stallCount = 0;
-            previousSignature = '';
-          } else {
-            setStatus('stalled', {}, 'warning');
-            return;
-          }
+        if (stallCount >= 8) {
+          setStatus('stalled', {}, 'warning');
+          return;
         }
       }
 

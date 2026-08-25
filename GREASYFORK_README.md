@@ -2,19 +2,21 @@
 
 在 Discord 网页版的当前文字频道中，采集你的账号有权查看、且已经由页面加载出来的消息，并按日期范围导出。
 
-脚本会先判断开始日期位于当前消息视窗之前、之后还是视窗内，自动选择向上或向下定位；到达开始边界前后，再向下逐屏收集到结束日期。也可以只扫描手动滚动到的消息。所有处理都在当前浏览器标签页内完成，不调用 Discord 私有 API，不使用外部依赖，不上传聊天内容。
+脚本会判断所选日期范围位于当前消息视窗之前、之后还是与当前视窗相交，然后选择成本较低的方向连续采集。若当前界面晚于整个日期范围，会从当前位置直接向上逐屏采集，到达开始边界后完成，不再回到顶部重复向下扫描；位于范围内时会先到较近边界，再反向覆盖另一边。也可以只扫描手动滚动到的消息。所有处理都在当前浏览器标签页内完成，不调用 Discord 私有 API，不使用外部依赖，不上传聊天内容。
 
 ## 功能
 
-- 按开始日期和结束日期自动滚动采集当前频道，并根据当前视窗时间自动选择上翻或下翻。
-- 定位阶段直接跳到当前已加载消息列表的顶部或底部，触发 Discord 加载下一批内容；越过边界后自动回到边界前方再顺序采集。
+- 按开始日期和结束日期自动滚动采集当前频道，并根据当前视窗与完整日期范围的位置自动选择上翻或下翻。
+- 上翻和下翻都使用重叠视窗边滚动边采集；只有到达当前已加载列表边缘时才触发继续加载，避免快速跳转漏掉中间消息。
+- 当前视窗晚于整个范围时直接反向采集到开始日期并结束，取消“先上翻、再回头向下重扫”的冗余路径。
 - 日期按浏览器本地时区解释，结束日期包含当天全部消息。
 - 使用 Discord Snowflake 消息 ID 还原时间，避免受到 Discord 界面语言和时间显示格式影响。
 - 自动按消息 ID 去重并恢复聊天顺序；同一 Discord 附件的 CDN 原图、媒体代理和缩略图会合并为一项，优先保留原图地址。
-- 尽可能采集作者、正文、回复摘要、嵌入内容、贴纸、图片、视频、音频、附件地址、反应和编辑状态。
+- 尽可能采集作者、真实头像、正文、Unicode/自定义表情、回复摘要、嵌入内容、贴纸、图片、视频、音频、附件地址、结构化反应及编辑状态。
 - 导出 TXT、JSON、CSV、HTML。
 - CSV 含 UTF-8 BOM，可直接用 Excel 等表格软件打开。
 - HTML 为单文件可阅读归档页面：按日期分组，连续作者消息紧凑显示，正文 URL 可点击，代码块单独排版，并提供全文/作者搜索。
+- HTML 将作者、头像、表情和媒体存入去重后的字典表，消息只保存引用；归档数据库使用浏览器原生 gzip 压缩后嵌入文件，打开时在本地解压和渲染。
 - HTML 直接展示可识别的图片，提供视频和音频播放器，并保留文件链接；页面支持明暗主题、移动端和打印布局。
 - 可选“完成后自动下载”，一次操作完成刷取和导出。
 - 面板语言：English、简体中文、繁體中文、日本語、한국어、Español、Français、Deutsch、Português (Brasil)、Русский、العربية。
@@ -36,7 +38,7 @@
 2. 在面板中选择开始日期和结束日期。
 3. 网络较慢、频道很活跃或日期跨度很大时，把“滚动等待”改为“稳妥（1200 毫秒）”。
 4. 点击“自动刷取日期范围”。
-5. 脚本比较当前已挂载消息与开始日期：目标较早就上翻，目标较新就下翻；定位阶段会快速跳到当前已加载区间的相应边缘。越过开始边界后，从边界前方开始向下经过完整范围。采集期间不要手动滚动消息列表，也不要切换频道。
+5. 脚本比较当前已挂载消息与完整日期范围：范围较早就直接上翻采集，范围较新就向下采集；当前视窗位于范围内时先覆盖较近边界，再反向覆盖另一边。采集期间不要手动滚动消息列表，也不要切换频道。
 6. 如需一次操作直接完成导出，先勾选“完成后自动下载”；否则状态显示完成后，再点击“下载”或“复制”。
 
 结束日期按包含当天处理。例如，开始和结束都选择 `2026-08-24`，会筛选浏览器本地时间 8 月 24 日 00:00:00 至 8 月 25 日 00:00:00 之前的消息。
@@ -67,9 +69,11 @@
 
 ### HTML
 
-适合阅读和浏览媒体。生成单个 HTML 文件，其中可识别的图片会直接显示，视频和音频使用浏览器播放器，其他附件显示为链接。
+适合阅读和浏览媒体。生成单个 HTML 文件，其中会显示可用的作者头像、消息内自定义表情、反应图标和图片，视频和音频使用浏览器播放器，其他附件显示为链接。
 
-页面顶部包含日期范围、消息数量、时区、导出时间和搜索栏；消息按浏览器本地日期分组。五分钟内同一作者的连续消息会使用紧凑布局，但每条消息仍保留独立时间、来源链接和消息 ID。长归档使用延迟图片加载及浏览器内容可见性优化，减少初次打开时的渲染负担。
+页面顶部包含日期范围、消息数量、时区、导出时间、压缩体积和搜索栏；消息按浏览器本地日期分组。五分钟内同一作者的连续消息会使用紧凑布局，但每条消息仍保留独立时间、来源链接和消息 ID。长归档使用延迟图片加载及浏览器内容可见性优化，减少初次打开时的渲染负担。
+
+HTML 不再为每条消息重复写入完整模板。导出时先建立轻量的内嵌归档数据库：作者表复用作者和头像，资源表复用头像、表情和媒体 URL，消息表只保存表索引；随后优先使用浏览器的 `CompressionStream('gzip')` 压缩。打开归档时由 `DecompressionStream` 在本机恢复并生成页面。若导出浏览器不支持压缩流，会自动回退到未压缩的 Base64 数据，功能仍可使用但文件会更大。
 
 HTML 文件只保存消息文本、结构和媒体 URL，不会把媒体二进制数据打包进 HTML。打开 HTML 时需要联网读取 Discord CDN 或原始站点；临时、已删除、需要登录或已经过期的媒体 URL 可能无法显示。每项媒体下方都会保留原始链接，加载失败时仍可检查链接。
 
@@ -88,7 +92,7 @@ HTML 文件只保存消息文本、结构和媒体 URL，不会把媒体二进�
 
 - 只能采集当前账号本来就能查看的内容，不能绕过频道权限。
 - Discord 使用虚拟列表；没有被页面加载的消息无法直接读取。自动功能本质上是在控制当前列表滚动并等待 Discord 加载。
-- 精确跳转到某条消息需要真实、已存在的消息链接。脚本只有日期而没有边界消息 ID 时，无法安全构造一个精确跳转链接，因此采用“跳到已加载区间边缘并继续加载”的方式，不调用 Discord 私有搜索接口。
+- 精确跳转到某条消息需要真实、已存在的消息链接。脚本只有日期而没有边界消息 ID 时，无法安全构造精确跳转链接，因此采用重叠视窗滚动，并只在列表边缘触发继续加载，不调用 Discord 私有搜索接口。
 - 已删除的消息、未加载成功的消息和没有查看权限的内容不会出现。
 - 作者名依赖页面中相邻消息的分组信息。若从一个消息组的中间开始、且组标题始终没有加载，个别连续消息的作者可能为空。
 - Discord 前端会更新。如果出现“找不到消息列表”，先刷新页面；若仍无效，请提交浏览器版本、脚本版本、Discord 版本以及控制台报错，但不要公开敏感聊天内容。
@@ -146,6 +150,16 @@ window.__discordChatExporter.hide();       // 隐藏面板
 
 ## 更新记录
 
+### 1.3.0
+
+- 根据 1,796 条消息、约 1.98 MB 的实际导出样本优化长归档；原样本约 97% 的内容来自重复消息模板。
+- 新增真实作者头像采集，并以作者/头像字典复用；头像不可用时继续使用确定性的首字母头像。
+- 保留正文中的 Unicode 表情和 Discord 自定义表情，自定义表情按原位置显示并提供文字替代。
+- 反应改为“图标或符号 + 数量 + 是否由当前账号点选”的结构化记录，修复数量、“添加反应”和 aria-label 被拆成多个反应的问题。
+- HTML 改为作者表、资源表和消息表组成的规范化内嵌数据库，并使用原生 gzip 压缩；不依赖外部 IndexedDB，复制单个 HTML 文件仍可打开。
+- 自动采集改为真正的双向连续覆盖：从较新的界面向上采集时，到达开始边界即可结束，不再返回顶部向下重复扫描。
+- 当前视窗位于日期范围内部时优先前往较近边界，再反向覆盖另一边；所有移动都使用重叠视窗降低漏采风险。
+
 ### 1.2.0
 
 - 根据 514 条消息的实际月度导出样本重做 HTML 信息层级和排版。
@@ -171,7 +185,7 @@ Greasy Fork 要求脚本具有准确说明、代码可检查、至少一个 `@ma
 
 ## English quick guide
 
-Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script detects whether the boundary is older or newer than the current viewport, seeks in the correct direction, then scans forward through the selected period. HTML exports group messages by local date, compact consecutive posts, deduplicate media variants, render recognized images/video/audio, and include instant text/author search. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
+Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script continuously collects in the most efficient direction: when the current viewport is newer than the whole range, it scans upward to the start boundary and finishes without rescanning downward. HTML exports retain available avatars, custom emoji and structured reaction icons/counts, normalize reusable assets into dictionary tables, and embed the archive database with native gzip compression. They remain portable single files with local-date groups, compact consecutive posts, media playback and instant text/author search. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
 
 The script reads only messages rendered in the current tab, never calls Discord's private API, loads no external code, and sends no chat data anywhere.
 
