@@ -11,7 +11,7 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.3.0
+// @version      1.4.0
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动抓取、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
 // @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
@@ -53,7 +53,7 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.3.0';
+  const VERSION = '1.4.0';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -462,6 +462,33 @@
     }
   }
 
+  function customEmojiIdFromUrl(value) {
+    if (!/^https?:\/\//i.test(value || '')) return '';
+
+    try {
+      const parsed = new URL(value, location.href);
+      if (!/(?:^|\.)discordapp\.(?:com|net)$/i.test(parsed.hostname)) return '';
+      return parsed.pathname.match(/^\/emojis\/(\d{15,25})(?:\.[a-z0-9]+)?$/i)?.[1] || '';
+    } catch (_) {
+      return '';
+    }
+  }
+
+  function normalizeEmojiAssetUrl(value) {
+    const id = customEmojiIdFromUrl(value);
+    if (!id) return '';
+
+    try {
+      const source = new URL(value, location.href);
+      const animated = source.searchParams.get('animated') === 'true' || /\.gif$/i.test(source.pathname);
+      const parsed = new URL(`https://cdn.discordapp.com/emojis/${id}.webp`);
+      if (animated) parsed.searchParams.set('animated', 'true');
+      return parsed.href;
+    } catch (_) {
+      return '';
+    }
+  }
+
   function getAvatar(item) {
     if (!item) return '';
     const image = item.querySelector(
@@ -498,10 +525,10 @@
         /\/emojis\//i.test(node.currentSrc || node.src || '')
       )) {
         const name = clean(node.alt || node.getAttribute('aria-label') || '');
-        const url = normalizeAssetUrl(node.currentSrc || node.src || '');
+        const url = normalizeEmojiAssetUrl(node.currentSrc || node.src || '');
         foundEmoji = true;
 
-        if (/\/emojis\//i.test(url)) parts.push({ type: 'emoji', name: name || ':emoji:', url });
+        if (url) parts.push({ type: 'emoji', name: name || ':emoji:', url });
         else appendText(name);
         return;
       }
@@ -572,6 +599,8 @@
   function mediaIdentity(url) {
     try {
       const parsed = new URL(url, location.href);
+      const emoji = customEmojiIdFromUrl(parsed.href);
+      if (emoji) return `discord-emoji:${emoji}`;
       const attachment = parsed.pathname.match(
         /\/(?:ephemeral-)?attachments\/(\d+)\/(\d+)\/([^/?]+)/i
       );
@@ -667,7 +696,10 @@
       const emoji = clean(image?.alt || label.split(/[,，]\s*\d/)[0] || root.textContent)
         .replace(/^:+|:+$/g, '')
         .replace(/\s+/g, ' ');
-      const url = normalizeAssetUrl(image?.currentSrc || image?.src || '');
+      // Discord renders standard Unicode emoji through hashed web-client SVG
+      // assets. Those build URLs are not stable archive resources, so only
+      // keep an image URL when it is a real custom emoji CDN endpoint.
+      const url = normalizeEmojiAssetUrl(image?.currentSrc || image?.src || '');
 
       if (!emoji && !url) continue;
       reactions.push({ emoji: emoji || 'reaction', count: Number.isFinite(count) ? count : 1, url, me: root.getAttribute('aria-pressed') === 'true' });
@@ -760,16 +792,20 @@
         : {
             emoji: clean(entry?.emoji || 'reaction'),
             count: Math.max(1, Number(entry?.count) || 1),
-            url: normalizeAssetUrl(entry?.url || ''),
+            url: normalizeEmojiAssetUrl(entry?.url || ''),
             me: Boolean(entry?.me)
           };
-      const identity = normalized.url || normalized.emoji.toLocaleLowerCase();
+      const customId = customEmojiIdFromUrl(normalized.url);
+      const identity = customId ? `custom:${customId}` : `unicode:${normalized.emoji.toLocaleLowerCase()}`;
       if (!identity) continue;
       const existing = merged.get(identity);
+      const preferredUrl = existing && /[?&]animated=true(?:&|$)/.test(existing.url) && !/[?&]animated=true(?:&|$)/.test(normalized.url)
+        ? existing.url
+        : (normalized.url || existing?.url || '');
       merged.set(identity, existing ? {
         emoji: normalized.emoji || existing.emoji,
         count: Math.max(existing.count, normalized.count),
-        url: normalized.url || existing.url,
+        url: preferredUrl,
         me: existing.me || normalized.me
       } : normalized);
     }
@@ -995,11 +1031,20 @@
     const authorLookup = new Map();
 
     const assetIndex = (entry) => {
-      const url = normalizeAssetUrl(entry?.url || '');
+      const type = entry.type || mediaTypeFromUrl(entry?.url || '', 'file');
+      const url = type === 'emoji'
+        ? normalizeEmojiAssetUrl(entry?.url || '')
+        : normalizeAssetUrl(entry?.url || '');
       if (!url) return -1;
-      const type = entry.type || mediaTypeFromUrl(url, 'file');
       const identity = `${mediaIdentity(url)}:${type}`;
-      if (assetLookup.has(identity)) return assetLookup.get(identity);
+      if (assetLookup.has(identity)) {
+        const existingIndex = assetLookup.get(identity);
+        const existing = assets[existingIndex];
+        if (type === 'emoji' && /[?&]animated=true(?:&|$)/.test(url) && !/[?&]animated=true(?:&|$)/.test(existing[0])) {
+          existing[0] = url;
+        }
+        return existingIndex;
+      }
       const index = assets.length;
       assets.push([url, type, clean(entry.alt), normalizeAssetUrl(entry.poster || '')]);
       assetLookup.set(identity, index);
@@ -1049,7 +1094,7 @@
       ];
     });
 
-    return { v: 1, a: assets, u: authors, m: rows };
+    return { v: 2, a: assets, u: authors, m: rows };
   }
 
   function bytesToBase64(bytes) {
@@ -1152,6 +1197,10 @@
         for (const character of String(author || '')) hash = ((hash << 5) - hash + character.codePointAt(0)) | 0;
         return Math.abs(hash) % 360;
       };
+      const customEmojiText = (name) => {
+        const value = String(name || 'emoji').replace(/^:+|:+$/g, '');
+        return ':' + value + ':';
+      };
 
       const section = (title, values, className) => values && values.length
         ? '<section class="detail-section ' + className + '"><h3>' + esc(title) + '</h3>' + values.map((value) => '<div>' + formatText(value) + '</div>').join('') + '</section>'
@@ -1165,14 +1214,14 @@
             if (typeof part === 'string') return formatText(part);
             const item = asset(part[1]);
             return item
-              ? '<img class="inline-emoji" src="' + esc(item[0]) + '" alt="' + esc(part[0]) + '" title="' + esc(part[0]) + '" loading="lazy" decoding="async">'
+              ? '<span class="inline-emoji-wrap"><img class="inline-emoji fallback-image" src="' + esc(item[0]) + '" alt="' + esc(part[0]) + '" title="' + esc(part[0]) + '" loading="lazy" decoding="async"><span class="inline-emoji-fallback" hidden>' + esc(customEmojiText(part[0])) + '</span></span>'
               : esc(part[0]);
           }).join('');
         };
         const reactions = (items) => !items || !items.length ? '' : '<div class="reaction-row" aria-label="' + esc(labels.reactions) + '">' + items.map((item) => {
           const icon = asset(item[2]);
           const symbol = icon
-            ? '<img class="reaction-emoji" src="' + esc(icon[0]) + '" alt="' + esc(item[0]) + '" loading="lazy" decoding="async">'
+            ? '<span class="reaction-icon"><img class="reaction-emoji fallback-image" src="' + esc(icon[0]) + '" alt="' + esc(item[0]) + '" loading="lazy" decoding="async"><span class="reaction-symbol" hidden>' + esc(customEmojiText(item[0])) + '</span></span>'
             : '<span class="reaction-symbol">' + esc(item[0]) + '</span>';
           return '<span class="reaction-chip' + (item[3] ? ' mine' : '') + '" title="' + esc(item[0]) + '">' + symbol + '<strong>' + Number(item[1] || 1) + '</strong></span>';
         }).join('') + '</div>';
@@ -1206,7 +1255,7 @@
           const compact = previous && previous[2] === row[2] && dayKey(previous[1]) === key && new Date(row[1]) - new Date(previous[1]) <= 300000;
           const avatarAsset = asset(author[1]);
           const avatar = avatarAsset
-            ? '<img class="avatar-image" src="' + esc(avatarAsset[0]) + '" alt="" loading="lazy" decoding="async">'
+            ? '<img class="avatar-image fallback-image" src="' + esc(avatarAsset[0]) + '" alt="" loading="lazy" decoding="async"><span class="avatar-fallback" hidden>' + esc(initial(author[0])) + '</span>'
             : '<span>' + esc(initial(author[0])) + '</span>';
           const visible = row[3] || row[5] || row[6].length || row[7].length || row[8].length;
           const body = row[3] || (!visible ? labels.emptyText : '');
@@ -1224,6 +1273,18 @@
 
         timeline.innerHTML = groups.map((item) => '<section class="day-group" data-day="' + esc(item.key) + '"><h2 class="day-divider"><span>' + esc(item.label) + '</span><small>' + item.rows.length + '</small></h2><div class="day-messages">' + item.rows.join('') + '</div></section>').join('');
         loading.remove();
+
+        const revealFallback = (image) => {
+          if (image.dataset.fallbackApplied === '1') return;
+          image.dataset.fallbackApplied = '1';
+          image.hidden = true;
+          const fallback = image.nextElementSibling;
+          if (fallback) fallback.hidden = false;
+        };
+        for (const image of timeline.querySelectorAll('img.fallback-image')) {
+          image.addEventListener('error', () => revealFallback(image), { once: true });
+          if (image.complete && image.naturalWidth === 0) revealFallback(image);
+        }
 
         const messages = [...document.querySelectorAll('.message')];
         const dayGroups = [...document.querySelectorAll('.day-group')];
@@ -1280,8 +1341,8 @@
   <style>
     :root{color-scheme:light dark;--bg:#f4f5f7;--surface:#fff;--surface-2:#f0f1f4;--text:#24252a;--muted:#656872;--border:#dfe1e6;--accent:#5865f2;--accent-soft:#eef0ff;--reply:#d6d9e0;--shadow:0 8px 28px #1f23290d;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{max-width:1040px;margin:0 auto;padding:36px 20px 80px;background:var(--bg);line-height:1.5}a{color:#4752c4;text-underline-offset:2px;overflow-wrap:anywhere}button,input{font:inherit}.archive-hero{padding:28px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}.eyebrow{margin:0 0 6px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.archive-hero h1{margin:0;font-size:clamp(25px,4vw,38px);line-height:1.18;overflow-wrap:anywhere}.archive-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.meta-pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--muted);font-size:12px}.toolbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;gap:12px;margin:18px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(12px)}.search{min-width:0;flex:1;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);padding:9px 11px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}.result-count{color:var(--muted);font-size:12px;white-space:nowrap}.archive-loading{padding:28px;text-align:center;color:var(--muted)}.archive-loading.error{color:#c8323d}
-    .day-group{margin:24px 0}.day-divider{position:sticky;top:78px;z-index:10;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto 10px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 2px 10px #0000000a;color:var(--muted);font-size:12px;font-weight:750;backdrop-filter:blur(10px)}.day-divider small{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--surface-2);font-size:10px}.day-messages{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}.message{content-visibility:auto;contain-intrinsic-size:auto 140px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}.message:last-child{border-bottom:0}.message:hover{background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.message.compact{padding-top:8px;padding-bottom:8px}.avatar{display:grid;place-items:center;width:40px;height:40px;overflow:hidden;border-radius:50%;background:hsl(var(--author-hue) 55% 36%);color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px #ffffff26}.avatar-image{width:100%;height:100%;object-fit:cover}.message.compact .avatar{visibility:hidden}.message-content{min-width:0}.message-header{display:flex;align-items:baseline;gap:8px;min-height:22px}.message-author{font-size:14px;font-weight:760;overflow-wrap:anywhere}.message.compact .message-author{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.message-header time,.edited-badge{color:var(--muted);font-size:11px}.edited-badge{font-style:italic}.message-body{margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.62}.message-body.empty{color:var(--muted);font-style:italic}.inline-emoji{display:inline-block;width:1.35em;height:1.35em;margin:0 .06em;vertical-align:-.28em;object-fit:contain}.message-body pre{max-width:100%;margin:10px 0;padding:12px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#17181c;color:#e7e9ee;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.detail-section{margin-top:10px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--surface-2);overflow-wrap:anywhere}.detail-section h3{margin:0 0 4px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.detail-section>div{white-space:pre-wrap;font-size:13px;line-height:1.52}.reply-card{border-left-color:var(--reply)}.embed-card{background:var(--accent-soft)}
-    .reaction-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.reaction-chip{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px}.reaction-chip.mine{border-color:var(--accent);background:var(--accent-soft)}.reaction-emoji{width:18px;height:18px;object-fit:contain}.reaction-symbol{font-size:15px}.reaction-chip strong{font-size:11px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px;margin-top:8px}.media-item{min-width:0;margin:0;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.media-item img,.media-item video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.media-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-item{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}.message-footer{display:flex;align-items:center;gap:8px;margin-top:9px;opacity:.58;color:var(--muted);font-size:10px;transition:opacity .15s}.message:hover .message-footer,.message:focus-within .message-footer{opacity:1}.message-footer code{overflow:hidden;text-overflow:ellipsis}.back-top{position:fixed;right:18px;bottom:18px;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:12px;text-decoration:none}[hidden]{display:none!important}
+    .day-group{margin:24px 0}.day-divider{position:sticky;top:78px;z-index:10;display:flex;align-items:center;gap:8px;width:max-content;max-width:100%;margin:0 auto 10px;padding:5px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 92%,transparent);box-shadow:0 2px 10px #0000000a;color:var(--muted);font-size:12px;font-weight:750;backdrop-filter:blur(10px)}.day-divider small{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 5px;border-radius:999px;background:var(--surface-2);font-size:10px}.day-messages{overflow:hidden;border:1px solid var(--border);border-radius:14px;background:var(--surface);box-shadow:var(--shadow)}.message{content-visibility:auto;contain-intrinsic-size:auto 140px;display:grid;grid-template-columns:40px minmax(0,1fr);gap:12px;padding:14px 16px;border-bottom:1px solid var(--border)}.message:last-child{border-bottom:0}.message:hover{background:color-mix(in srgb,var(--accent) 3%,var(--surface))}.message.compact{padding-top:8px;padding-bottom:8px}.avatar{display:grid;place-items:center;width:40px;height:40px;overflow:hidden;border-radius:50%;background:hsl(var(--author-hue) 55% 36%);color:#fff;font-size:15px;font-weight:800;box-shadow:inset 0 0 0 1px #ffffff26}.avatar-image{width:100%;height:100%;object-fit:cover}.avatar-fallback{display:grid;place-items:center;width:100%;height:100%}.message.compact .avatar{visibility:hidden}.message-content{min-width:0}.message-header{display:flex;align-items:baseline;gap:8px;min-height:22px}.message-author{font-size:14px;font-weight:760;overflow-wrap:anywhere}.message.compact .message-author{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.message-header time,.edited-badge{color:var(--muted);font-size:11px}.edited-badge{font-style:italic}.message-body{margin-top:3px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;line-height:1.62}.message-body.empty{color:var(--muted);font-style:italic}.inline-emoji-wrap{display:inline-flex;align-items:baseline;vertical-align:baseline}.inline-emoji{display:inline-block;width:1.35em;height:1.35em;margin:0 .06em;vertical-align:-.28em;object-fit:contain}.inline-emoji-fallback{margin:0 .08em;color:var(--muted);font:600 .88em/1.2 ui-monospace,SFMono-Regular,Consolas,monospace}.message-body pre{max-width:100%;margin:10px 0;padding:12px;overflow:auto;border:1px solid var(--border);border-radius:8px;background:#17181c;color:#e7e9ee;font:12px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace;white-space:pre}.detail-section{margin-top:10px;padding:9px 11px;border-left:3px solid var(--accent);border-radius:0 8px 8px 0;background:var(--surface-2);overflow-wrap:anywhere}.detail-section h3{margin:0 0 4px;color:var(--muted);font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.detail-section>div{white-space:pre-wrap;font-size:13px;line-height:1.52}.reply-card{border-left-color:var(--reply)}.embed-card{background:var(--accent-soft)}
+    .reaction-row{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}.reaction-chip{display:inline-flex;align-items:center;gap:5px;min-height:28px;padding:3px 8px;border:1px solid var(--border);border-radius:999px;background:var(--surface-2);font-size:12px}.reaction-chip.mine{border-color:var(--accent);background:var(--accent-soft)}.reaction-icon{display:inline-flex;align-items:center}.reaction-emoji{width:18px;height:18px;object-fit:contain}.reaction-symbol{font-size:15px;line-height:1}.reaction-icon .reaction-symbol{max-width:12em;overflow:hidden;color:var(--muted);font:600 11px/1.2 ui-monospace,SFMono-Regular,Consolas,monospace;text-overflow:ellipsis;white-space:nowrap}.reaction-chip strong{font-size:11px}.media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(250px,100%),1fr));gap:10px;margin-top:8px}.media-item{min-width:0;margin:0;padding:7px;border:1px solid var(--border);border-radius:9px;background:var(--surface)}.media-item img,.media-item video{display:block;width:100%;max-height:560px;object-fit:contain;border-radius:6px;background:#111}.media-item audio{display:block;width:100%}.media-item figcaption{margin-top:6px;color:var(--muted);font-size:10px;overflow-wrap:anywhere}.media-link{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file-item{padding:9px;border:1px solid var(--border);border-radius:7px;background:var(--surface)}.message-footer{display:flex;align-items:center;gap:8px;margin-top:9px;opacity:.58;color:var(--muted);font-size:10px;transition:opacity .15s}.message:hover .message-footer,.message:focus-within .message-footer{opacity:1}.message-footer code{overflow:hidden;text-overflow:ellipsis}.back-top{position:fixed;right:18px;bottom:18px;padding:9px 12px;border:1px solid var(--border);border-radius:999px;background:var(--surface);box-shadow:var(--shadow);font-size:12px;text-decoration:none}[hidden]{display:none!important}
     @media(max-width:620px){body{padding:18px 8px 70px}.archive-hero{padding:20px 16px;border-radius:14px}.toolbar{top:6px}.result-count{display:none}.day-divider{top:70px}.message{grid-template-columns:34px minmax(0,1fr);gap:9px;padding:12px 10px}.avatar{width:34px;height:34px;font-size:13px}.media-grid{grid-template-columns:1fr}.message-footer{opacity:.65}}@media(prefers-color-scheme:dark){:root{--bg:#191a1e;--surface:#24262b;--surface-2:#2d3036;--text:#e4e6eb;--muted:#a7abb4;--border:#3a3d45;--accent:#8ea1e1;--accent-soft:#2b3044;--reply:#5d626d;--shadow:0 10px 34px #0004}a{color:#aab7f0}.meta-pill{background:#24262bd9}}@media print{.toolbar,.back-top{display:none}.day-divider{position:static}.message{content-visibility:visible;break-inside:avoid}.message-footer{opacity:1}body{max-width:none;padding:0}}
   </style>
 </head>

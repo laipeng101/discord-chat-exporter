@@ -13,6 +13,7 @@
 - 使用 Discord Snowflake 消息 ID 还原时间，避免受到 Discord 界面语言和时间显示格式影响。
 - 自动按消息 ID 去重并恢复聊天顺序；同一 Discord 附件的 CDN 原图、媒体代理和缩略图会合并为一项，优先保留原图地址。
 - 尽可能采集作者、真实头像、正文、Unicode/自定义表情、回复摘要、嵌入内容、贴纸、图片、视频、音频、附件地址、结构化反应及编辑状态。
+- 普通 Unicode 表情以字符保存，不依赖 Discord 网页客户端的临时构建图标；自定义表情按 Discord emoji ID 去重并使用稳定的 CDN WebP 地址。
 - 导出 TXT、JSON、CSV、HTML。
 - CSV 含 UTF-8 BOM，可直接用 Excel 等表格软件打开。
 - HTML 为单文件可阅读归档页面：按日期分组，连续作者消息紧凑显示，正文 URL 可点击，代码块单独排版，并提供全文/作者搜索。
@@ -77,6 +78,8 @@ HTML 不再为每条消息重复写入完整模板。导出时先建立轻量的
 
 HTML 文件只保存消息文本、结构和媒体 URL，不会把媒体二进制数据打包进 HTML。打开 HTML 时需要联网读取 Discord CDN 或原始站点；临时、已删除、需要登录或已经过期的媒体 URL 可能无法显示。每项媒体下方都会保留原始链接，加载失败时仍可检查链接。
 
+普通 Unicode 表情不需要联网。自定义表情和头像仍需联网读取；如果远程图标被删除、权限失效或加载失败，页面会自动隐藏破图，并分别回退到 `:表情名:` 或作者首字母，不再显示浏览器的损坏图片图标。
+
 ## 面板操作
 
 - **扫描当前画面**：立即读取当前已经挂载的消息节点。
@@ -121,6 +124,10 @@ HTML 文件只保存消息文本、结构和媒体 URL，不会把媒体二进�
 
 记录按服务器/私信范围和频道 ID 隔离。面板只统计、复制、下载和清空当前频道的数据。
 
+### 反应显示为破图或出现两次
+
+请升级到 1.4.0 后重新采集并导出。旧版可能把普通 Unicode 反应保存成 Discord 网页构建中的哈希 SVG 地址，这些地址在客户端更新后会失效；旧版也可能把同一个动态自定义表情的动画和静态 WebP 版本识别为两个反应。1.4.0 已分别改为 Unicode 字符和按 emoji ID 合并。
+
 ## 控制台接口
 
 高级用户可在浏览器开发者工具中使用：
@@ -149,6 +156,14 @@ window.__discordChatExporter.hide();       // 隐藏面板
 8. 发布前在一个测试频道分别验证：单日、跨日、空日期范围、四种格式、取消、切换频道、隐藏和快捷键恢复。
 
 ## 更新记录
+
+### 1.4.0
+
+- 根据 645 条消息、76 个反应的真实导出样本修复大量反应破图。
+- 普通 Unicode 表情不再保存为 `discord.com/assets/<构建哈希>.svg`，而是直接以字符渲染，避免 Discord 网页更新后资源地址失效。
+- 仅把 `cdn.discordapp.com/emojis/<id>` 识别为自定义表情图标，并规范为官方推荐的 WebP 地址。
+- 自定义表情按 emoji Snowflake ID 去重；动画与静态候选同时出现时优先保留 `?animated=true`，避免一个反应显示两次。
+- 自定义表情和头像加载失败时分别回退到 `:表情名:` 和作者首字母，归档不再留下浏览器破图图标。
 
 ### 1.3.0
 
@@ -181,11 +196,12 @@ Greasy Fork 要求脚本具有准确说明、代码可检查、至少一个 `@ma
 
 - [Greasy Fork 发布脚本规则](https://greasyfork.org/help/code-rules)
 - [Greasy Fork 用户脚本元数据说明](https://greasyfork.org/help/meta-keys)
+- [Discord Emoji Resource（标准/自定义表情及 WebP 说明）](https://docs.discord.com/developers/resources/emoji)
 - [Discord 官方搜索与日期筛选说明](https://support.discord.com/hc/en-us/articles/115000468588-How-to-Use-Search-on-Discord)
 
 ## English quick guide
 
-Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script continuously collects in the most efficient direction: when the current viewport is newer than the whole range, it scans upward to the start boundary and finishes without rescanning downward. HTML exports retain available avatars, custom emoji and structured reaction icons/counts, normalize reusable assets into dictionary tables, and embed the archive database with native gzip compression. They remain portable single files with local-date groups, compact consecutive posts, media playback and instant text/author search. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
+Open a Discord text channel in the browser, choose a local start and end date, and click **Fetch date range**. The script continuously collects in the most efficient direction: when the current viewport is newer than the whole range, it scans upward to the start boundary and finishes without rescanning downward. HTML exports retain available avatars, custom emoji and structured reaction icons/counts, normalize reusable assets into dictionary tables, and embed the archive database with native gzip compression. Standard emoji are stored as Unicode instead of unstable Discord client SVG assets; custom emoji are deduplicated by ID and fall back to `:name:` if their CDN image cannot load. The archives remain portable single files with local-date groups, compact consecutive posts, media playback and instant text/author search. Do not scroll or change channels while collection runs. Press **Alt/Option + Shift + D** to show or hide the panel.
 
 The script reads only messages rendered in the current tab, never calls Discord's private API, loads no external code, and sends no chat data anywhere.
 
