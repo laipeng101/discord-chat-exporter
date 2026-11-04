@@ -3,3 +3,4 @@ Thumbs.db
 .env
 release.env
 *.log
+node_modules/

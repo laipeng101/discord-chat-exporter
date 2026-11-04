@@ -7,14 +7,14 @@
 -   Greasy Fork sync URL: `https://raw.githubusercontent.com/laipeng101/discord-chat-exporter/main/discord-chat-exporter.user.js`
 -   Greasy Fork script: <https://greasyfork.org/scripts/592901-discord-chat-exporter-date-range-multi-language>
 -   GitHub → Greasy Fork webhook: `release` events only
--   The committed `.user.js` is the final published artifact. Rebuild it locally from `src/` with `node scripts/build.mjs`.
+-   The committed `.user.js` is the final published artifact. Rebuild it locally from `src/` with `npm run build`.
 
 ## Normal release
 
 For a future `vX.Y.Z`:
 
-1.  Edit the sources in `src/`, bump `@version` in `src/userscript-header.txt`, and run `node scripts/build.mjs`.
-2.  Run `node --check discord-chat-exporter.user.js` and `node scripts/check-locales.mjs`.
+1.  Edit the sources in `src/` and bump `@version` in `src/userscript-header.txt`. Run `npm ci` and `npm run build`.
+2.  Run `npm run check` to verify the bundle, localization, date traversal, DOM parsing, and export fixtures.
 3.  Regression-test in a real browser: single day, cross-day, empty range, all four formats, cancel, channel switch, hide and shortcut restore.
 4.  Commit the change.
 5.  Create an annotated tag: `git tag -a vX.Y.Z -m "Discord Chat Exporter vX.Y.Z"`.

@@ -74,9 +74,9 @@ Automatic mode uses the first supported language in the browser's language prefe
 
 ## Development / Documentation
 
-- Edit the source in [src/](src/), then run `node scripts/build.mjs` to regenerate the standalone userscript.
-- Run `node --check discord-chat-exporter.user.js`, `node scripts/check-locales.mjs`, and `node --test scripts/check-language-resolution.mjs scripts/check-collection.mjs` for syntax, localization, and date traversal checks.
-- With Node.js 22+ and `jsdom`, run `node scripts/check-current-dom.mjs` for the message and export fixtures. The script accepts a directory containing `jsdom` in `node_modules` as an optional argument.
+- With Node.js 22+, run `npm ci`, then `npm run build` to regenerate the standalone userscript. Run `npm run check` to verify the bundle and run the localization, traversal, DOM, and export tests.
+- [exporter.mjs](src/exporter.mjs) connects the userscript lifecycle, browser actions, settings, and panel. [dom-reader.mjs](src/dom-reader.mjs) reads Discord's rendered messages, [records.mjs](src/records.mjs) merges and selects records, and [collection.mjs](src/collection.mjs) controls date traversal and pagination.
+- [export-formats.mjs](src/export-formats.mjs) builds TXT, JSON, CSV and HTML. [archive-viewer.mjs](src/archive-viewer.mjs) supplies the inline viewer that runs inside the exported HTML.
 - [GitHub Releases](https://github.com/laipeng101/discord-chat-exporter/releases) — version history
 - [Publishing guide](docs/greasyfork/PUBLISHING_GUIDE.md) — maintainer release workflow
 - [Greasy Fork localized additional info](docs/greasyfork/locales/) — multilingual description sources

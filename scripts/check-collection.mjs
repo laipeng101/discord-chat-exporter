@@ -1,14 +1,8 @@
 #!/usr/bin/env node
 // Exercise automatic collection with synthetic viewports and a virtual clock.
 import assert from 'node:assert/strict';
-import { readFileSync } from 'node:fs';
 import test from 'node:test';
-import vm from 'node:vm';
-
-const src = readFileSync(new URL('../discord-chat-exporter.user.js', import.meta.url), 'utf8');
-const welcomeSelector = src.match(/^  const CHANNEL_WELCOME_SELECTOR = .+;$/m)?.[0];
-assert.ok(welcomeSelector);
-const collection = src.slice(src.indexOf('  function exportFileStem('), src.indexOf('  function clearCurrentChannel('));
+import { createCollector } from '../src/collection.mjs';
 
 function viewport({
   top = 0, height = 100, scrollHeight = 200, beginning = false, busy = false, jumpBar = false,
@@ -61,64 +55,55 @@ function viewport({
 function harness({ bounds = { startMs: 10, endExclusiveMs: 20 }, scan, onWait, onBuild } = {}) {
   let now = 0;
   const route = { key: 'guild:channel', label: 'Test Channel', channelId: 'channel' };
-  const settings = { startDate: '2026-11-01', endDate: '2026-11-02', delay: 400, format: 'html', autoDownload: true };
+  const delay = 400;
   const statuses = [];
   const downloads = [];
   const seen = new Map();
   let scans = 0;
   const api = {
     route,
-    settings,
     statuses,
     downloads,
     get now() { return now; },
     get scans() { return scans; },
     get state() { return statuses.at(-1)?.key; }
   };
-  const context = vm.createContext({
-    Blob,
-    URL,
-    document: {
-      createElement: () => ({ click() { downloads.push(this.download); }, remove() {} }),
-      body: { appendChild() {} }
-    },
-    activeJob: null,
-    elements: {},
-    settings,
-    clean: (text) => text,
+  const collector = createCollector({
     getRoute: () => api.route,
     getDateBounds: () => bounds,
-    findScroller: (root) => root.scroller,
-    performance: { now: () => now },
-    setTimeout: (callback, delay) => {
-      if (delay === settings.delay) {
-        now += delay;
-        assert.ok(now < 120000, 'collector should stop after a bounded wait');
-        onWait?.(api);
-      }
-      callback();
+    getDelay: () => delay,
+    readTime: () => now,
+    async wait(milliseconds) {
+      now += milliseconds;
+      assert.ok(now < 120000, 'collector should stop after a bounded wait');
+      onWait?.(api);
     },
     setStatus: (key, values, tone) => statuses.push({ key, values, tone }),
-    updateCount() {},
-    scanVisible: () => {
+    setRunning() {},
+    readView() {
       scans++;
       const { root, rows } = scan(api);
       for (const [id, time] of rows) seen.set(id, time);
       return {
         root,
+        scroller: root?.scroller,
         ids: rows.map(([id]) => id),
         minMs: rows.length ? Math.min(...rows.map(([, time]) => time)) : NaN,
         maxMs: rows.length ? Math.max(...rows.map(([, time]) => time)) : NaN
       };
     },
-    selectedRecords: () => [...seen].filter(([, time]) => time >= bounds.startMs && time < bounds.endExclusiveMs),
-    buildExport: async (format, messages) => {
+    async complete(mayDownload) {
+      const messages = [...seen].filter(([, time]) => time >= bounds.startMs && time < bounds.endExclusiveMs);
+      statuses.push({ key: 'done', values: { count: messages.length }, tone: 'success' });
+      if (!messages.length) return;
       await onBuild?.(api);
-      return { extension: format, mime: 'text/html', content: JSON.stringify(messages) };
+      if (mayDownload()) {
+        downloads.push(messages);
+        statuses.push({ key: 'downloaded', values: { count: messages.length }, tone: 'success' });
+      }
     }
   });
-  const collect = vm.runInContext(`${welcomeSelector}\n${collection}\n({ start: startAutomaticCollection, cancel: cancelAutomaticCollection })`, context);
-  return Object.assign(api, collect);
+  return Object.assign(api, collector);
 }
 
 test('small viewports overlap and an exact start timestamp still needs an older row', async () => {
@@ -280,7 +265,7 @@ test('a channel beginning and a stable latest viewport allow automatic download'
   const app = harness({ scan: () => ({ root, rows: [['selected', 12]] }) });
   await app.start();
   assert.ok(app.now >= 4500);
-  assert.deepEqual(app.downloads, ['discord-chat-Test-Channel-2026-11-01_2026-11-02.html']);
+  assert.deepEqual(app.downloads, [[['selected', 12]]]);
 });
 
 test('a jump-to-present marker prevents a loaded viewport from counting as latest', async () => {

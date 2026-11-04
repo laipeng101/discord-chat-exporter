@@ -1,16 +1,11 @@
-// Run with Node.js and jsdom. To keep dependencies outside the repository:
-// npm install --prefix <temp-directory> --no-package-lock jsdom
-// node scripts/check-current-dom.mjs <temp-directory>
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { createRequire } from 'node:module';
-import { resolve } from 'node:path';
 import { test } from 'node:test';
+import { JSDOM } from 'jsdom';
 import { readCatalog } from './build.mjs';
 
-const require = createRequire(process.argv[2] ? resolve(process.argv[2], 'package.json') : import.meta.url);
-const { JSDOM } = require('jsdom');
 const source = readFileSync(new URL('../discord-chat-exporter.user.js', import.meta.url), 'utf8');
+const baselineSource = process.env.DCE_BASELINE_PATH && readFileSync(process.env.DCE_BASELINE_PATH, 'utf8');
 
 const date = '2026-11-04';
 const guildId = '1000000000000000001';
@@ -94,19 +89,31 @@ function installBlobApis(window) {
   Object.assign(window, { Blob, CompressionStream, DecompressionStream, Response, TextDecoder, TextEncoder });
 }
 
-function openFixture(t, { withOtherList = false, rows, startDate = date } = {}) {
+function openFixture(t, { withOtherList = false, rows, startDate = date, script = source, freezeClock = false } = {}) {
   const dom = new JSDOM(fixture({ withOtherList, rows }), {
     url: `https://discord.com/channels/${guildId}/${channelId}`,
     runScripts: 'outside-only',
-    beforeParse: installBlobApis
+    beforeParse(window) {
+      installBlobApis(window);
+      if (freezeClock) {
+        window.Date = class extends window.Date {
+          constructor(...args) {
+            super(...(args.length ? args : ['2026-11-04T12:00:00.000Z']));
+          }
+        };
+      }
+    }
   });
   const { window } = dom;
-  t.after(() => window.close());
+  t.after(() => {
+    window.__discordChatExporter?.destroy();
+    window.close();
+  });
 
   window.localStorage.setItem('discord-chat-exporter:settings:v1', JSON.stringify({
     language: 'en', startDate, endDate: date
   }));
-  window.eval(source);
+  window.eval(script);
 
   const api = window.__discordChatExporter;
   const getRecord = (id) => api.messages().find((record) => record.id === id);
@@ -181,6 +188,78 @@ test('keeps the renewed original attachment URL and its signature', (t) => {
   assert.equal(getRecord(ids.attachment).attachments[0], renewedUrl);
 });
 
+test('scans message changes and replacement lists while ignoring unrelated DOM churn', async (t) => {
+  const { window, api, getRecord } = openFixture(t);
+  const { document } = window;
+  const timers = new Map();
+  let timerId = 0;
+  window.setTimeout = (callback) => {
+    timers.set(++timerId, callback);
+    return timerId;
+  };
+  window.clearTimeout = (id) => timers.delete(id);
+  const flushScans = async (count) => {
+    await Promise.resolve();
+    assert.equal(timers.size, count);
+    for (const callback of [...timers.values()]) callback();
+  };
+
+  document.body.appendChild(document.createElement('aside'));
+  await flushScans(0);
+  document.getElementById(`message-content-${ids.head}`).textContent = 'New message text';
+  await flushScans(1);
+  assert.equal(getRecord(ids.head).text, 'New message text');
+
+  document.getElementById(`message-content-${ids.head}`).firstChild.data = 'Edited in place';
+  document.getElementById('original-file').href = renewedUrl;
+  document.querySelector('[aria-checked="true"]').setAttribute('aria-checked', 'false');
+  await flushScans(1);
+  assert.equal(getRecord(ids.head).text, 'Edited in place');
+  assert.equal(getRecord(ids.attachment).attachments[0], renewedUrl);
+  assert.equal(getRecord(ids.reactions).reactions.find(({ emoji }) => emoji === '🎉').me, false);
+
+  const image = document.querySelector('#original-file img');
+  image.srcset = thumbnailUrl;
+  api.scan();
+  image.dispatchEvent(new window.Event('load'));
+  await flushScans(1);
+
+  const root = document.querySelector('[data-list-id="chat-messages"]');
+  root.outerHTML = `<ol role="list" data-list-id="chat-messages">${row(ids.head, content(ids.head, 'Remounted'))}</ol>`;
+  await flushScans(1);
+  assert.equal(getRecord(ids.head).text, 'Remounted');
+
+  document.getElementById(`message-content-${ids.head}`).textContent = 'Scanned explicitly';
+  api.scan();
+  await flushScans(0);
+  assert.equal(getRecord(ids.head).text, 'Scanned explicitly');
+});
+
+test('keeps range counts and grouped authors across rescans, date changes, and clear', (t) => {
+  const before = String(firstSnowflake - (86400000n << 22n));
+  const { window, api, getRecord } = openFixture(t, {
+    rows: row(before, username(before, 'Earlier author', firstAvatar) + content(before, 'Older')) +
+      row(ids.continuation, content(ids.continuation, 'Continuation'), { group: before })
+  });
+  assert.equal(api.count(), 1);
+  assert.equal(getRecord(ids.continuation).author, 'Earlier author');
+
+  const root = window.document.querySelector('[data-list-id="chat-messages"]');
+  root.insertAdjacentHTML('beforeend', row(ids.head, content(ids.head, 'New row')));
+  api.scan();
+  api.scan();
+  assert.equal(api.count(), 2);
+
+  const panel = window.document.getElementById('discord-chat-exporter-host').shadowRoot;
+  const start = panel.querySelector('.start-date');
+  start.value = '2026-11-03';
+  start.dispatchEvent(new window.Event('change'));
+  assert.equal(api.count(), 3);
+  window.confirm = () => true;
+  panel.querySelector('.clear').click();
+  assert.equal(api.count(), 0);
+});
+
 async function exportFormat({ window, api }, format) {
   const selector = window.document.getElementById('discord-chat-exporter-host').shadowRoot.querySelector('.format');
   selector.value = format;
@@ -191,11 +270,70 @@ async function exportFormat({ window, api }, format) {
     return 'blob:https://discord.com/test-download';
   };
   window.URL.revokeObjectURL = () => {};
-  window.HTMLAnchorElement.prototype.click = () => {};
+  window.HTMLAnchorElement.prototype.click = function () {
+    assert.equal(this.download, `discord-chat-#fixture-${date}_${date}.${format}`);
+  };
   assert.equal(await api.download(), true);
   assert.ok(blob, `Expected a ${format} download`);
   return blob.text();
 }
+
+test('matches the baseline in all four formats and both HTML encodings', { skip: !baselineSource }, async (t) => {
+  const baseline = openFixture(t, { script: baselineSource, freezeClock: true });
+  const candidate = openFixture(t, { freezeClock: true });
+  assert.deepEqual(Object.keys(candidate.api), Object.keys(baseline.api));
+  assert.equal(JSON.stringify(candidate.api.messages()), JSON.stringify(baseline.api.messages()));
+
+  for (const format of ['txt', 'csv', 'json', 'html']) {
+    const actual = await exportFormat(candidate, format);
+    let expected = await exportFormat(baseline, format);
+    if (format === 'json') {
+      const baselineExporter = `Discord Chat Exporter ${baseline.api.version}`;
+      const candidateExporter = `Discord Chat Exporter ${candidate.api.version}`;
+      assert.equal(JSON.parse(expected).exporter, baselineExporter);
+      assert.equal(JSON.parse(actual).exporter, candidateExporter);
+      expected = expected.replace(
+        `"exporter": ${JSON.stringify(baselineExporter)}`,
+        () => `"exporter": ${JSON.stringify(candidateExporter)}`
+      );
+    }
+    assert.equal(actual, expected);
+  }
+  candidate.window.CompressionStream = undefined;
+  baseline.window.CompressionStream = undefined;
+  assert.equal(await exportFormat(candidate, 'html'), await exportFormat(baseline, 'html'));
+});
+
+test('cancelling automatic HTML export before the archive is ready prevents the download', async (t) => {
+  const before = String(firstSnowflake - (86400000n << 22n));
+  const after = String(firstSnowflake + (86400000n << 22n));
+  const app = openFixture(t, {
+    rows: row(before, content(before, 'Older boundary')) +
+      row(ids.head, content(ids.head, 'In range')) + row(after, content(after, 'Newer boundary'))
+  });
+  const { api, window } = app;
+  const scroller = window.document.querySelector('.scroller_x');
+  Object.defineProperties(scroller, { clientHeight: { value: 500 }, scrollHeight: { value: 1000 } });
+  const panel = window.document.getElementById('discord-chat-exporter-host').shadowRoot;
+  for (const [selector, property, value] of [['.format', 'value', 'html'], ['.auto-download', 'checked', true]]) {
+    const input = panel.querySelector(selector);
+    input[property] = value;
+    input.dispatchEvent(new window.Event('change'));
+  }
+  let compressed = false;
+  window.CompressionStream = class extends CompressionStream {
+    constructor(format) {
+      super(format);
+      compressed = true;
+      api.cancel();
+    }
+  };
+  window.HTMLAnchorElement.prototype.click = () => assert.fail('cancelled run downloaded a file');
+  await api.start();
+  assert.ok(compressed);
+  assert.equal(panel.querySelector('.status').dataset.tone, 'warning');
+  assert.equal(panel.querySelector('.status').textContent, readCatalog().en.messages.cancelled);
+});
 
 test('selects every locale in the installed panel and uses it in the exported archive', async (t) => {
   const app = openFixture(t);

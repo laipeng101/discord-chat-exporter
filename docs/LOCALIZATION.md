@@ -7,4 +7,4 @@
 
 Write for the place where each line appears. Use short action labels, tell the reader what happened and what they can do next, and look up Discord's own terminology for features such as channels, replies, and forwarding. A technical term such as “embed” can be described as “link previews and cards” when the UI shows those items. Avoid exposing scrolling internals or browser errors in status text. Keep placeholders such as `{count}` intact and check wording at 0, 1, and more than 1; a label with a count works well where an inflected noun would otherwise be needed.
 
-Run `node scripts/build.mjs` and `node scripts/check-locales.mjs` before publishing. Include the regenerated `discord-chat-exporter.user.js` with its source changes. It installs as a single file and does not load translation files at runtime.
+Run `npm ci`, `npm run build`, and `npm run check` before publishing. Include the regenerated `discord-chat-exporter.user.js` with its source changes. It installs as a single file and does not load translation files at runtime.
