@@ -7,14 +7,14 @@
 -   Greasy Fork sync URL: `https://raw.githubusercontent.com/laipeng101/discord-chat-exporter/main/discord-chat-exporter.user.js`
 -   Greasy Fork script: <https://greasyfork.org/scripts/592901-discord-chat-exporter-date-range-multi-language>
 -   GitHub → Greasy Fork webhook: `release` events only
--   No GitHub Actions: the committed `.user.js` in the repository is already the final published artifact.
+-   The committed `.user.js` is the final published artifact. Rebuild it locally from `src/` with `node scripts/build.mjs`.
 
 ## Normal release
 
 For a future `vX.Y.Z`:
 
-1.  Edit the script and bump `@version`.
-2.  Run `node --check discord-chat-exporter.user.js`.
+1.  Edit the sources in `src/`, bump `@version` in `src/userscript-header.txt`, and run `node scripts/build.mjs`.
+2.  Run `node --check discord-chat-exporter.user.js` and `node scripts/check-locales.mjs`.
 3.  Regression-test in a real browser: single day, cross-day, empty range, all four formats, cancel, channel switch, hide and shortcut restore.
 4.  Commit the change.
 5.  Create an annotated tag: `git tag -a vX.Y.Z -m "Discord Chat Exporter vX.Y.Z"`.
@@ -32,6 +32,20 @@ For a future `vX.Y.Z`:
 
 8.  The `release`-only webhook triggers the Greasy Fork sync.
 9.  Verify the version and code on both GitHub and Greasy Fork.
+
+For a new locale, add a **Localized synced additional info** row in Greasy
+Fork's **Admin → Code syncing** section. Select the locale, choose Markdown,
+and use the same GitHub raw URL pattern as the existing rows:
+
+```
+https://raw.githubusercontent.com/laipeng101/discord-chat-exporter/refs/heads/main/docs/greasyfork/locales/ADDITIONAL_INFO.<tag>.md
+```
+
+Ensure the URL is available on `main` before syncing. Keep the existing
+sync URL and Webhook setting. Save the rows, then verify the public listing
+after the release webhook or **Update settings and sync now**. The admin
+locale list includes languages that do not appear in Greasy Fork's site
+language menu (for example, Hindi).
 
 ## Important invariants
 

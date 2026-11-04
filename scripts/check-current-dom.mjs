@@ -6,6 +6,7 @@ import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { test } from 'node:test';
+import { readCatalog } from './build.mjs';
 
 const require = createRequire(process.argv[2] ? resolve(process.argv[2], 'package.json') : import.meta.url);
 const { JSDOM } = require('jsdom');
@@ -195,6 +196,37 @@ async function exportFormat({ window, api }, format) {
   assert.ok(blob, `Expected a ${format} download`);
   return blob.text();
 }
+
+test('selects every locale in the installed panel and uses it in the exported archive', async (t) => {
+  const app = openFixture(t);
+  const { window } = app;
+  const panel = window.document.getElementById('discord-chat-exporter-host').shadowRoot;
+  const catalog = readCatalog();
+  const selectLanguage = (code) => {
+    const select = panel.querySelector('.language');
+    select.value = code;
+    select.dispatchEvent(new window.Event('change'));
+  };
+  assert.deepEqual(Array.from(panel.querySelectorAll('.language option'), ({ value }) => value), ['auto', ...Object.keys(catalog)]);
+  for (const [code, entry] of Object.entries(catalog)) {
+    selectLanguage(code);
+    assert.equal(panel.querySelector('.panel').lang, code);
+    assert.equal(panel.querySelector('.panel').dir, entry.direction ?? 'ltr');
+    assert.equal(panel.querySelector('.fetch').textContent, entry.messages.fetch ?? catalog[entry.inherits].messages.fetch);
+  }
+  for (const code of ['es-419', 'ar', 'hi']) {
+    selectLanguage(code);
+    const archive = new JSDOM(await exportFormat(app, 'html'));
+    t.after(() => archive.window.close());
+    const { document } = archive.window;
+    const { lang, dir, dataset } = document.documentElement;
+    assert.equal(lang, code);
+    assert.equal(dir, catalog[code].direction ?? 'ltr');
+    assert.equal(JSON.parse(dataset.labels).forwarded, (catalog[code].inherits ? catalog.es : catalog[code]).messages.forwarded);
+    assert.match(document.getElementById('result-count').textContent, /\d/);
+  }
+  assert.match(await exportFormat(app, 'txt'), /फ़ॉरवर्ड किया गया मैसेज/);
+});
 
 test('exports forwarded text in TXT, CSV, JSON and the rendered HTML archive', async (t) => {
   const app = openFixture(t);

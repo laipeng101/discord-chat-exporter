@@ -6,27 +6,16 @@ script não chama APIs privadas do Discord nem envia o conteúdo do chat.
 
 ## Principais recursos
 
--   Selecione data inicial e final e colete automaticamente o período.
--   Escolha automática da direção de rolagem para cima ou para baixo
-    conforme a posição atual.
--   Coleta com áreas sobrepostas para reduzir mensagens perdidas.
--   Exportação TXT, JSON, CSV e HTML único e legível.
--   Preserva, quando disponível, autor, avatar, texto, respostas,
-    embeds, anexos, stickers, emoji Unicode/personalizados e reações
-    estruturadas.
--   O HTML agrupa por data local, compacta mensagens consecutivas,
-    permite busca por texto/autor e exibe imagens, vídeo e áudio
-    disponíveis.
--   Reutiliza dicionários de autores, mídia e emoji e comprime o banco
-    incorporado com gzip quando suportado.
--   Emoji padrão são armazenados como Unicode; emoji personalizados são
-    deduplicados pelo ID do Discord e usam `:nome:` como fallback.
--   Interface em 11 idiomas.
+-   Escolha as datas inicial e final. O script percorre a lista de mensagens automaticamente.
+-   Salve o resultado em TXT, JSON, CSV ou em um único arquivo HTML.
+-   Quando disponíveis, a exportação inclui texto, autor, respostas, mensagens encaminhadas, prévias de links, anexos, figurinhas e reações.
+-   No HTML, você pode buscar mensagens ou autores e abrir imagens, vídeos e áudios que ainda estejam disponíveis.
+-   Interface em 19 idiomas.
 
 ## Uso
 
 Abra um canal de texto no Discord Web, escolha o período e o formato e
-clique em **Coletar período**. Não role manualmente nem troque de canal
+clique em **Coletar mensagens por data**. Não role a lista de mensagens nem troque de canal
 durante a coleta automática. **Alt/Option + Shift + D** mostra ou oculta
 o painel.
 

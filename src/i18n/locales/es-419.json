@@ -1,0 +1,12 @@
+{
+  "label": "Español (Latinoamérica)",
+  "name": "Exportador de chats de Discord por fecha",
+  "description": "Elige las fechas y exporta los mensajes que puedes ver en el canal de Discord abierto. Guarda el chat en TXT, JSON, CSV o HTML. Los datos se quedan en tu navegador.",
+  "inherits": "es",
+  "messages": {
+    "collected": "En las fechas elegidas: {selected} · Total recopilado: {total}",
+    "shortcut": "Mostrar u ocultar: Alt + Shift + D",
+    "noScroller": "No se encontró la lista de mensajes. Vuelve a cargar Discord e inténtalo de nuevo.",
+    "csv": "Para una hoja de cálculo (CSV)"
+  }
+}

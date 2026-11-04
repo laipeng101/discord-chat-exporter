@@ -1,0 +1,15 @@
+// ==UserScript==
+// @namespace    https://greasyfork.org/scripts/discord-chat-exporter
+// @version      1.6.0
+// @match        https://discord.com/channels/*
+// @match        https://ptb.discord.com/channels/*
+// @match        https://canary.discord.com/channels/*
+// @run-at       document-idle
+// @grant        none
+// @license      MIT
+// @homepageURL  https://github.com/laipeng101/discord-chat-exporter
+// @supportURL   https://github.com/laipeng101/discord-chat-exporter/issues
+// @compatible   chrome
+// @compatible   firefox
+// @compatible   edge
+// ==/UserScript==

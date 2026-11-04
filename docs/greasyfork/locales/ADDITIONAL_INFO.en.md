@@ -8,30 +8,26 @@ tab and does not call Discord private APIs or upload chat content.
 
 -   Choose a start and end date and automatically collect the selected
     range.
--   Automatically decides whether to scroll upward or downward from the
-    current viewport.
--   Uses overlapping viewports while collecting to reduce missed
-    messages.
+-   Scrolls the message list automatically. If some messages may be
+    missing, you can still export what was collected.
 -   Exports TXT, JSON, CSV, and a readable single-file HTML archive.
--   Preserves available authors, avatars, message text, replies, embeds,
+-   Preserves available authors, avatars, message text, replies, forwarded
+    messages, link previews and cards,
     attachments, stickers, Unicode/custom emoji, and structured
     reactions.
 -   HTML archives group messages by local date, compact consecutive
     posts, support text/author search, and display available
     images/video/audio.
--   Reuses author/media/emoji dictionaries and compresses the embedded
-    archive database with native gzip when supported.
 -   Standard emoji are stored as Unicode; custom emoji use stable
     Discord emoji IDs and fall back to `:name:` if the image cannot
     load.
--   Interface languages: English, Simplified Chinese, Traditional
-    Chinese, Japanese, Korean, Spanish, French, German, Brazilian
-    Portuguese, Russian, and Arabic.
+-   The panel and exported HTML are available in 19 languages and
+    regional variants. Choose a language in the panel or follow your browser.
 
 ## Use
 
 Open a Discord text channel in the browser, choose the date range and
-export format, then click **Collect date range**. Do not manually scroll
+export format, then click **Collect messages by date**. Do not manually scroll
 or switch channels while automatic collection is running. Press
 **Alt/Option + Shift + D** to show or hide the panel.
 

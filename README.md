@@ -17,7 +17,7 @@ Export Discord messages you can already view by date range to TXT, JSON, CSV, or
 - HTML archives: local-date grouping, compact consecutive posts, text/author search, and media preview.
 - Reuses author/media/emoji dictionaries and compresses the embedded archive database with native gzip when supported.
 - Standard emoji stored as Unicode; custom Discord emoji deduplicated by stable emoji ID with a `:name:` fallback.
-- 11 interface languages.
+- 19 interface locales, including Spanish for Spain and Latin America.
 - Works on Discord stable, PTB, and Canary.
 - All chat data is processed locally in the current browser tab and never uploaded.
 
@@ -36,7 +36,7 @@ If the panel is hidden, press `Alt/Option + Shift + D` to show it again.
 
 1. Open the target channel, thread, or DM in Discord Web.
 2. Choose a start date, an end date, and an export format.
-3. Click **Collect date range**.
+3. Click **Collect messages by date**.
 4. Do not manually scroll or switch channels while automatic collection runs.
 5. When it finishes, copy or download the result.
 6. Press `Alt/Option + Shift + D` to show or hide the panel.
@@ -60,7 +60,9 @@ Forwarded text appears inside the forwarding message. In JSON, `forwarded` is an
 
 ## Languages
 
-`English · 简体中文 · 繁體中文 · 日本語 · 한국어 · Español · Français · Deutsch · Português (Brasil) · Русский · العربية`
+`English · 简体中文 · 繁體中文 · 日本語 · 한국어 · Español (España) · Español (Latinoamérica) · Français · Deutsch · Português (Brasil) · Русский · العربية · हिन्दी · Bahasa Indonesia · Türkçe · Tiếng Việt · ไทย · Polski · Italiano`
+
+Automatic mode uses the first supported language in the browser's language preferences, or English if none match. A manually selected language takes precedence and is used for the panel and future TXT and HTML exports. Message contents and the CSV and JSON field names stay as they are.
 
 ## Privacy & limitations
 
@@ -72,11 +74,13 @@ Forwarded text appears inside the forwarding message. In JSON, `forwarded` is an
 
 ## Development / Documentation
 
-- Run `node --check discord-chat-exporter.user.js`, `node scripts/check-locales.mjs`, and `node --test scripts/check-collection.mjs` for syntax, localization, and date traversal checks.
+- Edit the source in [src/](src/), then run `node scripts/build.mjs` to regenerate the standalone userscript.
+- Run `node --check discord-chat-exporter.user.js`, `node scripts/check-locales.mjs`, and `node --test scripts/check-language-resolution.mjs scripts/check-collection.mjs` for syntax, localization, and date traversal checks.
 - With Node.js 22+ and `jsdom`, run `node scripts/check-current-dom.mjs` for the message and export fixtures. The script accepts a directory containing `jsdom` in `node_modules` as an optional argument.
 - [GitHub Releases](https://github.com/laipeng101/discord-chat-exporter/releases) — version history
 - [Publishing guide](docs/greasyfork/PUBLISHING_GUIDE.md) — maintainer release workflow
 - [Greasy Fork localized additional info](docs/greasyfork/locales/) — multilingual description sources
+- [Localization guide](docs/LOCALIZATION.md) — add a locale or revise wording
 - [Issues](https://github.com/laipeng101/discord-chat-exporter/issues) — bug reports and feedback
 
 ## License

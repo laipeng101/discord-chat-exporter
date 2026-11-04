@@ -7,29 +7,16 @@ discussion n'est envoyé ailleurs.
 
 ## Fonctions principales
 
--   Sélection d'une date de début et de fin avec collecte automatique de
-    la période.
--   Choix automatique du défilement vers le haut ou le bas selon la
-    position actuelle.
--   Collecte avec zones de vue chevauchantes pour réduire les messages
-    manqués.
--   Export TXT, JSON, CSV et archive HTML autonome lisible.
--   Conservation, lorsque disponible, de l'auteur, avatar, texte,
-    réponses, intégrations, pièces jointes, stickers, emoji
-    Unicode/personnalisés et réactions structurées.
--   L'HTML regroupe par date locale, compacte les messages consécutifs,
-    permet la recherche texte/auteur et affiche les images, vidéos et
-    sons disponibles.
--   Réutilisation de dictionnaires auteurs/médias/emoji et compression
-    gzip de la base intégrée si le navigateur le permet.
--   Les emoji standards sont stockés en Unicode ; les emoji
-    personnalisés sont dédupliqués par ID Discord avec repli `:nom:`.
--   Interface en 11 langues.
+-   Choisissez les dates de début et de fin. Le script fait défiler automatiquement la liste des messages.
+-   Enregistrez le résultat en TXT, JSON, CSV ou dans un seul fichier HTML.
+-   L’export conserve le texte, les auteurs, les réponses, les messages transférés, les aperçus de liens, les pièces jointes, les stickers et les réactions, selon ce que Discord affiche.
+-   Dans le fichier HTML, vous pouvez rechercher des messages ou des auteurs et consulter les images, vidéos et fichiers audio encore accessibles.
+-   Interface en 19 langues.
 
 ## Utilisation
 
 Ouvrez un salon texte dans Discord Web, choisissez la période et le
-format, puis lancez **Collecter la période**. Ne faites pas défiler
+format, puis cliquez sur **Collecter les messages par date**. Ne faites pas défiler
 manuellement et ne changez pas de salon pendant la collecte automatique.
 **Alt/Option + Shift + D** affiche ou masque le panneau.
 

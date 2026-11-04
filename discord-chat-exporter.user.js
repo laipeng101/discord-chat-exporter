@@ -1,28 +1,44 @@
 // ==UserScript==
 // @name         Discord Chat Exporter - Date Range & Multi-language
-// @name:zh-CN   Discord 聊天导出器 - 日期范围与多语言
-// @name:zh-TW   Discord 聊天匯出器 - 日期範圍與多語言
+// @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
+// @name:de      Discord-Chat-Exporter - Zeitraum und mehrsprachig
+// @name:es      Exportador de chats de Discord - Fechas e idiomas
+// @name:es-419  Exportador de chats de Discord por fecha
+// @name:fr      Exportateur de discussions Discord - Dates et langues
+// @name:hi      Discord चैट एक्सपोर्टर — तारीख के हिसाब से
+// @name:id      Ekspor Chat Discord berdasarkan Tanggal
+// @name:it      Esporta le chat di Discord per data
 // @name:ja      Discord チャットエクスポーター - 日付範囲・多言語
 // @name:ko      Discord 채팅 내보내기 - 날짜 범위 및 다국어
-// @name:es      Exportador de chats de Discord - Fechas e idiomas
-// @name:fr      Exportateur de discussions Discord - Dates et langues
-// @name:de      Discord-Chat-Exporter - Zeitraum und mehrsprachig
+// @name:pl      Eksport czatu Discord według dat
 // @name:pt-BR   Exportador de chat do Discord - Período e idiomas
 // @name:ru      Экспорт чата Discord — даты и языки
-// @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
+// @name:th      ส่งออกแชต Discord ตามช่วงวันที่
+// @name:tr      Discord Sohbetlerini Tarihe Göre Dışa Aktar
+// @name:vi      Xuất tin nhắn Discord theo ngày
+// @name:zh-CN   Discord 聊天导出器 - 日期范围与多语言
+// @name:zh-TW   Discord 聊天匯出器 - 日期範圍與多語言
+// @description  Export messages you can view in the current Discord channel. Pick a date range and save as TXT, JSON, CSV, or HTML. Your chat data stays in your browser.
+// @description:ar اختر فترة زمنية وصدّر الرسائل التي يمكنك الاطّلاع عليها في قناة Discord المفتوحة بصيغة TXT أو JSON أو CSV أو HTML. تبقى بيانات المحادثة في متصفحك.
+// @description:de Wähle einen Zeitraum und exportiere die Nachrichten, die du im geöffneten Discord-Kanal sehen kannst. Unterstützt TXT, JSON, CSV und HTML. Die Chatdaten bleiben im Browser.
+// @description:es Elige un periodo y exporta los mensajes a los que tienes acceso en el canal de Discord abierto. Guarda el chat en TXT, JSON, CSV o HTML. Los datos se quedan en el navegador.
+// @description:es-419 Elige las fechas y exporta los mensajes que puedes ver en el canal de Discord abierto. Guarda el chat en TXT, JSON, CSV o HTML. Los datos se quedan en tu navegador.
+// @description:fr Choisissez une période et exportez les messages auxquels vous avez accès dans le salon Discord ouvert. Formats : TXT, JSON, CSV et HTML. Les données restent dans votre navigateur.
+// @description:hi मौजूदा Discord चैनल में जो मैसेज आप देख सकते हैं, उन्हें चुनी हुई तारीखों के लिए TXT, JSON, CSV या HTML में सेव करें। चैट डेटा आपके ब्राउज़र में ही रहता है।
+// @description:id Pilih rentang tanggal dan ekspor pesan yang dapat Anda lihat di kanal Discord yang sedang dibuka. Simpan sebagai TXT, JSON, CSV, atau HTML. Data chat tetap di browser.
+// @description:it Scegli un intervallo di date ed esporta i messaggi che puoi vedere nel canale Discord aperto. Salva in formato TXT, JSON, CSV o HTML. I dati restano nel browser.
+// @description:ja 現在のDiscordチャンネルで閲覧できるメッセージを、期間を指定してTXT、JSON、CSV、HTMLに保存します。データはブラウザー内で処理されます。
+// @description:ko 현재 Discord 채널에서 볼 수 있는 메시지를 날짜별로 선택해 TXT, JSON, CSV, HTML로 내보냅니다. 채팅 데이터는 브라우저에서만 처리됩니다.
+// @description:pl Wybierz daty i wyeksportuj wiadomości, do których masz dostęp w otwartym kanale Discorda. Zapisz je jako TXT, JSON, CSV lub HTML. Dane pozostają w przeglądarce.
+// @description:pt-BR Escolha um período e exporte as mensagens que você pode ver no canal aberto do Discord. Salve em TXT, JSON, CSV ou HTML. Os dados ficam no navegador.
+// @description:ru Выберите период и экспортируйте доступные вам сообщения из открытого канала Discord в TXT, JSON, CSV или HTML. Данные остаются в браузере.
+// @description:th เลือกช่วงวันที่แล้วส่งออกข้อความที่คุณมีสิทธิ์ดูในช่อง Discord ที่เปิดอยู่เป็นไฟล์ TXT, JSON, CSV หรือ HTML ข้อมูลแชตจะอยู่ในเบราว์เซอร์ของคุณ
+// @description:tr Açık Discord kanalında görebildiğin mesajları seçtiğin tarihler için TXT, JSON, CSV veya HTML olarak dışa aktar. Sohbet verileri tarayıcında kalır.
+// @description:vi Chọn khoảng ngày và xuất những tin nhắn bạn có thể xem trong kênh Discord đang mở. Lưu dưới dạng TXT, JSON, CSV hoặc HTML. Dữ liệu chỉ được xử lý trong trình duyệt.
+// @description:zh-CN 按日期导出当前 Discord 频道中你有权限查看的消息。支持 TXT、JSON、CSV 和 HTML，聊天记录仅在浏览器内处理。
+// @description:zh-TW 依日期匯出你有權在目前 Discord 頻道查看的訊息。支援 TXT、JSON、CSV 和 HTML，聊天記錄只在瀏覽器內處理。
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.5.1
-// @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
-// @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动采集、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
-// @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
-// @description:ja 現在のDiscordチャンネルから閲覧可能なメッセージをエクスポート。日付範囲の自動スクロール、TXT/JSON/CSV/HTML、添付、埋め込み、返信、リアクション、多言語UIに対応。データはブラウザ内だけで処理します。
-// @description:ko 현재 Discord 채널에서 계정이 볼 수 있는 메시지를 내보냅니다. 날짜 범위 자동 스크롤, TXT/JSON/CSV/HTML, 첨부 파일, 임베드, 답글, 반응, 다국어 패널을 지원하며 데이터는 브라우저에서만 처리됩니다.
-// @description:es Exporta los mensajes visibles para tu cuenta del canal actual. Incluye desplazamiento automático por fechas, TXT/JSON/CSV/HTML, adjuntos, incrustaciones, respuestas, reacciones y panel multilingüe. Los datos permanecen en el navegador.
-// @description:fr Exporte les messages visibles par votre compte dans le salon actuel. Défilement automatique par dates, TXT/JSON/CSV/HTML, pièces jointes, intégrations, réponses, réactions et interface multilingue. Les données restent dans le navigateur.
-// @description:de Exportiert für Ihr Konto sichtbare Nachrichten aus dem aktuellen Kanal. Mit automatischem Datums-Scrollen, TXT/JSON/CSV/HTML, Anhängen, Einbettungen, Antworten, Reaktionen und mehrsprachiger Oberfläche. Daten bleiben im Browser.
-// @description:pt-BR Exporta as mensagens visíveis para sua conta no canal atual. Inclui rolagem automática por período, TXT/JSON/CSV/HTML, anexos, incorporações, respostas, reações e painel multilíngue. Os dados ficam no navegador.
-// @description:ru Экспортирует доступные вашей учётной записи сообщения текущего канала. Есть автопрокрутка по датам, TXT/JSON/CSV/HTML, вложения, вставки, ответы, реакции и многоязычная панель. Данные остаются в браузере.
-// @description:ar يُصدّر الرسائل التي يستطيع حسابك رؤيتها من القناة الحالية، مع تمرير تلقائي حسب التاريخ وصيغ TXT/JSON/CSV/HTML والمرفقات والتضمينات والردود والتفاعلات ولوحة متعددة اللغات. تبقى البيانات داخل المتصفح.
+// @version      1.6.0
 // @match        https://discord.com/channels/*
 // @match        https://ptb.discord.com/channels/*
 // @match        https://canary.discord.com/channels/*
@@ -55,677 +71,1263 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.5.1';
   const CHANNEL_WELCOME_SELECTOR = 'div:has(> [class*="emptyChannelIcon_"])';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
   }
 
-  const translations = {
-    en: {
-      title: 'Discord Chat Exporter',
-      collected: '{selected} in range · {total} seen',
-      messages: 'messages',
-      searchPlaceholder: 'Search messages or authors…',
-      showing: 'Showing {visible} of {total}',
-      backToTop: 'Back to top',
-      language: 'Language',
-      startDate: 'Start date',
-      endDate: 'End date',
-      format: 'Format',
-      delay: 'Scroll delay',
-      autoDownload: 'Download automatically when finished',
-      delayFast: 'Fast (400 ms)',
-      delayNormal: 'Normal (700 ms)',
-      delaySafe: 'Slower (1200 ms)',
-      scan: 'Scan visible messages',
-      fetch: 'Collect date range',
-      cancel: 'Cancel',
-      copy: 'Copy',
-      download: 'Download',
-      clear: 'Clear collected data',
-      minimize: 'Minimize',
-      close: 'Hide',
-      timezone: 'Dates use your local time zone: {zone}',
-      shortcut: 'Show/hide: Alt + Shift + D',
-      idle: 'Panel ready — observing the current channel.',
-      scanning: 'Scanning visible messages…',
-      seeking: 'Locating the date boundary… step {step}',
-      collecting: 'Collecting the selected range… {percent}% · step {step}',
-      done: 'Finished. {count} messages are ready.',
-      cancelled: 'Collection cancelled.',
-      noChannel: 'Open a Discord text channel first.',
-      noScroller: 'Could not find the message list. Reload Discord and try again.',
-      badDates: 'Choose a valid start and end date (start must not be after end).',
-      noMessages: 'No collected messages match this date range.',
-      copied: 'Copied {count} messages.',
-      copyFailed: 'Clipboard access failed. Use Download instead.',
-      downloaded: 'Downloaded {count} messages.',
-      clearConfirm: 'Clear all collected messages for the current channel?',
-      cleared: 'Current channel data cleared.',
-      routeChanged: 'The channel changed, so automatic collection stopped.',
-      stalled: 'Could not confirm the full date range. Messages collected so far are still available.',
-      txt: 'Plain text (TXT)',
-      json: 'Structured data (JSON)',
-      csv: 'Spreadsheet (CSV)',
-      html: 'Web page (HTML)',
-      reply: 'Reply',
-      forwarded: 'Forwarded message',
-      embeds: 'Embeds',
-      attachments: 'Attachments',
-      reactions: 'Reactions',
-      stickers: 'Stickers',
-      emptyText: '[No text content]',
-      edited: 'edited',
-      source: 'Source',
-      messageId: 'Message ID',
-      loadFailed: 'Failed to load the archive:',
-      archiveTitle: 'Discord Chat Export',
-    },
-    'zh-CN': {
-      title: 'Discord 聊天导出器',
-      collected: '范围内 {selected} 条 · 已见 {total} 条',
-      messages: '条消息',
-      searchPlaceholder: '搜索消息或作者…',
-      showing: '显示 {visible} / {total}',
-      backToTop: '返回顶部',
-      language: '语言',
-      startDate: '开始日期',
-      endDate: '结束日期',
-      format: '导出格式',
-      delay: '滚动间隔',
-      autoDownload: '完成后自动下载',
-      delayFast: '快速（400 毫秒）',
-      delayNormal: '标准（700 毫秒）',
-      delaySafe: '较慢（1200 毫秒）',
-      scan: '扫描可见消息',
-      fetch: '采集日期范围',
-      cancel: '取消',
-      copy: '复制',
-      download: '下载',
-      clear: '清除已采集数据',
-      minimize: '最小化',
-      close: '隐藏',
-      timezone: '日期按浏览器本地时区计算：{zone}',
-      shortcut: '显示/隐藏：Alt + Shift + D',
-      idle: '面板就绪，正在观察当前频道。',
-      scanning: '正在扫描可见消息…',
-      seeking: '正在双向定位日期边界… 第 {step} 步',
-      collecting: '正在采集所选范围… {percent}% · 第 {step} 步',
-      done: '完成，可导出 {count} 条消息。',
-      cancelled: '已取消自动采集。',
-      noChannel: '请先打开一个 Discord 文字频道。',
-      noScroller: '找不到消息列表，请刷新 Discord 后重试。',
-      badDates: '请选择有效的开始和结束日期，且开始日期不能晚于结束日期。',
-      noMessages: '已采集内容中没有符合该日期范围的消息。',
-      copied: '已复制 {count} 条消息。',
-      copyFailed: '无法写入剪贴板，请改用“下载”。',
-      downloaded: '已下载 {count} 条消息。',
-      clearConfirm: '清除当前频道已经采集的全部消息？',
-      cleared: '已清除当前频道数据。',
-      routeChanged: '检测到频道已切换，自动采集已停止。',
-      stalled: '无法确认已采集完整日期范围，已采集的消息仍可导出。',
-      txt: '纯文本（TXT）',
-      json: '结构化数据（JSON）',
-      csv: '表格（CSV）',
-      html: '网页（HTML）',
-      reply: '回复',
-      forwarded: '转发消息',
-      embeds: '嵌入内容',
-      attachments: '附件',
-      reactions: '反应',
-      stickers: '贴纸',
-      emptyText: '[无文字内容]',
-      edited: '已编辑',
-      source: '来源',
-      messageId: '消息 ID',
-      loadFailed: '归档加载失败：',
-      archiveTitle: 'Discord 聊天导出',
-    },
-    'zh-TW': {
-      title: 'Discord 聊天匯出器',
-      collected: '範圍內 {selected} 則 · 已見 {total} 則',
-      messages: '則訊息',
-      searchPlaceholder: '搜尋訊息或作者…',
-      showing: '顯示 {visible} / {total}',
-      backToTop: '返回頂端',
-      language: '語言',
-      startDate: '開始日期',
-      endDate: '結束日期',
-      format: '匯出格式',
-      delay: '捲動間隔',
-      autoDownload: '完成後自動下載',
-      delayFast: '快速（400 毫秒）',
-      delayNormal: '標準（700 毫秒）',
-      delaySafe: '較慢（1200 毫秒）',
-      scan: '掃描可見訊息',
-      fetch: '擷取日期範圍',
-      cancel: '取消',
-      copy: '複製',
-      download: '下載',
-      clear: '清除已擷取資料',
-      minimize: '最小化',
-      close: '隱藏',
-      timezone: '日期依瀏覽器本地時區計算：{zone}',
-      shortcut: '顯示/隱藏：Alt + Shift + D',
-      idle: '面板就緒，正在觀察目前頻道。',
-      scanning: '正在掃描可見訊息…',
-      seeking: '正在雙向定位日期邊界… 第 {step} 步',
-      collecting: '正在擷取所選範圍… {percent}% · 第 {step} 步',
-      done: '完成，可匯出 {count} 則訊息。',
-      cancelled: '已取消自動擷取。',
-      noChannel: '請先開啟 Discord 文字頻道。',
-      noScroller: '找不到訊息清單，請重新整理 Discord 後再試。',
-      badDates: '請選擇有效的開始與結束日期，且開始日期不得晚於結束日期。',
-      noMessages: '已擷取內容中沒有符合此日期範圍的訊息。',
-      copied: '已複製 {count} 則訊息。',
-      copyFailed: '無法寫入剪貼簿，請改用「下載」。',
-      downloaded: '已下載 {count} 則訊息。',
-      clearConfirm: '清除目前頻道已擷取的全部訊息？',
-      cleared: '已清除目前頻道資料。',
-      routeChanged: '偵測到頻道已切換，自動擷取已停止。',
-      stalled: '無法確認已擷取完整的日期範圍，已擷取的訊息仍可匯出。',
-      txt: '純文字（TXT）',
-      json: '結構化資料（JSON）',
-      csv: '試算表（CSV）',
-      html: '網頁（HTML）',
-      reply: '回覆',
-      forwarded: '轉發訊息',
-      embeds: '嵌入內容',
-      attachments: '附件',
-      reactions: '反應',
-      stickers: '貼圖',
-      emptyText: '[無文字內容]',
-      edited: '已編輯',
-      source: '來源',
-      messageId: '訊息 ID',
-      loadFailed: '封存載入失敗：',
-      archiveTitle: 'Discord 聊天匯出',
-    },
-    ja: {
-      title: 'Discord チャットエクスポーター',
-      collected: '範囲内 {selected} 件 · 検出 {total} 件',
-      messages: '件のメッセージ',
-      searchPlaceholder: 'メッセージまたは投稿者を検索…',
-      showing: '{total} 件中 {visible} 件を表示',
-      backToTop: '先頭へ戻る',
-      language: '言語',
-      startDate: '開始日',
-      endDate: '終了日',
-      format: '形式',
-      delay: '待機時間',
-      autoDownload: '完了時に自動ダウンロード',
-      delayFast: '高速（400 ms）',
-      delayNormal: '標準（700 ms）',
-      delaySafe: '低速（1200 ms）',
-      scan: '表示中のメッセージをスキャン',
-      fetch: '日付範囲を収集',
-      cancel: 'キャンセル',
-      copy: 'コピー',
-      download: 'ダウンロード',
-      clear: '収集データを消去',
-      minimize: '最小化',
-      close: '非表示',
-      timezone: '日付はローカルタイムゾーンを使用：{zone}',
-      shortcut: '表示/非表示：Alt + Shift + D',
-      idle: 'パネルは準備完了。現在のチャンネルを待機中。',
-      scanning: '表示中のメッセージをスキャン中…',
-      seeking: '日付境界を双方向に検索中… {step} ステップ',
-      collecting: '選択範囲を収集中… {percent}% · {step} ステップ',
-      done: '完了。{count} 件を出力できます。',
-      cancelled: '収集をキャンセルしました。',
-      noChannel: 'Discordのテキストチャンネルを開いてください。',
-      noScroller: 'メッセージ一覧が見つかりません。再読み込みして再試行してください。',
-      badDates: '有効な開始日と終了日を選択してください（開始日は終了日より後にならないように）。',
-      noMessages: 'この日付範囲に一致するメッセージはありません。',
-      copied: '{count} 件をコピーしました。',
-      copyFailed: 'コピーできません。ダウンロードを使用してください。',
-      downloaded: '{count} 件をダウンロードしました。',
-      clearConfirm: '現在のチャンネルの収集データを消去しますか？',
-      cleared: '収集データを消去しました。',
-      routeChanged: 'チャンネルが変わったため収集を停止しました。',
-      stalled: '指定期間の取得が完了したか確認できませんでした。取得済みのメッセージは引き続き利用できます。',
-      txt: 'テキスト（TXT）',
-      json: '構造化データ（JSON）',
-      csv: '表計算（CSV）',
-      html: 'Webページ（HTML）',
-      reply: '返信',
-      forwarded: '転送されたメッセージ',
-      embeds: '埋め込み',
-      attachments: '添付',
-      reactions: 'リアクション',
-      stickers: 'スタンプ',
-      emptyText: '[本文なし]',
-      edited: '編集済み',
-      source: 'ソース',
-      messageId: 'メッセージID',
-      loadFailed: 'アーカイブの読み込みに失敗しました：',
-      archiveTitle: 'Discord チャットエクスポート',
-    },
-    ko: {
-      title: 'Discord 채팅 내보내기',
-      collected: '범위 내 {selected}개 · 확인 {total}개',
-      messages: '개 메시지',
-      searchPlaceholder: '메시지 또는 작성자 검색…',
-      showing: '{total}개 중 {visible}개 표시',
-      backToTop: '맨 위로',
-      language: '언어',
-      startDate: '시작 날짜',
-      endDate: '종료 날짜',
-      format: '형식',
-      delay: '스크롤 간격',
-      autoDownload: '완료 후 자동 다운로드',
-      delayFast: '빠른 속도 (400ms)',
-      delayNormal: '보통 속도 (700ms)',
-      delaySafe: '느린 속도 (1200ms)',
-      scan: '보이는 메시지 스캔',
-      fetch: '날짜 범위 수집',
-      cancel: '취소',
-      copy: '복사',
-      download: '다운로드',
-      clear: '수집 데이터 지우기',
-      minimize: '최소화',
-      close: '숨기기',
-      timezone: '날짜는 현지 시간대 기준: {zone}',
-      shortcut: '표시/숨기기: Alt + Shift + D',
-      idle: '패널 준비됨. 현재 채널을 관찰 중입니다.',
-      scanning: '보이는 메시지 스캔 중…',
-      seeking: '날짜 경계를 양방향으로 찾는 중… {step}단계',
-      collecting: '선택 범위 수집 중… {percent}% · {step}단계',
-      done: '완료. {count}개 메시지를 내보낼 수 있습니다.',
-      cancelled: '수집이 취소되었습니다.',
-      noChannel: 'Discord 텍스트 채널을 먼저 여세요.',
-      noScroller: '메시지 목록을 찾지 못했습니다. Discord를 새로고침하세요.',
-      badDates: '올바른 시작일과 종료일을 선택하세요.',
-      noMessages: '이 날짜 범위에 맞는 수집 메시지가 없습니다.',
-      copied: '{count}개 메시지를 복사했습니다.',
-      copyFailed: '클립보드에 쓸 수 없습니다. 다운로드를 이용하세요.',
-      downloaded: '{count}개 메시지를 다운로드했습니다.',
-      clearConfirm: '현재 채널에서 수집한 메시지를 모두 지울까요?',
-      cleared: '현재 채널 데이터를 지웠습니다.',
-      routeChanged: '채널이 바뀌어 자동 수집을 중지했습니다.',
-      stalled: '지정한 날짜 범위 전체를 수집했는지 확인하지 못했습니다. 지금까지 수집한 메시지는 그대로 사용할 수 있습니다.',
-      txt: '일반 텍스트(TXT)',
-      json: '구조화 데이터(JSON)',
-      csv: '스프레드시트(CSV)',
-      html: '웹 페이지(HTML)',
-      reply: '답글',
-      forwarded: '전달된 메시지',
-      embeds: '임베드',
-      attachments: '첨부 파일',
-      reactions: '반응',
-      stickers: '스티커',
-      emptyText: '[텍스트 없음]',
-      edited: '수정됨',
-      source: '출처',
-      messageId: '메시지 ID',
-      loadFailed: '아카이브를 불러오지 못했습니다:',
-      archiveTitle: 'Discord 채팅 내보내기',
-    },
-    es: {
-      title: 'Exportador de chats de Discord',
-      collected: '{selected} en el rango · {total} vistos',
-      messages: 'mensajes',
-      searchPlaceholder: 'Buscar mensajes o autores…',
-      showing: 'Mostrando {visible} de {total}',
-      backToTop: 'Volver arriba',
-      language: 'Idioma',
-      startDate: 'Fecha inicial',
-      endDate: 'Fecha final',
-      format: 'Formato',
-      delay: 'Intervalo de desplazamiento',
-      autoDownload: 'Descargar automáticamente al terminar',
-      delayFast: 'Rápido (400 ms)',
-      delayNormal: 'Normal (700 ms)',
-      delaySafe: 'Más lento (1200 ms)',
-      scan: 'Escanear mensajes visibles',
-      fetch: 'Recopilar rango de fechas',
-      cancel: 'Cancelar',
-      copy: 'Copiar',
-      download: 'Descargar',
-      clear: 'Borrar datos recopilados',
-      minimize: 'Minimizar',
-      close: 'Ocultar',
-      timezone: 'Las fechas usan tu zona local: {zone}',
-      shortcut: 'Mostrar/ocultar: Alt + Mayús + D',
-      idle: 'Panel listo — esperando en el canal actual.',
-      scanning: 'Escaneando mensajes visibles…',
-      seeking: 'Localizando el límite de fecha en ambas direcciones… paso {step}',
-      collecting: 'Recopilando el rango… {percent}% · paso {step}',
-      done: 'Terminado. Hay {count} mensajes listos.',
-      cancelled: 'Recopilación cancelada.',
-      noChannel: 'Abre primero un canal de texto de Discord.',
-      noScroller: 'No se encontró la lista de mensajes. Recarga Discord.',
-      badDates: 'Elige fechas válidas; la inicial no puede ser posterior a la final.',
-      noMessages: 'No hay mensajes recopilados en este rango.',
-      copied: 'Se copiaron {count} mensajes.',
-      copyFailed: 'No se pudo usar el portapapeles. Usa Descargar.',
-      downloaded: 'Se descargaron {count} mensajes.',
-      clearConfirm: '¿Borrar los mensajes recopilados del canal actual?',
-      cleared: 'Se borraron los datos del canal actual.',
-      routeChanged: 'El canal cambió y se detuvo la recopilación.',
-      stalled: 'No se pudo confirmar el intervalo completo. Los mensajes recopilados siguen disponibles.',
-      txt: 'Texto (TXT)',
-      json: 'Datos estructurados (JSON)',
-      csv: 'Hoja de cálculo (CSV)',
-      html: 'Página web (HTML)',
-      reply: 'Respuesta',
-      forwarded: 'Mensaje reenviado',
-      embeds: 'Incrustaciones',
-      attachments: 'Adjuntos',
-      reactions: 'Reacciones',
-      stickers: 'Stickers',
-      emptyText: '[Sin texto]',
-      edited: 'editado',
-      source: 'Origen',
-      messageId: 'ID del mensaje',
-      loadFailed: 'No se pudo cargar el archivo:',
-      archiveTitle: 'Exportación de chat de Discord',
-    },
-    fr: {
-      title: 'Exportateur de discussions Discord',
-      collected: '{selected} dans la période · {total} vus',
-      messages: 'messages',
-      searchPlaceholder: 'Rechercher des messages ou auteurs…',
-      showing: '{visible} sur {total} affichés',
-      backToTop: 'Retour en haut',
-      language: 'Langue',
-      startDate: 'Date de début',
-      endDate: 'Date de fin',
-      format: 'Format',
-      delay: 'Délai de défilement',
-      autoDownload: 'Télécharger automatiquement à la fin',
-      delayFast: 'Rapide (400 ms)',
-      delayNormal: 'Normal (700 ms)',
-      delaySafe: 'Plus lent (1200 ms)',
-      scan: 'Analyser les messages visibles',
-      fetch: 'Collecter la période',
-      cancel: 'Annuler',
-      copy: 'Copier',
-      download: 'Télécharger',
-      clear: 'Effacer les données collectées',
-      minimize: 'Réduire',
-      close: 'Masquer',
-      timezone: 'Dates selon votre fuseau local : {zone}',
-      shortcut: 'Afficher/masquer : Alt + Maj + D',
-      idle: 'Panneau prêt — salon actuel prêt pour la collecte.',
-      scanning: 'Analyse des messages visibles…',
-      seeking: 'Recherche bidirectionnelle de la limite de date… étape {step}',
-      collecting: 'Collecte de la période… {percent}% · étape {step}',
-      done: 'Terminé. {count} messages sont prêts.',
-      cancelled: 'Collecte annulée.',
-      noChannel: 'Ouvrez d’abord un salon textuel Discord.',
-      noScroller: 'Liste des messages introuvable. Rechargez Discord.',
-      badDates: 'Choisissez des dates valides, dans le bon ordre.',
-      noMessages: 'Aucun message collecté ne correspond à cette période.',
-      copied: '{count} messages copiés.',
-      copyFailed: 'Échec du presse-papiers. Utilisez Télécharger.',
-      downloaded: '{count} messages téléchargés.',
-      clearConfirm: 'Effacer les messages collectés pour ce salon ?',
-      cleared: 'Données du salon effacées.',
-      routeChanged: 'Le salon a changé, la collecte est arrêtée.',
-      stalled: 'Impossible de confirmer que toute la période a été couverte. Les messages recueillis restent disponibles.',
-      txt: 'Texte brut (TXT)',
-      json: 'Données structurées (JSON)',
-      csv: 'Tableur (CSV)',
-      html: 'Page web (HTML)',
-      reply: 'Réponse',
-      forwarded: 'Message transféré',
-      embeds: 'Intégrations',
-      attachments: 'Pièces jointes',
-      reactions: 'Réactions',
-      stickers: 'Stickers',
-      emptyText: '[Aucun texte]',
-      edited: 'modifié',
-      source: 'Source',
-      messageId: 'ID du message',
-      loadFailed: 'Échec du chargement de l’archive :',
-      archiveTitle: 'Export de discussions Discord',
-    },
-    de: {
-      title: 'Discord-Chat-Exporter',
-      collected: '{selected} im Zeitraum · {total} gesehen',
-      messages: 'Nachrichten',
-      searchPlaceholder: 'Nachrichten oder Autoren suchen…',
-      showing: '{visible} von {total} angezeigt',
-      backToTop: 'Nach oben',
-      language: 'Sprache',
-      startDate: 'Startdatum',
-      endDate: 'Enddatum',
-      format: 'Format',
-      delay: 'Scroll-Intervall',
-      autoDownload: 'Nach Abschluss automatisch herunterladen',
-      delayFast: 'Schnell (400 ms)',
-      delayNormal: 'Normal (700 ms)',
-      delaySafe: 'Langsamer (1200 ms)',
-      scan: 'Sichtbare Nachrichten scannen',
-      fetch: 'Zeitraum erfassen',
-      cancel: 'Abbrechen',
-      copy: 'Kopieren',
-      download: 'Herunterladen',
-      clear: 'Gesammelte Daten löschen',
-      minimize: 'Minimieren',
-      close: 'Ausblenden',
-      timezone: 'Datumsangaben verwenden Ihre lokale Zeitzone: {zone}',
-      shortcut: 'Ein-/ausblenden: Alt + Umschalt + D',
-      idle: 'Panel bereit – aktueller Kanal steht zur Erfassung bereit.',
-      scanning: 'Sichtbare Nachrichten werden erfasst…',
-      seeking: 'Datumsgrenze wird in beide Richtungen gesucht… Schritt {step}',
-      collecting: 'Zeitraum wird erfasst… {percent}% · Schritt {step}',
-      done: 'Fertig. {count} Nachrichten sind bereit.',
-      cancelled: 'Erfassung abgebrochen.',
-      noChannel: 'Öffnen Sie zuerst einen Discord-Textkanal.',
-      noScroller: 'Nachrichtenliste nicht gefunden. Laden Sie Discord neu.',
-      badDates: 'Wählen Sie gültige Daten in der richtigen Reihenfolge.',
-      noMessages: 'Keine erfasste Nachricht passt zum Zeitraum.',
-      copied: '{count} Nachrichten kopiert.',
-      copyFailed: 'Zwischenablage fehlgeschlagen. Nutzen Sie Herunterladen.',
-      downloaded: '{count} Nachrichten heruntergeladen.',
-      clearConfirm: 'Erfasste Nachrichten dieses Kanals löschen?',
-      cleared: 'Kanaldaten gelöscht.',
-      routeChanged: 'Der Kanal wurde gewechselt; die Erfassung wurde beendet.',
-      stalled: 'Der vollständige Zeitraum konnte nicht bestätigt werden. Die bisher erfassten Nachrichten bleiben verfügbar.',
-      txt: 'Text (TXT)',
-      json: 'Strukturierte Daten (JSON)',
-      csv: 'Tabelle (CSV)',
-      html: 'Webseite (HTML)',
-      reply: 'Antwort',
-      forwarded: 'Weitergeleitete Nachricht',
-      embeds: 'Einbettungen',
-      attachments: 'Anhänge',
-      reactions: 'Reaktionen',
-      stickers: 'Sticker',
-      emptyText: '[Kein Text]',
-      edited: 'bearbeitet',
-      source: 'Quelle',
-      messageId: 'Nachrichten-ID',
-      loadFailed: 'Archiv konnte nicht geladen werden:',
-      archiveTitle: 'Discord-Chat-Export',
-    },
-    'pt-BR': {
-      title: 'Exportador de chat do Discord',
-      collected: '{selected} no período · {total} vistos',
-      messages: 'mensagens',
-      searchPlaceholder: 'Buscar mensagens ou autores…',
-      showing: 'Mostrando {visible} de {total}',
-      backToTop: 'Voltar ao topo',
-      language: 'Idioma',
-      startDate: 'Data inicial',
-      endDate: 'Data final',
-      format: 'Formato',
-      delay: 'Intervalo da rolagem',
-      autoDownload: 'Baixar automaticamente ao concluir',
-      delayFast: 'Rápido (400 ms)',
-      delayNormal: 'Normal (700 ms)',
-      delaySafe: 'Mais lento (1200 ms)',
-      scan: 'Ler mensagens visíveis',
-      fetch: 'Coletar período',
-      cancel: 'Cancelar',
-      copy: 'Copiar',
-      download: 'Baixar',
-      clear: 'Limpar dados coletados',
-      minimize: 'Minimizar',
-      close: 'Ocultar',
-      timezone: 'As datas usam seu fuso local: {zone}',
-      shortcut: 'Mostrar/ocultar: Alt + Shift + D',
-      idle: 'Painel pronto — aguardando no canal atual.',
-      scanning: 'Lendo mensagens visíveis…',
-      seeking: 'Localizando o limite de data nas duas direções… etapa {step}',
-      collecting: 'Coletando o período… {percent}% · etapa {step}',
-      done: 'Concluído. {count} mensagens prontas.',
-      cancelled: 'Coleta cancelada.',
-      noChannel: 'Abra primeiro um canal de texto do Discord.',
-      noScroller: 'Lista de mensagens não encontrada. Recarregue o Discord.',
-      badDates: 'Escolha datas válidas na ordem correta.',
-      noMessages: 'Nenhuma mensagem coletada corresponde ao período.',
-      copied: '{count} mensagens copiadas.',
-      copyFailed: 'Falha na área de transferência. Use Baixar.',
-      downloaded: '{count} mensagens baixadas.',
-      clearConfirm: 'Limpar as mensagens coletadas deste canal?',
-      cleared: 'Dados do canal limpos.',
-      routeChanged: 'O canal mudou e a coleta foi interrompida.',
-      stalled: 'Não foi possível confirmar a coleta de todo o período. As mensagens já coletadas continuam disponíveis.',
-      txt: 'Texto simples (TXT)',
-      json: 'Dados estruturados (JSON)',
-      csv: 'Planilha (CSV)',
-      html: 'Página web (HTML)',
-      reply: 'Resposta',
-      forwarded: 'Mensagem encaminhada',
-      embeds: 'Embeds',
-      attachments: 'Anexos',
-      reactions: 'Reações',
-      stickers: 'Figurinhas',
-      emptyText: '[Sem texto]',
-      edited: 'editado',
-      source: 'Origem',
-      messageId: 'ID da mensagem',
-      loadFailed: 'Falha ao carregar o arquivo:',
-      archiveTitle: 'Exportação de chat do Discord',
-    },
-    ru: {
-      title: 'Экспорт чата Discord',
-      collected: 'В диапазоне: {selected} · просмотрено: {total}',
-      messages: 'сообщений',
-      searchPlaceholder: 'Поиск сообщений или авторов…',
-      showing: 'Показано {visible} из {total}',
-      backToTop: 'Наверх',
-      language: 'Язык',
-      startDate: 'Начальная дата',
-      endDate: 'Конечная дата',
-      format: 'Формат',
-      delay: 'Задержка прокрутки',
-      autoDownload: 'Скачать автоматически после завершения',
-      delayFast: 'Быстро (400 мс)',
-      delayNormal: 'Обычно (700 мс)',
-      delaySafe: 'Медленнее (1200 мс)',
-      scan: 'Сканировать видимые сообщения',
-      fetch: 'Собрать диапазон дат',
-      cancel: 'Отмена',
-      copy: 'Копировать',
-      download: 'Скачать',
-      clear: 'Очистить собранные данные',
-      minimize: 'Свернуть',
-      close: 'Скрыть',
-      timezone: 'Даты используют ваш часовой пояс: {zone}',
-      shortcut: 'Показать/скрыть: Alt + Shift + D',
-      idle: 'Панель готова — ожидание в текущем канале.',
-      scanning: 'Сканирование видимых сообщений…',
-      seeking: 'Двунаправленный поиск границы даты… шаг {step}',
-      collecting: 'Сбор диапазона… {percent}% · шаг {step}',
-      done: 'Готово. Сообщений к экспорту: {count}.',
-      cancelled: 'Сбор отменён.',
-      noChannel: 'Сначала откройте текстовый канал Discord.',
-      noScroller: 'Список сообщений не найден. Перезагрузите Discord.',
-      badDates: 'Выберите допустимые даты в правильном порядке.',
-      noMessages: 'Нет собранных сообщений за этот период.',
-      copied: 'Скопировано сообщений: {count}.',
-      copyFailed: 'Буфер обмена недоступен. Используйте скачивание.',
-      downloaded: 'Скачано сообщений: {count}.',
-      clearConfirm: 'Удалить собранные сообщения текущего канала?',
-      cleared: 'Данные текущего канала удалены.',
-      routeChanged: 'Канал изменился, сбор остановлен.',
-      stalled: 'Не удалось подтвердить полноту сбора за выбранный период. Собранные сообщения остаются доступны.',
-      txt: 'Текст (TXT)',
-      json: 'Структурированные данные (JSON)',
-      csv: 'Таблица (CSV)',
-      html: 'Веб-страница (HTML)',
-      reply: 'Ответ',
-      forwarded: 'Пересланное сообщение',
-      embeds: 'Встроенный контент',
-      attachments: 'Вложения',
-      reactions: 'Реакции',
-      stickers: 'Стикеры',
-      emptyText: '[Нет текста]',
-      edited: 'изменено',
-      source: 'Источник',
-      messageId: 'ID сообщения',
-      loadFailed: 'Не удалось загрузить архив:',
-      archiveTitle: 'Экспорт чата Discord',
-    },
-    ar: {
-      title: 'مُصدِّر محادثات Discord',
-      collected: '{selected} ضمن النطاق · شوهد {total}',
-      messages: 'رسالة',
-      searchPlaceholder: 'البحث في الرسائل أو المؤلفين…',
-      showing: 'عرض {visible} من {total}',
-      backToTop: 'العودة للأعلى',
-      language: 'اللغة',
-      startDate: 'تاريخ البدء',
-      endDate: 'تاريخ الانتهاء',
-      format: 'الصيغة',
-      delay: 'مهلة التمرير',
-      autoDownload: 'تنزيل تلقائي عند الاكتمال',
-      delayFast: 'سريع (400 مللي ثانية)',
-      delayNormal: 'عادي (700 مللي ثانية)',
-      delaySafe: 'أبطأ (1200 مللي ثانية)',
-      scan: 'مسح الرسائل الظاهرة',
-      fetch: 'جمع نطاق التاريخ',
-      cancel: 'إلغاء',
-      copy: 'نسخ',
-      download: 'تنزيل',
-      clear: 'مسح البيانات المجمعة',
-      minimize: 'تصغير',
-      close: 'إخفاء',
-      timezone: 'تستخدم التواريخ منطقتك الزمنية: {zone}',
-      shortcut: 'إظهار/إخفاء: Alt + Shift + D',
-      idle: 'اللوحة جاهزة — في انتظار القناة الحالية.',
-      scanning: 'جارٍ مسح الرسائل الظاهرة…',
-      seeking: 'جارٍ تحديد حد التاريخ في الاتجاهين… الخطوة {step}',
-      collecting: 'جارٍ جمع النطاق… {percent}% · الخطوة {step}',
-      done: 'اكتمل. {count} رسالة جاهزة.',
-      cancelled: 'أُلغي الجمع.',
-      noChannel: 'افتح قناة نصية في Discord أولاً.',
-      noScroller: 'تعذر العثور على قائمة الرسائل. أعد تحميل Discord.',
-      badDates: 'اختر تاريخي بدء وانتهاء صالحين بالترتيب الصحيح.',
-      noMessages: 'لا توجد رسائل مجمعة تطابق هذا النطاق.',
-      copied: 'تم نسخ {count} رسالة.',
-      copyFailed: 'تعذر استخدام الحافظة. استخدم التنزيل.',
-      downloaded: 'تم تنزيل {count} رسالة.',
-      clearConfirm: 'هل تريد مسح الرسائل المجمعة للقناة الحالية؟',
-      cleared: 'تم مسح بيانات القناة الحالية.',
-      routeChanged: 'تغيرت القناة، لذلك توقف الجمع.',
-      stalled: 'تعذّر التأكد من اكتمال جمع الرسائل ضمن النطاق الزمني. تظل الرسائل التي جُمعت متاحة.',
-      txt: 'نص عادي (TXT)',
-      json: 'بيانات منظمة (JSON)',
-      csv: 'جدول (CSV)',
-      html: 'صفحة ويب (HTML)',
-      reply: 'رد',
-      forwarded: 'رسالة مُعاد توجيهها',
-      embeds: 'تضمينات',
-      attachments: 'مرفقات',
-      reactions: 'تفاعلات',
-      stickers: 'ملصقات',
-      emptyText: '[لا يوجد نص]',
-      edited: 'معدّل',
-      source: 'المصدر',
-      messageId: 'معرّف الرسالة',
-      loadFailed: 'تعذر تحميل الأرشيف:',
-      archiveTitle: 'تصدير محادثات Discord',
-    }
-  };
+  // Generated by scripts/build.mjs. Edit the sources in src/.
+  function createI18n(catalog) {
+    const locales = Object.keys(catalog);
+    const latinAmericanRegions = new Set('419 AR BO BR BZ CL CO CR CU DO EC GT HN HT MX NI PA PE PR PY SV US UY VE'.split(' '));
 
-  const supportedLanguages = Object.keys(translations);
+    function matchLocale(tag) {
+      let locale;
+      try {
+        locale = new Intl.Locale(tag.replaceAll('_', '-'));
+      } catch {
+        return undefined;
+      }
+
+      const { language, script, region, baseName } = locale;
+      if (language === 'zh') {
+        if (script === 'Hant') return 'zh-TW';
+        if (script === 'Hans') return 'zh-CN';
+        return ['TW', 'HK', 'MO'].includes(region) ? 'zh-TW' : 'zh-CN';
+      }
+      if (language === 'pt') return 'pt-BR';
+      if (language === 'es' && latinAmericanRegions.has(region)) return 'es-419';
+      return [baseName, language].find((code) => locales.includes(code));
+    }
+
+    function resolveLanguage(preference, browserLanguages) {
+      if (locales.includes(preference)) return preference;
+      for (const tag of browserLanguages) {
+        const match = matchLocale(tag);
+        if (locales.includes(match)) return match;
+      }
+      return 'en';
+    }
+
+    function translate(locale, key, values = {}) {
+      const entry = catalog[locale];
+      const inherited = catalog[entry?.inherits]?.messages[key];
+      const template = entry?.messages[key] ?? inherited ?? catalog.en.messages[key] ?? key;
+      return template.replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
+    }
+
+    return {
+      locales,
+      label: (locale) => catalog[locale].label,
+      direction: (locale) => catalog[locale].direction ?? 'ltr',
+      resolveLanguage,
+      translate
+    };
+  }
+
+  function createDiscordLabelParser(clean) {
+    const serverTagPattern = /(?:,\s*)?(?:server\s*tag|服务器标签|伺服器標籤|サーバータグ|서버\s*태그|etiqueta\s+del\s+servidor|balise\s+du\s+serveur|server-tag|tag\s+do\s+servidor|тег\s+сервера|علامة\s+الخادم)\s*[:：].*$/i;
+    const avatarSuffix = /,?\s*(?:avatar|头像|頭像|アバター|아바타|avatar\s+del\s+usuario|аватар)\s*$/i;
+
+    function author(value) {
+      const label = clean(value).replace(/\u00A0/g, ' ');
+      if (!serverTagPattern.test(label)) return label;
+      return label.replace(serverTagPattern, '').trim().replace(/\s*\[[^\]\n]{1,24}\]\s*,?\s*$/, '').trim();
+    }
+
+    return {
+      author,
+      isServerTag: (value) => serverTagPattern.test(clean(value)),
+      avatarAuthor: (value) => author(value).replace(avatarSuffix, '').trim()
+    };
+  }
+
+  const i18n = createI18n({
+    "ar": {
+      "label": "العربية",
+      "direction": "rtl",
+      "messages": {
+        "title": "مُصدِّر محادثات Discord",
+        "auto": "تلقائي (لغة المتصفح)",
+        "collected": "ضمن الفترة: {selected} · المجموع: {total}",
+        "messageCount": "عدد الرسائل: {count}",
+        "searchPlaceholder": "البحث في الرسائل أو المؤلفين…",
+        "showing": "عرض {visible} من {total}",
+        "backToTop": "العودة للأعلى",
+        "language": "اللغة",
+        "startDate": "تاريخ البدء",
+        "endDate": "تاريخ الانتهاء",
+        "format": "الصيغة",
+        "delay": "مهلة التمرير",
+        "autoDownload": "تنزيل تلقائي عند الاكتمال",
+        "delayFast": "سريع (400 مللي ثانية)",
+        "delayNormal": "عادي (700 مللي ثانية)",
+        "delaySafe": "أبطأ (1200 مللي ثانية)",
+        "scan": "جمع الرسائل الظاهرة",
+        "fetch": "جمع الرسائل حسب التاريخ",
+        "cancel": "إلغاء",
+        "copy": "نسخ",
+        "download": "تنزيل",
+        "clear": "مسح الرسائل التي جُمعت",
+        "minimize": "تصغير",
+        "close": "إخفاء",
+        "timezone": "تستخدم التواريخ منطقتك الزمنية: {zone}",
+        "shortcut": "إظهار/إخفاء: Alt + Shift + D",
+        "idle": "يمكنك الآن جمع الرسائل من هذه القناة.",
+        "scanning": "جارٍ جمع الرسائل الظاهرة…",
+        "seeking": "جارٍ البحث عن الرسائل في التواريخ المحددة…",
+        "collecting": "جارٍ جمع الرسائل… {percent}٪",
+        "done": "عدد الرسائل الجاهزة للتصدير: {count}",
+        "cancelled": "أُلغي الجمع.",
+        "noChannel": "افتح قناة نصية في Discord أولاً.",
+        "noScroller": "تعذر العثور على قائمة الرسائل. أعد تحميل Discord.",
+        "badDates": "اختر تاريخي بدء وانتهاء صالحين بالترتيب الصحيح.",
+        "noMessages": "لا توجد رسائل مجمعة تطابق هذا النطاق.",
+        "copied": "عدد الرسائل المنسوخة: {count}",
+        "copyFailed": "تعذّر النسخ إلى الحافظة. استخدم زر «تنزيل».",
+        "downloaded": "عدد الرسائل التي نُزّلت: {count}",
+        "clearConfirm": "هل تريد مسح الرسائل المجمعة للقناة الحالية؟",
+        "cleared": "مُسحت الرسائل التي جُمعت من هذه القناة.",
+        "routeChanged": "تغيرت القناة، لذلك توقف الجمع.",
+        "stalled": "تعذّر التأكد من اكتمال جمع الرسائل ضمن النطاق الزمني. تظل الرسائل التي جُمعت متاحة.",
+        "txt": "نص عادي (TXT)",
+        "json": "بيانات منظمة (JSON)",
+        "csv": "جدول (CSV)",
+        "html": "صفحة ويب (HTML)",
+        "reply": "رد",
+        "forwarded": "رسالة مُعاد توجيهها",
+        "embeds": "معاينات الروابط والبطاقات",
+        "attachments": "مرفقات",
+        "reactions": "تفاعلات",
+        "stickers": "ملصقات",
+        "emptyText": "[لا يوجد نص]",
+        "edited": "معدّل",
+        "source": "عرض في Discord",
+        "messageId": "معرّف الرسالة",
+        "archiveLoading": "جارٍ تحميل سجل المحادثة…",
+        "loadFailed": "تعذّر فتح سجل المحادثة.",
+        "archiveTitle": "تصدير محادثات Discord"
+      }
+    },
+    "de": {
+      "label": "Deutsch",
+      "messages": {
+        "title": "Discord-Chat-Exporter",
+        "auto": "Automatisch (Browsersprache)",
+        "collected": "Im Zeitraum: {selected} · Insgesamt erfasst: {total}",
+        "messageCount": "Nachrichten: {count}",
+        "searchPlaceholder": "Nachrichten oder Autoren suchen…",
+        "showing": "{visible} von {total} angezeigt",
+        "backToTop": "Nach oben",
+        "language": "Sprache",
+        "startDate": "Startdatum",
+        "endDate": "Enddatum",
+        "format": "Format",
+        "delay": "Scroll-Intervall",
+        "autoDownload": "Nach Abschluss automatisch herunterladen",
+        "delayFast": "Schnell (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Langsamer (1200 ms)",
+        "scan": "Sichtbare Nachrichten erfassen",
+        "fetch": "Nachrichten nach Datum erfassen",
+        "cancel": "Abbrechen",
+        "copy": "Kopieren",
+        "download": "Herunterladen",
+        "clear": "Erfasste Nachrichten löschen",
+        "minimize": "Minimieren",
+        "close": "Ausblenden",
+        "timezone": "Für Datumsangaben gilt deine lokale Zeitzone: {zone}",
+        "shortcut": "Ein-/ausblenden: Alt + Umschalt + D",
+        "idle": "Du kannst jetzt Nachrichten aus diesem Kanal erfassen.",
+        "scanning": "Sichtbare Nachrichten werden erfasst…",
+        "seeking": "Nachrichten für den gewählten Zeitraum werden gesucht…",
+        "collecting": "Nachrichten werden erfasst… {percent} %",
+        "done": "Bereit zum Export: {count}",
+        "cancelled": "Erfassung abgebrochen.",
+        "noChannel": "Öffne zuerst einen Textkanal in Discord.",
+        "noScroller": "Nachrichtenliste nicht gefunden. Lade Discord neu und versuche es noch einmal.",
+        "badDates": "Wähle gültige Daten. Das Startdatum darf nicht nach dem Enddatum liegen.",
+        "noMessages": "Keine erfasste Nachricht passt zum Zeitraum.",
+        "copied": "{count} Nachrichten kopiert.",
+        "copyFailed": "Kopieren nicht möglich. Klicke stattdessen auf Herunterladen.",
+        "downloaded": "{count} Nachrichten heruntergeladen.",
+        "clearConfirm": "Erfasste Nachrichten dieses Kanals löschen?",
+        "cleared": "Erfasste Nachrichten aus diesem Kanal wurden gelöscht.",
+        "routeChanged": "Der Kanal wurde gewechselt; die Erfassung wurde beendet.",
+        "stalled": "Der vollständige Zeitraum konnte nicht bestätigt werden. Die bisher erfassten Nachrichten bleiben verfügbar.",
+        "txt": "Text (TXT)",
+        "json": "Strukturierte Daten (JSON)",
+        "csv": "Tabelle (CSV)",
+        "html": "Webseite (HTML)",
+        "reply": "Antwort",
+        "forwarded": "Weitergeleitete Nachricht",
+        "embeds": "Linkvorschauen und Karten",
+        "attachments": "Anhänge",
+        "reactions": "Reaktionen",
+        "stickers": "Sticker",
+        "emptyText": "[Kein Text]",
+        "edited": "bearbeitet",
+        "source": "In Discord öffnen",
+        "messageId": "Nachrichten-ID",
+        "archiveLoading": "Chatverlauf wird geladen…",
+        "loadFailed": "Der Chatverlauf konnte nicht geöffnet werden.",
+        "archiveTitle": "Discord-Chat-Export"
+      }
+    },
+    "en": {
+      "label": "English",
+      "messages": {
+        "title": "Discord Chat Exporter",
+        "auto": "Automatic (browser language)",
+        "collected": "{selected} in range · {total} collected",
+        "messageCount": "Messages: {count}",
+        "searchPlaceholder": "Search messages or authors…",
+        "showing": "Showing {visible} of {total}",
+        "backToTop": "Back to top",
+        "language": "Language",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "format": "Format",
+        "delay": "Scroll delay",
+        "autoDownload": "Download automatically when finished",
+        "delayFast": "Fast (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Slower (1200 ms)",
+        "scan": "Scan visible messages",
+        "fetch": "Collect messages by date",
+        "cancel": "Cancel",
+        "copy": "Copy",
+        "download": "Download",
+        "clear": "Clear collected data",
+        "minimize": "Minimize",
+        "close": "Hide",
+        "timezone": "Dates use your local time zone: {zone}",
+        "shortcut": "Show/hide: Alt + Shift + D",
+        "idle": "Ready to collect messages from this channel.",
+        "scanning": "Scanning visible messages…",
+        "seeking": "Looking for messages on the selected dates…",
+        "collecting": "Collecting messages… {percent}%",
+        "done": "Ready to export: {count}",
+        "cancelled": "Collection cancelled.",
+        "noChannel": "Open a Discord text channel first.",
+        "noScroller": "Could not find the message list. Reload Discord and try again.",
+        "badDates": "Choose a valid start and end date (start must not be after end).",
+        "noMessages": "No collected messages match this date range.",
+        "copied": "Messages copied: {count}",
+        "copyFailed": "Clipboard access failed. Use Download instead.",
+        "downloaded": "Messages downloaded: {count}",
+        "clearConfirm": "Clear all collected messages for the current channel?",
+        "cleared": "Current channel data cleared.",
+        "routeChanged": "The channel changed, so automatic collection stopped.",
+        "stalled": "Some messages in the selected dates may be missing. You can still export what was collected.",
+        "txt": "Plain text (TXT)",
+        "json": "Structured data (JSON)",
+        "csv": "For spreadsheets (CSV)",
+        "html": "Web page (HTML)",
+        "reply": "Reply",
+        "forwarded": "Forwarded message",
+        "embeds": "Link previews and cards",
+        "attachments": "Attachments",
+        "reactions": "Reactions",
+        "stickers": "Stickers",
+        "emptyText": "[No text content]",
+        "edited": "edited",
+        "source": "Open in Discord",
+        "messageId": "Message ID",
+        "archiveLoading": "Loading the chat archive…",
+        "loadFailed": "Could not open the chat archive.",
+        "archiveTitle": "Discord Chat Export"
+      }
+    },
+    "es": {
+      "label": "Español (España)",
+      "messages": {
+        "title": "Exportador de chats de Discord",
+        "auto": "Automático (idioma del navegador)",
+        "collected": "En el periodo: {selected} · Total recopilado: {total}",
+        "messageCount": "Mensajes: {count}",
+        "searchPlaceholder": "Buscar mensajes o autores…",
+        "showing": "Mostrando {visible} de {total}",
+        "backToTop": "Volver arriba",
+        "language": "Idioma",
+        "startDate": "Fecha inicial",
+        "endDate": "Fecha final",
+        "format": "Formato",
+        "delay": "Intervalo de desplazamiento",
+        "autoDownload": "Descargar automáticamente al terminar",
+        "delayFast": "Rápido (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Más lento (1200 ms)",
+        "scan": "Recopilar mensajes visibles",
+        "fetch": "Recopilar mensajes por fecha",
+        "cancel": "Cancelar",
+        "copy": "Copiar",
+        "download": "Descargar",
+        "clear": "Borrar mensajes recopilados",
+        "minimize": "Minimizar",
+        "close": "Ocultar",
+        "timezone": "Las fechas usan tu zona local: {zone}",
+        "shortcut": "Mostrar/ocultar: Alt + Mayús + D",
+        "idle": "Ya puedes recopilar los mensajes de este canal.",
+        "scanning": "Recopilando mensajes visibles…",
+        "seeking": "Buscando mensajes de las fechas elegidas…",
+        "collecting": "Recopilando mensajes… {percent} %",
+        "done": "Mensajes listos para exportar: {count}",
+        "cancelled": "Recopilación cancelada.",
+        "noChannel": "Abre primero un canal de texto de Discord.",
+        "noScroller": "No se encontró la lista de mensajes. Recarga Discord.",
+        "badDates": "Elige fechas válidas; la inicial no puede ser posterior a la final.",
+        "noMessages": "No hay mensajes recopilados en este rango.",
+        "copied": "Mensajes copiados: {count}",
+        "copyFailed": "No se pudo copiar al portapapeles. Usa el botón Descargar.",
+        "downloaded": "Mensajes descargados: {count}",
+        "clearConfirm": "¿Borrar los mensajes recopilados del canal actual?",
+        "cleared": "Se borraron los mensajes recopilados en este canal.",
+        "routeChanged": "El canal cambió y se detuvo la recopilación.",
+        "stalled": "No se pudo confirmar el intervalo completo. Los mensajes recopilados siguen disponibles.",
+        "txt": "Texto (TXT)",
+        "json": "Datos estructurados (JSON)",
+        "csv": "Para hojas de cálculo (CSV)",
+        "html": "Página web (HTML)",
+        "reply": "Respuesta",
+        "forwarded": "Mensaje reenviado",
+        "embeds": "Vistas previas de enlaces y tarjetas",
+        "attachments": "Adjuntos",
+        "reactions": "Reacciones",
+        "stickers": "Stickers",
+        "emptyText": "[Sin texto]",
+        "edited": "editado",
+        "source": "Ver en Discord",
+        "messageId": "ID del mensaje",
+        "archiveLoading": "Cargando el historial del chat…",
+        "loadFailed": "No se pudo abrir el historial del chat.",
+        "archiveTitle": "Exportación de chat de Discord"
+      }
+    },
+    "es-419": {
+      "label": "Español (Latinoamérica)",
+      "inherits": "es",
+      "messages": {
+        "collected": "En las fechas elegidas: {selected} · Total recopilado: {total}",
+        "shortcut": "Mostrar u ocultar: Alt + Shift + D",
+        "noScroller": "No se encontró la lista de mensajes. Vuelve a cargar Discord e inténtalo de nuevo.",
+        "csv": "Para una hoja de cálculo (CSV)"
+      }
+    },
+    "fr": {
+      "label": "Français",
+      "messages": {
+        "title": "Exportateur de discussions Discord",
+        "auto": "Automatique (langue du navigateur)",
+        "collected": "Sur la période : {selected} · Total collecté : {total}",
+        "messageCount": "Messages : {count}",
+        "searchPlaceholder": "Rechercher par message ou nom d’auteur…",
+        "showing": "{visible} sur {total} affichés",
+        "backToTop": "Retour en haut",
+        "language": "Langue",
+        "startDate": "Date de début",
+        "endDate": "Date de fin",
+        "format": "Format",
+        "delay": "Délai de défilement",
+        "autoDownload": "Télécharger automatiquement à la fin",
+        "delayFast": "Rapide (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Plus lent (1200 ms)",
+        "scan": "Collecter les messages visibles",
+        "fetch": "Collecter les messages par date",
+        "cancel": "Annuler",
+        "copy": "Copier",
+        "download": "Télécharger",
+        "clear": "Effacer les messages collectés",
+        "minimize": "Réduire",
+        "close": "Masquer",
+        "timezone": "Dates selon votre fuseau local : {zone}",
+        "shortcut": "Afficher/masquer : Alt + Maj + D",
+        "idle": "Vous pouvez collecter les messages de ce salon.",
+        "scanning": "Collecte des messages visibles…",
+        "seeking": "Recherche des messages aux dates choisies…",
+        "collecting": "Collecte des messages… {percent} %",
+        "done": "Messages prêts à exporter : {count}",
+        "cancelled": "Collecte annulée.",
+        "noChannel": "Ouvrez d’abord un salon textuel Discord.",
+        "noScroller": "Liste des messages introuvable. Rechargez Discord.",
+        "badDates": "Choisissez des dates valides, dans le bon ordre.",
+        "noMessages": "Aucun message collecté ne correspond à cette période.",
+        "copied": "Messages copiés : {count}",
+        "copyFailed": "Impossible de copier dans le presse-papiers. Cliquez sur Télécharger.",
+        "downloaded": "Messages téléchargés : {count}",
+        "clearConfirm": "Effacer les messages collectés pour ce salon ?",
+        "cleared": "Les messages collectés dans ce salon ont été effacés.",
+        "routeChanged": "Le salon a changé, la collecte est arrêtée.",
+        "stalled": "Impossible de confirmer que toute la période a été couverte. Les messages recueillis restent disponibles.",
+        "txt": "Texte brut (TXT)",
+        "json": "Données structurées (JSON)",
+        "csv": "Tableur (CSV)",
+        "html": "Page web (HTML)",
+        "reply": "Réponse",
+        "forwarded": "Message transféré",
+        "embeds": "Aperçus de liens et cartes",
+        "attachments": "Pièces jointes",
+        "reactions": "Réactions",
+        "stickers": "Stickers",
+        "emptyText": "[Aucun texte]",
+        "edited": "modifié",
+        "source": "Voir sur Discord",
+        "messageId": "ID du message",
+        "archiveLoading": "Chargement de l’historique de la discussion…",
+        "loadFailed": "Impossible d’ouvrir l’historique de la discussion.",
+        "archiveTitle": "Export de discussions Discord"
+      }
+    },
+    "hi": {
+      "label": "हिन्दी",
+      "messages": {
+        "title": "Discord चैट एक्सपोर्टर",
+        "auto": "अपने आप (ब्राउज़र की भाषा)",
+        "collected": "चुनी तारीखों में: {selected} · कुल: {total}",
+        "messageCount": "मैसेज की संख्या: {count}",
+        "searchPlaceholder": "मैसेज या भेजने वाले का नाम खोजें…",
+        "showing": "{total} में से {visible} दिख रहे हैं",
+        "backToTop": "सबसे ऊपर जाएँ",
+        "language": "भाषा",
+        "startDate": "शुरू होने की तारीख",
+        "endDate": "आखिरी तारीख",
+        "format": "फ़ाइल फ़ॉर्मैट",
+        "delay": "स्क्रोल करने के बीच का समय",
+        "autoDownload": "पूरा होने पर अपने आप डाउनलोड करें",
+        "delayFast": "तेज़ (400 मि.से.)",
+        "delayNormal": "सामान्य (700 मि.से.)",
+        "delaySafe": "धीमा (1200 मि.से.)",
+        "scan": "स्क्रीन पर दिख रहे मैसेज जुटाएँ",
+        "fetch": "तारीख के हिसाब से मैसेज जुटाएँ",
+        "cancel": "रद्द करें",
+        "copy": "कॉपी करें",
+        "download": "डाउनलोड करें",
+        "clear": "जुटाए गए मैसेज हटाएँ",
+        "minimize": "छोटा करें",
+        "close": "छिपाएँ",
+        "timezone": "तारीखें आपके स्थानीय समय क्षेत्र के मुताबिक हैं: {zone}",
+        "shortcut": "दिखाएँ या छिपाएँ: Alt + Shift + D",
+        "idle": "आप इस चैनल के मैसेज जुटाना शुरू कर सकते हैं।",
+        "scanning": "स्क्रीन पर दिख रहे मैसेज जुटाए जा रहे हैं…",
+        "seeking": "चुनी हुई तारीखों के मैसेज खोजे जा रहे हैं…",
+        "collecting": "मैसेज जुटाए जा रहे हैं… {percent}%",
+        "done": "एक्सपोर्ट के लिए तैयार मैसेज: {count}",
+        "cancelled": "मैसेज जुटाना रद्द कर दिया गया।",
+        "noChannel": "पहले Discord में कोई टेक्स्ट चैनल खोलें।",
+        "noScroller": "मैसेज की सूची नहीं मिली। Discord को फिर से लोड करके दोबारा कोशिश करें।",
+        "badDates": "सही तारीखें चुनें। शुरुआत की तारीख आखिरी तारीख के बाद नहीं हो सकती।",
+        "noMessages": "जुटाए गए मैसेज में से कोई भी चुनी हुई तारीखों में नहीं है।",
+        "copied": "कॉपी किए गए मैसेज: {count}",
+        "copyFailed": "क्लिपबोर्ड पर कॉपी नहीं हो सका। डाउनलोड करें।",
+        "downloaded": "डाउनलोड किए गए मैसेज: {count}",
+        "clearConfirm": "इस चैनल से जुटाए गए सभी मैसेज हटाएँ?",
+        "cleared": "इस चैनल से जुटाए गए मैसेज हटा दिए गए।",
+        "routeChanged": "चैनल बदल गया है, इसलिए मैसेज जुटाना रोक दिया गया।",
+        "stalled": "यह पक्का नहीं हो सका कि चुनी हुई तारीखों के सभी मैसेज मिल गए हैं। अब तक मिले मैसेज एक्सपोर्ट कर सकते हैं।",
+        "txt": "सादा टेक्स्ट (TXT)",
+        "json": "स्ट्रक्चर्ड डेटा (JSON)",
+        "csv": "स्प्रेडशीट में खोलें (CSV)",
+        "html": "वेब पेज (HTML)",
+        "reply": "जवाब",
+        "forwarded": "फ़ॉरवर्ड किया गया मैसेज",
+        "embeds": "लिंक प्रीव्यू और कार्ड",
+        "attachments": "अटैचमेंट",
+        "reactions": "रिएक्शन",
+        "stickers": "स्टिकर",
+        "emptyText": "[कोई टेक्स्ट नहीं]",
+        "edited": "बदला गया",
+        "source": "Discord में खोलें",
+        "messageId": "मैसेज आईडी",
+        "archiveLoading": "चैट हिस्ट्री लोड हो रही है…",
+        "loadFailed": "चैट हिस्ट्री नहीं खुल सकी।",
+        "archiveTitle": "Discord चैट का एक्सपोर्ट"
+      }
+    },
+    "id": {
+      "label": "Bahasa Indonesia",
+      "messages": {
+        "title": "Ekspor Chat Discord",
+        "auto": "Otomatis (bahasa browser)",
+        "collected": "Dalam rentang: {selected} · Total terkumpul: {total}",
+        "messageCount": "Jumlah pesan: {count}",
+        "searchPlaceholder": "Cari pesan atau nama pengirim…",
+        "showing": "Menampilkan {visible} dari {total}",
+        "backToTop": "Kembali ke atas",
+        "language": "Bahasa",
+        "startDate": "Tanggal mulai",
+        "endDate": "Tanggal akhir",
+        "format": "Format ekspor",
+        "delay": "Jeda antar guliran",
+        "autoDownload": "Unduh otomatis setelah selesai",
+        "delayFast": "Cepat (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Lambat (1200 ms)",
+        "scan": "Kumpulkan pesan yang terlihat",
+        "fetch": "Kumpulkan pesan berdasarkan tanggal",
+        "cancel": "Batal",
+        "copy": "Salin",
+        "download": "Unduh",
+        "clear": "Hapus pesan yang terkumpul",
+        "minimize": "Ciutkan",
+        "close": "Sembunyikan",
+        "timezone": "Tanggal mengikuti zona waktu setempat: {zone}",
+        "shortcut": "Tampilkan atau sembunyikan: Alt + Shift + D",
+        "idle": "Anda dapat mulai mengumpulkan pesan dari kanal ini.",
+        "scanning": "Mengumpulkan pesan yang terlihat…",
+        "seeking": "Mencari pesan pada tanggal yang dipilih…",
+        "collecting": "Mengumpulkan pesan… {percent}%",
+        "done": "Pesan siap diekspor: {count}",
+        "cancelled": "Pengumpulan pesan dibatalkan.",
+        "noChannel": "Buka kanal teks di Discord terlebih dahulu.",
+        "noScroller": "Daftar pesan tidak ditemukan. Muat ulang Discord, lalu coba lagi.",
+        "badDates": "Pilih tanggal yang valid. Tanggal mulai tidak boleh setelah tanggal akhir.",
+        "noMessages": "Tidak ada pesan yang terkumpul dalam rentang tanggal ini.",
+        "copied": "Pesan disalin: {count}",
+        "copyFailed": "Tidak dapat menyalin ke papan klip. Gunakan tombol Unduh.",
+        "downloaded": "Pesan diunduh: {count}",
+        "clearConfirm": "Hapus semua pesan yang dikumpulkan dari kanal ini?",
+        "cleared": "Pesan yang dikumpulkan dari kanal ini telah dihapus.",
+        "routeChanged": "Pengumpulan dihentikan karena kanal berubah.",
+        "stalled": "Belum bisa dipastikan bahwa semua pesan dalam rentang tanggal ini sudah terkumpul. Pesan yang sudah terkumpul tetap bisa diekspor.",
+        "txt": "Teks biasa (TXT)",
+        "json": "Data terstruktur (JSON)",
+        "csv": "Untuk spreadsheet (CSV)",
+        "html": "Halaman web (HTML)",
+        "reply": "Balasan",
+        "forwarded": "Pesan yang diteruskan",
+        "embeds": "Pratinjau tautan dan kartu",
+        "attachments": "Lampiran",
+        "reactions": "Reaksi",
+        "stickers": "Stiker",
+        "emptyText": "[Tanpa teks]",
+        "edited": "diedit",
+        "source": "Buka di Discord",
+        "messageId": "ID pesan",
+        "archiveLoading": "Memuat riwayat chat…",
+        "loadFailed": "Riwayat chat tidak dapat dibuka.",
+        "archiveTitle": "Hasil ekspor chat Discord"
+      }
+    },
+    "it": {
+      "label": "Italiano",
+      "messages": {
+        "title": "Esporta le chat di Discord",
+        "auto": "Automatico (lingua del browser)",
+        "collected": "Nel periodo: {selected} · Raccolti in totale: {total}",
+        "messageCount": "Numero di messaggi: {count}",
+        "searchPlaceholder": "Cerca messaggi o mittenti…",
+        "showing": "Mostrati {visible} di {total}",
+        "backToTop": "Torna in alto",
+        "language": "Lingua",
+        "startDate": "Data di inizio",
+        "endDate": "Data di fine",
+        "format": "Formato del file",
+        "delay": "Pausa tra gli scorrimenti",
+        "autoDownload": "Scarica automaticamente al termine",
+        "delayFast": "Veloce (400 ms)",
+        "delayNormal": "Normale (700 ms)",
+        "delaySafe": "Lento (1200 ms)",
+        "scan": "Raccogli i messaggi visibili",
+        "fetch": "Raccogli i messaggi per data",
+        "cancel": "Annulla",
+        "copy": "Copia",
+        "download": "Scarica",
+        "clear": "Cancella i messaggi raccolti",
+        "minimize": "Riduci a icona",
+        "close": "Nascondi",
+        "timezone": "Le date seguono il fuso orario locale: {zone}",
+        "shortcut": "Mostra o nascondi: Alt + Maiusc + D",
+        "idle": "Puoi iniziare a raccogliere i messaggi di questo canale.",
+        "scanning": "Raccolta dei messaggi visibili…",
+        "seeking": "Ricerca dei messaggi nelle date selezionate…",
+        "collecting": "Raccolta dei messaggi… {percent}%",
+        "done": "Messaggi pronti per l’esportazione: {count}",
+        "cancelled": "Raccolta annullata.",
+        "noChannel": "Apri prima un canale testuale di Discord.",
+        "noScroller": "Impossibile trovare l’elenco dei messaggi. Ricarica Discord e riprova.",
+        "badDates": "Scegli date valide. La data di inizio non può essere successiva alla data di fine.",
+        "noMessages": "Nessuno dei messaggi raccolti rientra nelle date selezionate.",
+        "copied": "Messaggi copiati: {count}",
+        "copyFailed": "Impossibile copiare negli appunti. Usa il pulsante Scarica.",
+        "downloaded": "Messaggi scaricati: {count}",
+        "clearConfirm": "Cancellare tutti i messaggi raccolti da questo canale?",
+        "cleared": "I messaggi raccolti da questo canale sono stati cancellati.",
+        "routeChanged": "La raccolta si è interrotta perché è cambiato il canale.",
+        "stalled": "Non è stato possibile verificare che tutti i messaggi del periodo siano stati raccolti. Puoi comunque esportare quelli raccolti finora.",
+        "txt": "Testo semplice (TXT)",
+        "json": "Dati strutturati (JSON)",
+        "csv": "Per fogli di calcolo (CSV)",
+        "html": "Pagina web (HTML)",
+        "reply": "Risposta",
+        "forwarded": "Messaggio inoltrato",
+        "embeds": "Anteprime dei link e schede",
+        "attachments": "Allegati",
+        "reactions": "Reazioni",
+        "stickers": "Sticker",
+        "emptyText": "[Senza testo]",
+        "edited": "modificato",
+        "source": "Apri in Discord",
+        "messageId": "ID del messaggio",
+        "archiveLoading": "Caricamento della cronologia della chat…",
+        "loadFailed": "Impossibile aprire la cronologia della chat.",
+        "archiveTitle": "Chat di Discord esportata"
+      }
+    },
+    "ja": {
+      "label": "日本語",
+      "messages": {
+        "title": "Discord チャットエクスポーター",
+        "auto": "自動（ブラウザーの言語）",
+        "collected": "期間内 {selected} 件 · 取得済み {total} 件",
+        "messageCount": "メッセージ数：{count}",
+        "searchPlaceholder": "メッセージまたは投稿者を検索…",
+        "showing": "{total} 件中 {visible} 件を表示",
+        "backToTop": "先頭へ戻る",
+        "language": "言語",
+        "startDate": "開始日",
+        "endDate": "終了日",
+        "format": "形式",
+        "delay": "スクロールの間隔",
+        "autoDownload": "完了時に自動ダウンロード",
+        "delayFast": "高速（400 ms）",
+        "delayNormal": "標準（700 ms）",
+        "delaySafe": "低速（1200 ms）",
+        "scan": "表示中のメッセージを取得",
+        "fetch": "期間を指定して取得",
+        "cancel": "キャンセル",
+        "copy": "コピー",
+        "download": "ダウンロード",
+        "clear": "取得したメッセージを消去",
+        "minimize": "最小化",
+        "close": "非表示",
+        "timezone": "日付はローカルタイムゾーンを使用：{zone}",
+        "shortcut": "表示/非表示：Alt + Shift + D",
+        "idle": "このチャンネルのメッセージを取得できます。",
+        "scanning": "表示中のメッセージを取得中…",
+        "seeking": "指定した期間のメッセージを探しています…",
+        "collecting": "メッセージを取得中… {percent}%",
+        "done": "{count} 件のメッセージをエクスポートできます。",
+        "cancelled": "収集をキャンセルしました。",
+        "noChannel": "Discordのテキストチャンネルを開いてください。",
+        "noScroller": "メッセージ一覧が見つかりません。再読み込みして再試行してください。",
+        "badDates": "有効な開始日と終了日を選択してください（開始日は終了日より後にならないように）。",
+        "noMessages": "取得済みのメッセージの中に、指定期間のものがありません。",
+        "copied": "{count} 件をコピーしました。",
+        "copyFailed": "コピーできません。ダウンロードを使用してください。",
+        "downloaded": "{count} 件をダウンロードしました。",
+        "clearConfirm": "現在のチャンネルの収集データを消去しますか？",
+        "cleared": "収集データを消去しました。",
+        "routeChanged": "チャンネルが変わったため収集を停止しました。",
+        "stalled": "指定期間の取得が完了したか確認できませんでした。取得済みのメッセージは引き続き利用できます。",
+        "txt": "テキスト（TXT）",
+        "json": "構造化データ（JSON）",
+        "csv": "表計算（CSV）",
+        "html": "Webページ（HTML）",
+        "reply": "返信",
+        "forwarded": "転送されたメッセージ",
+        "embeds": "リンクのプレビューとカード",
+        "attachments": "添付",
+        "reactions": "リアクション",
+        "stickers": "ステッカー",
+        "emptyText": "[本文なし]",
+        "edited": "編集済み",
+        "source": "Discord で表示",
+        "messageId": "メッセージID",
+        "archiveLoading": "チャット履歴を読み込んでいます…",
+        "loadFailed": "チャット履歴を開けませんでした。",
+        "archiveTitle": "Discord チャットエクスポート"
+      }
+    },
+    "ko": {
+      "label": "한국어",
+      "messages": {
+        "title": "Discord 채팅 내보내기",
+        "auto": "자동(브라우저 언어)",
+        "collected": "선택 기간 {selected}개 · 수집한 메시지 {total}개",
+        "messageCount": "메시지 수: {count}",
+        "searchPlaceholder": "메시지 또는 작성자 검색…",
+        "showing": "{total}개 중 {visible}개 표시",
+        "backToTop": "맨 위로",
+        "language": "언어",
+        "startDate": "시작 날짜",
+        "endDate": "종료 날짜",
+        "format": "형식",
+        "delay": "스크롤 간격",
+        "autoDownload": "완료 후 자동 다운로드",
+        "delayFast": "빠른 속도 (400ms)",
+        "delayNormal": "보통 속도 (700ms)",
+        "delaySafe": "느린 속도 (1200ms)",
+        "scan": "화면에 보이는 메시지 수집",
+        "fetch": "날짜를 지정해 수집",
+        "cancel": "취소",
+        "copy": "복사",
+        "download": "다운로드",
+        "clear": "수집한 메시지 지우기",
+        "minimize": "최소화",
+        "close": "숨기기",
+        "timezone": "날짜는 현지 시간대 기준: {zone}",
+        "shortcut": "표시/숨기기: Alt + Shift + D",
+        "idle": "현재 채널의 메시지를 수집할 수 있습니다.",
+        "scanning": "화면에 보이는 메시지를 수집하는 중…",
+        "seeking": "선택한 날짜의 메시지를 찾는 중…",
+        "collecting": "메시지 수집 중… {percent}%",
+        "done": "메시지 {count}개를 내보낼 수 있습니다.",
+        "cancelled": "수집이 취소되었습니다.",
+        "noChannel": "Discord 텍스트 채널을 먼저 여세요.",
+        "noScroller": "메시지 목록을 찾지 못했습니다. Discord를 새로고침하세요.",
+        "badDates": "날짜를 확인하세요. 시작일은 종료일보다 늦을 수 없습니다.",
+        "noMessages": "수집한 메시지 중 선택한 기간에 해당하는 메시지가 없습니다.",
+        "copied": "{count}개 메시지를 복사했습니다.",
+        "copyFailed": "클립보드에 쓸 수 없습니다. 다운로드를 이용하세요.",
+        "downloaded": "{count}개 메시지를 다운로드했습니다.",
+        "clearConfirm": "현재 채널에서 수집한 메시지를 모두 지울까요?",
+        "cleared": "현재 채널 데이터를 지웠습니다.",
+        "routeChanged": "채널이 바뀌어 자동 수집을 중지했습니다.",
+        "stalled": "지정한 날짜 범위 전체를 수집했는지 확인하지 못했습니다. 지금까지 수집한 메시지는 그대로 사용할 수 있습니다.",
+        "txt": "일반 텍스트(TXT)",
+        "json": "구조화 데이터(JSON)",
+        "csv": "스프레드시트(CSV)",
+        "html": "웹 페이지(HTML)",
+        "reply": "답글",
+        "forwarded": "전달된 메시지",
+        "embeds": "링크 미리보기 및 카드",
+        "attachments": "첨부 파일",
+        "reactions": "반응",
+        "stickers": "스티커",
+        "emptyText": "[텍스트 없음]",
+        "edited": "수정됨",
+        "source": "Discord에서 보기",
+        "messageId": "메시지 ID",
+        "archiveLoading": "채팅 기록을 불러오는 중…",
+        "loadFailed": "채팅 기록을 열 수 없습니다.",
+        "archiveTitle": "Discord 채팅 내보내기"
+      }
+    },
+    "pl": {
+      "label": "Polski",
+      "messages": {
+        "title": "Eksport czatu Discord",
+        "auto": "Automatycznie (język przeglądarki)",
+        "collected": "W wybranym okresie: {selected} · Zebrano łącznie: {total}",
+        "messageCount": "Liczba wiadomości: {count}",
+        "searchPlaceholder": "Szukaj wiadomości lub nadawców…",
+        "showing": "Wyświetlono {visible} z {total}",
+        "backToTop": "Wróć na górę",
+        "language": "Język",
+        "startDate": "Data początkowa",
+        "endDate": "Data końcowa",
+        "format": "Format pliku",
+        "delay": "Odstęp między przewinięciami",
+        "autoDownload": "Pobierz automatycznie po zakończeniu",
+        "delayFast": "Szybko (400 ms)",
+        "delayNormal": "Normalnie (700 ms)",
+        "delaySafe": "Wolno (1200 ms)",
+        "scan": "Zbierz widoczne wiadomości",
+        "fetch": "Zbierz wiadomości z wybranych dni",
+        "cancel": "Anuluj",
+        "copy": "Kopiuj",
+        "download": "Pobierz",
+        "clear": "Wyczyść zebrane wiadomości",
+        "minimize": "Zminimalizuj",
+        "close": "Ukryj",
+        "timezone": "Daty są podawane według lokalnej strefy czasowej: {zone}",
+        "shortcut": "Pokaż lub ukryj: Alt + Shift + D",
+        "idle": "Możesz zacząć zbierać wiadomości z tego kanału.",
+        "scanning": "Zbieranie widocznych wiadomości…",
+        "seeking": "Wyszukiwanie wiadomości z wybranych dni…",
+        "collecting": "Zbieranie wiadomości… {percent}%",
+        "done": "Wiadomości gotowe do eksportu: {count}",
+        "cancelled": "Anulowano zbieranie wiadomości.",
+        "noChannel": "Najpierw otwórz kanał tekstowy w Discordzie.",
+        "noScroller": "Nie znaleziono listy wiadomości. Odśwież Discorda i spróbuj ponownie.",
+        "badDates": "Wybierz prawidłowe daty. Data początkowa nie może być późniejsza niż końcowa.",
+        "noMessages": "Wśród zebranych wiadomości nie ma żadnej z wybranego okresu.",
+        "copied": "Skopiowano: {count}",
+        "copyFailed": "Nie udało się skopiować do schowka. Użyj przycisku Pobierz.",
+        "downloaded": "Pobrano: {count}",
+        "clearConfirm": "Wyczyścić wszystkie wiadomości zebrane z tego kanału?",
+        "cleared": "Wyczyszczono wiadomości zebrane z tego kanału.",
+        "routeChanged": "Przerwano zbieranie wiadomości po zmianie kanału.",
+        "stalled": "Nie udało się potwierdzić, że zebrano wszystkie wiadomości z wybranego okresu. Nadal możesz wyeksportować te, które udało się zebrać.",
+        "txt": "Zwykły tekst (TXT)",
+        "json": "Dane strukturalne (JSON)",
+        "csv": "Do arkusza kalkulacyjnego (CSV)",
+        "html": "Strona internetowa (HTML)",
+        "reply": "Odpowiedź",
+        "forwarded": "Przekazana wiadomość",
+        "embeds": "Podglądy linków i karty",
+        "attachments": "Załączniki",
+        "reactions": "Reakcje",
+        "stickers": "Naklejki",
+        "emptyText": "[Brak tekstu]",
+        "edited": "edytowano",
+        "source": "Otwórz w Discordzie",
+        "messageId": "ID wiadomości",
+        "archiveLoading": "Wczytywanie historii czatu…",
+        "loadFailed": "Nie udało się otworzyć historii czatu.",
+        "archiveTitle": "Eksport czatu Discord"
+      }
+    },
+    "pt-BR": {
+      "label": "Português (Brasil)",
+      "messages": {
+        "title": "Exportador de chat do Discord",
+        "auto": "Automático (idioma do navegador)",
+        "collected": "No período: {selected} · Total coletado: {total}",
+        "messageCount": "Mensagens: {count}",
+        "searchPlaceholder": "Buscar mensagens ou autores…",
+        "showing": "Mostrando {visible} de {total}",
+        "backToTop": "Voltar ao topo",
+        "language": "Idioma",
+        "startDate": "Data inicial",
+        "endDate": "Data final",
+        "format": "Formato",
+        "delay": "Intervalo da rolagem",
+        "autoDownload": "Baixar automaticamente ao concluir",
+        "delayFast": "Rápido (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Mais lento (1200 ms)",
+        "scan": "Coletar mensagens visíveis",
+        "fetch": "Coletar mensagens por data",
+        "cancel": "Cancelar",
+        "copy": "Copiar",
+        "download": "Baixar",
+        "clear": "Limpar mensagens coletadas",
+        "minimize": "Minimizar",
+        "close": "Ocultar",
+        "timezone": "As datas usam seu fuso local: {zone}",
+        "shortcut": "Mostrar/ocultar: Alt + Shift + D",
+        "idle": "Você já pode coletar as mensagens deste canal.",
+        "scanning": "Coletando mensagens visíveis…",
+        "seeking": "Buscando mensagens nas datas escolhidas…",
+        "collecting": "Coletando mensagens… {percent}%",
+        "done": "Mensagens prontas para exportar: {count}",
+        "cancelled": "Coleta cancelada.",
+        "noChannel": "Abra primeiro um canal de texto do Discord.",
+        "noScroller": "Lista de mensagens não encontrada. Recarregue o Discord.",
+        "badDates": "Escolha datas válidas na ordem correta.",
+        "noMessages": "Nenhuma mensagem coletada corresponde ao período.",
+        "copied": "Mensagens copiadas: {count}",
+        "copyFailed": "Não foi possível copiar para a área de transferência. Use o botão Baixar.",
+        "downloaded": "Mensagens baixadas: {count}",
+        "clearConfirm": "Limpar as mensagens coletadas deste canal?",
+        "cleared": "As mensagens coletadas neste canal foram apagadas.",
+        "routeChanged": "O canal mudou e a coleta foi interrompida.",
+        "stalled": "Não foi possível confirmar a coleta de todo o período. As mensagens já coletadas continuam disponíveis.",
+        "txt": "Texto simples (TXT)",
+        "json": "Dados estruturados (JSON)",
+        "csv": "Planilha (CSV)",
+        "html": "Página web (HTML)",
+        "reply": "Resposta",
+        "forwarded": "Mensagem encaminhada",
+        "embeds": "Prévias de links e cartões",
+        "attachments": "Anexos",
+        "reactions": "Reações",
+        "stickers": "Figurinhas",
+        "emptyText": "[Sem texto]",
+        "edited": "editado",
+        "source": "Ver no Discord",
+        "messageId": "ID da mensagem",
+        "archiveLoading": "Carregando o histórico do chat…",
+        "loadFailed": "Não foi possível abrir o histórico do chat.",
+        "archiveTitle": "Exportação de chat do Discord"
+      }
+    },
+    "ru": {
+      "label": "Русский",
+      "messages": {
+        "title": "Экспорт чата Discord",
+        "auto": "Автоматически (язык браузера)",
+        "collected": "За период: {selected} · Всего собрано: {total}",
+        "messageCount": "Сообщений: {count}",
+        "searchPlaceholder": "Поиск сообщений или авторов…",
+        "showing": "Показано {visible} из {total}",
+        "backToTop": "Наверх",
+        "language": "Язык",
+        "startDate": "Дата начала",
+        "endDate": "Дата окончания",
+        "format": "Формат",
+        "delay": "Задержка прокрутки",
+        "autoDownload": "Скачать автоматически после завершения",
+        "delayFast": "Быстро (400 мс)",
+        "delayNormal": "Обычно (700 мс)",
+        "delaySafe": "Медленнее (1200 мс)",
+        "scan": "Собрать сообщения на экране",
+        "fetch": "Собрать сообщения по датам",
+        "cancel": "Отмена",
+        "copy": "Копировать",
+        "download": "Скачать",
+        "clear": "Удалить собранные сообщения",
+        "minimize": "Свернуть",
+        "close": "Скрыть",
+        "timezone": "Даты используют ваш часовой пояс: {zone}",
+        "shortcut": "Показать/скрыть: Alt + Shift + D",
+        "idle": "Можно начать сбор сообщений из этого канала.",
+        "scanning": "Сбор сообщений на экране…",
+        "seeking": "Поиск сообщений за выбранный период…",
+        "collecting": "Сбор сообщений… {percent} %",
+        "done": "Сообщений к экспорту: {count}",
+        "cancelled": "Сбор отменён.",
+        "noChannel": "Сначала откройте текстовый канал Discord.",
+        "noScroller": "Список сообщений не найден. Перезагрузите Discord.",
+        "badDates": "Выберите допустимые даты в правильном порядке.",
+        "noMessages": "Нет собранных сообщений за этот период.",
+        "copied": "Скопировано сообщений: {count}.",
+        "copyFailed": "Не удалось скопировать в буфер обмена. Нажмите «Скачать».",
+        "downloaded": "Скачано сообщений: {count}.",
+        "clearConfirm": "Удалить собранные сообщения текущего канала?",
+        "cleared": "Собранные сообщения этого канала удалены.",
+        "routeChanged": "Канал изменился, сбор остановлен.",
+        "stalled": "Не удалось подтвердить полноту сбора за выбранный период. Собранные сообщения остаются доступны.",
+        "txt": "Текст (TXT)",
+        "json": "Структурированные данные (JSON)",
+        "csv": "Таблица (CSV)",
+        "html": "Веб-страница (HTML)",
+        "reply": "Ответ",
+        "forwarded": "Пересланное сообщение",
+        "embeds": "Предпросмотр ссылок и карточки",
+        "attachments": "Вложения",
+        "reactions": "Реакции",
+        "stickers": "Стикеры",
+        "emptyText": "[Нет текста]",
+        "edited": "изменено",
+        "source": "Открыть в Discord",
+        "messageId": "ID сообщения",
+        "archiveLoading": "Загрузка истории чата…",
+        "loadFailed": "Не удалось открыть историю чата.",
+        "archiveTitle": "Экспорт чата Discord"
+      }
+    },
+    "th": {
+      "label": "ไทย",
+      "messages": {
+        "title": "ส่งออกแชต Discord",
+        "auto": "อัตโนมัติ (ตามภาษาเบราว์เซอร์)",
+        "collected": "ในช่วงที่เลือก: {selected} · รวบรวมทั้งหมด: {total}",
+        "messageCount": "จำนวนข้อความ: {count}",
+        "searchPlaceholder": "ค้นหาข้อความหรือชื่อผู้ส่ง…",
+        "showing": "แสดง {visible} จาก {total}",
+        "backToTop": "กลับขึ้นด้านบน",
+        "language": "ภาษา",
+        "startDate": "วันที่เริ่มต้น",
+        "endDate": "วันที่สิ้นสุด",
+        "format": "รูปแบบไฟล์",
+        "delay": "เวลารอระหว่างการเลื่อน",
+        "autoDownload": "ดาวน์โหลดอัตโนมัติเมื่อเสร็จ",
+        "delayFast": "เร็ว (400 มิลลิวินาที)",
+        "delayNormal": "ปกติ (700 มิลลิวินาที)",
+        "delaySafe": "ช้า (1200 มิลลิวินาที)",
+        "scan": "รวบรวมข้อความที่เห็นบนหน้าจอ",
+        "fetch": "รวบรวมข้อความตามวันที่",
+        "cancel": "ยกเลิก",
+        "copy": "คัดลอก",
+        "download": "ดาวน์โหลด",
+        "clear": "ล้างข้อความที่รวบรวมไว้",
+        "minimize": "ย่อ",
+        "close": "ซ่อน",
+        "timezone": "วันที่อิงตามเขตเวลาท้องถิ่นของคุณ: {zone}",
+        "shortcut": "แสดงหรือซ่อน: Alt + Shift + D",
+        "idle": "เริ่มรวบรวมข้อความจากช่องนี้ได้เลย",
+        "scanning": "กำลังรวบรวมข้อความที่เห็นบนหน้าจอ…",
+        "seeking": "กำลังค้นหาข้อความในช่วงวันที่ที่เลือก…",
+        "collecting": "กำลังรวบรวมข้อความ… {percent}%",
+        "done": "ข้อความพร้อมส่งออก: {count}",
+        "cancelled": "ยกเลิกการรวบรวมข้อความแล้ว",
+        "noChannel": "เปิดช่องข้อความใน Discord ก่อน",
+        "noScroller": "ไม่พบรายการข้อความ ให้โหลด Discord ใหม่แล้วลองอีกครั้ง",
+        "badDates": "เลือกวันที่ให้ถูกต้อง วันที่เริ่มต้นต้องไม่อยู่หลังวันที่สิ้นสุด",
+        "noMessages": "ไม่มีข้อความที่รวบรวมไว้ในช่วงวันที่นี้",
+        "copied": "คัดลอกแล้ว: {count} ข้อความ",
+        "copyFailed": "คัดลอกไปยังคลิปบอร์ดไม่ได้ ให้ใช้ปุ่มดาวน์โหลด",
+        "downloaded": "ดาวน์โหลดแล้ว: {count} ข้อความ",
+        "clearConfirm": "ล้างข้อความทั้งหมดที่รวบรวมไว้จากช่องนี้หรือไม่",
+        "cleared": "ล้างข้อความที่รวบรวมไว้จากช่องนี้แล้ว",
+        "routeChanged": "หยุดรวบรวมข้อความเนื่องจากมีการเปลี่ยนช่อง",
+        "stalled": "ยืนยันไม่ได้ว่ารวบรวมข้อความครบตามช่วงวันที่ที่เลือกแล้ว คุณยังส่งออกข้อความที่รวบรวมไว้ได้",
+        "txt": "ข้อความธรรมดา (TXT)",
+        "json": "ข้อมูลที่มีโครงสร้าง (JSON)",
+        "csv": "สำหรับโปรแกรมตารางคำนวณ (CSV)",
+        "html": "หน้าเว็บ (HTML)",
+        "reply": "ข้อความตอบกลับ",
+        "forwarded": "ข้อความที่ส่งต่อ",
+        "embeds": "ตัวอย่างลิงก์และการ์ด",
+        "attachments": "ไฟล์แนบ",
+        "reactions": "รีแอ็กชัน",
+        "stickers": "สติกเกอร์",
+        "emptyText": "[ไม่มีข้อความ]",
+        "edited": "แก้ไขแล้ว",
+        "source": "เปิดใน Discord",
+        "messageId": "ID ข้อความ",
+        "archiveLoading": "กำลังโหลดประวัติแชต…",
+        "loadFailed": "เปิดประวัติแชตไม่ได้",
+        "archiveTitle": "ประวัติแชตจาก Discord"
+      }
+    },
+    "tr": {
+      "label": "Türkçe",
+      "messages": {
+        "title": "Discord Sohbetlerini Dışa Aktar",
+        "auto": "Otomatik (tarayıcı dili)",
+        "collected": "Seçilen tarihlerde: {selected} · Toplam: {total}",
+        "messageCount": "Mesaj sayısı: {count}",
+        "searchPlaceholder": "Mesajlarda veya gönderen adlarında ara…",
+        "showing": "{total} mesajdan {visible} tanesi gösteriliyor",
+        "backToTop": "Başa dön",
+        "language": "Dil",
+        "startDate": "Başlangıç tarihi",
+        "endDate": "Bitiş tarihi",
+        "format": "Dosya biçimi",
+        "delay": "Kaydırma aralığı",
+        "autoDownload": "İşlem bitince otomatik indir",
+        "delayFast": "Hızlı (400 ms)",
+        "delayNormal": "Normal (700 ms)",
+        "delaySafe": "Yavaş (1200 ms)",
+        "scan": "Ekrandaki mesajları topla",
+        "fetch": "Mesajları tarihe göre topla",
+        "cancel": "İptal",
+        "copy": "Kopyala",
+        "download": "İndir",
+        "clear": "Toplanan mesajları temizle",
+        "minimize": "Küçült",
+        "close": "Gizle",
+        "timezone": "Tarihler yerel saat dilimine göre hesaplanır: {zone}",
+        "shortcut": "Göster veya gizle: Alt + Shift + D",
+        "idle": "Bu kanaldaki mesajları toplamaya başlayabilirsin.",
+        "scanning": "Ekrandaki mesajlar toplanıyor…",
+        "seeking": "Seçilen tarihlerdeki mesajlar aranıyor…",
+        "collecting": "Mesajlar toplanıyor… %{percent}",
+        "done": "Dışa aktarılmaya hazır mesaj: {count}",
+        "cancelled": "Mesaj toplama işlemi iptal edildi.",
+        "noChannel": "Önce Discord’da bir metin kanalı aç.",
+        "noScroller": "Mesaj listesi bulunamadı. Discord’u yenileyip tekrar dene.",
+        "badDates": "Geçerli tarihler seç. Başlangıç tarihi bitiş tarihinden sonra olamaz.",
+        "noMessages": "Toplanan mesajlar arasında bu tarih aralığına uyan mesaj yok.",
+        "copied": "Kopyalanan mesaj: {count}",
+        "copyFailed": "Panoya kopyalanamadı. İndir düğmesini kullan.",
+        "downloaded": "İndirilen mesaj: {count}",
+        "clearConfirm": "Bu kanaldan toplanan tüm mesajlar temizlensin mi?",
+        "cleared": "Bu kanaldan toplanan mesajlar temizlendi.",
+        "routeChanged": "Kanal değiştiği için mesaj toplama işlemi durdu.",
+        "stalled": "Seçilen tarihlerdeki tüm mesajların toplandığı doğrulanamadı. Şimdiye kadar toplanan mesajları dışa aktarabilirsin.",
+        "txt": "Düz metin (TXT)",
+        "json": "Yapılandırılmış veri (JSON)",
+        "csv": "Elektronik tablo için (CSV)",
+        "html": "Web sayfası (HTML)",
+        "reply": "Yanıt",
+        "forwarded": "İletilen mesaj",
+        "embeds": "Bağlantı önizlemeleri ve kartlar",
+        "attachments": "Ekler",
+        "reactions": "Tepkiler",
+        "stickers": "Çıkartmalar",
+        "emptyText": "[Metin yok]",
+        "edited": "düzenlendi",
+        "source": "Discord’da aç",
+        "messageId": "Mesaj kimliği",
+        "archiveLoading": "Sohbet geçmişi yükleniyor…",
+        "loadFailed": "Sohbet geçmişi açılamadı.",
+        "archiveTitle": "Discord Sohbet Dışa Aktarımı"
+      }
+    },
+    "vi": {
+      "label": "Tiếng Việt",
+      "messages": {
+        "title": "Xuất tin nhắn Discord",
+        "auto": "Tự động (ngôn ngữ trình duyệt)",
+        "collected": "Trong khoảng ngày: {selected} · Tổng số đã thu thập: {total}",
+        "messageCount": "Số tin nhắn: {count}",
+        "searchPlaceholder": "Tìm tin nhắn hoặc tên người gửi…",
+        "showing": "Hiển thị {visible} trên {total}",
+        "backToTop": "Về đầu trang",
+        "language": "Ngôn ngữ",
+        "startDate": "Ngày bắt đầu",
+        "endDate": "Ngày kết thúc",
+        "format": "Định dạng tệp",
+        "delay": "Thời gian chờ giữa các lần cuộn",
+        "autoDownload": "Tự động tải xuống khi hoàn tất",
+        "delayFast": "Nhanh (400 ms)",
+        "delayNormal": "Bình thường (700 ms)",
+        "delaySafe": "Chậm (1200 ms)",
+        "scan": "Thu thập tin nhắn đang hiển thị",
+        "fetch": "Thu thập tin nhắn theo ngày",
+        "cancel": "Hủy",
+        "copy": "Sao chép",
+        "download": "Tải xuống",
+        "clear": "Xóa tin nhắn đã thu thập",
+        "minimize": "Thu nhỏ",
+        "close": "Ẩn",
+        "timezone": "Ngày được tính theo múi giờ địa phương: {zone}",
+        "shortcut": "Hiện hoặc ẩn: Alt + Shift + D",
+        "idle": "Bạn có thể bắt đầu thu thập tin nhắn trong kênh này.",
+        "scanning": "Đang thu thập tin nhắn hiển thị…",
+        "seeking": "Đang tìm tin nhắn trong khoảng ngày đã chọn…",
+        "collecting": "Đang thu thập tin nhắn… {percent}%",
+        "done": "Số tin nhắn có thể xuất: {count}",
+        "cancelled": "Đã hủy thu thập tin nhắn.",
+        "noChannel": "Hãy mở một kênh văn bản trong Discord trước.",
+        "noScroller": "Không tìm thấy danh sách tin nhắn. Hãy tải lại Discord rồi thử lại.",
+        "badDates": "Hãy chọn ngày hợp lệ. Ngày bắt đầu không được sau ngày kết thúc.",
+        "noMessages": "Không có tin nhắn nào đã thu thập nằm trong khoảng ngày này.",
+        "copied": "Số tin nhắn đã sao chép: {count}",
+        "copyFailed": "Không thể sao chép vào bộ nhớ tạm. Hãy dùng nút Tải xuống.",
+        "downloaded": "Số tin nhắn đã tải xuống: {count}",
+        "clearConfirm": "Xóa tất cả tin nhắn đã thu thập trong kênh này?",
+        "cleared": "Đã xóa tin nhắn thu thập được trong kênh này.",
+        "routeChanged": "Đã dừng thu thập vì bạn chuyển kênh.",
+        "stalled": "Không thể xác nhận đã thu thập đủ tin nhắn trong khoảng ngày đã chọn. Bạn vẫn có thể xuất các tin nhắn đã thu thập.",
+        "txt": "Văn bản thuần túy (TXT)",
+        "json": "Dữ liệu có cấu trúc (JSON)",
+        "csv": "Dùng với bảng tính (CSV)",
+        "html": "Trang web (HTML)",
+        "reply": "Trả lời",
+        "forwarded": "Tin nhắn được chuyển tiếp",
+        "embeds": "Bản xem trước liên kết và thẻ",
+        "attachments": "Tệp đính kèm",
+        "reactions": "Biểu cảm",
+        "stickers": "Nhãn dán",
+        "emptyText": "[Không có văn bản]",
+        "edited": "đã chỉnh sửa",
+        "source": "Mở trong Discord",
+        "messageId": "ID tin nhắn",
+        "archiveLoading": "Đang tải lịch sử trò chuyện…",
+        "loadFailed": "Không thể mở lịch sử trò chuyện.",
+        "archiveTitle": "Lịch sử trò chuyện Discord đã xuất"
+      }
+    },
+    "zh-CN": {
+      "label": "简体中文",
+      "messages": {
+        "title": "Discord 聊天导出器",
+        "auto": "自动（跟随浏览器）",
+        "collected": "范围内 {selected} 条 · 已采集 {total} 条",
+        "messageCount": "消息数：{count}",
+        "searchPlaceholder": "搜索消息或作者…",
+        "showing": "显示 {visible} / {total}",
+        "backToTop": "返回顶部",
+        "language": "语言",
+        "startDate": "开始日期",
+        "endDate": "结束日期",
+        "format": "导出格式",
+        "delay": "滚动间隔",
+        "autoDownload": "完成后自动下载",
+        "delayFast": "快速（400 毫秒）",
+        "delayNormal": "标准（700 毫秒）",
+        "delaySafe": "较慢（1200 毫秒）",
+        "scan": "采集屏幕上的消息",
+        "fetch": "按日期采集",
+        "cancel": "取消",
+        "copy": "复制",
+        "download": "下载",
+        "clear": "清除已采集的消息",
+        "minimize": "最小化",
+        "close": "隐藏",
+        "timezone": "日期按浏览器本地时区计算：{zone}",
+        "shortcut": "显示/隐藏：Alt + Shift + D",
+        "idle": "可以开始采集当前频道的消息。",
+        "scanning": "正在采集屏幕上的消息…",
+        "seeking": "正在查找所选日期的消息…",
+        "collecting": "正在采集消息… {percent}%",
+        "done": "可导出 {count} 条消息。",
+        "cancelled": "已取消自动采集。",
+        "noChannel": "请先打开一个 Discord 文字频道。",
+        "noScroller": "找不到消息列表，请刷新 Discord 后重试。",
+        "badDates": "请选择有效的开始和结束日期，且开始日期不能晚于结束日期。",
+        "noMessages": "已采集内容中没有符合该日期范围的消息。",
+        "copied": "已复制 {count} 条消息。",
+        "copyFailed": "无法写入剪贴板，请改用“下载”。",
+        "downloaded": "已下载 {count} 条消息。",
+        "clearConfirm": "清除当前频道已经采集的全部消息？",
+        "cleared": "已清除在当前频道采集的消息。",
+        "routeChanged": "检测到频道已切换，自动采集已停止。",
+        "stalled": "所选日期内可能还有消息未采集。你仍可导出已采集的消息。",
+        "txt": "纯文本（TXT）",
+        "json": "结构化数据（JSON）",
+        "csv": "表格（CSV）",
+        "html": "网页（HTML）",
+        "reply": "回复",
+        "forwarded": "转发消息",
+        "embeds": "链接预览和卡片",
+        "attachments": "附件",
+        "reactions": "反应",
+        "stickers": "贴纸",
+        "emptyText": "[无文字内容]",
+        "edited": "已编辑",
+        "source": "在 Discord 中查看",
+        "messageId": "消息 ID",
+        "archiveLoading": "正在加载聊天记录…",
+        "loadFailed": "无法打开聊天记录。",
+        "archiveTitle": "Discord 聊天导出"
+      }
+    },
+    "zh-TW": {
+      "label": "繁體中文",
+      "messages": {
+        "title": "Discord 聊天匯出器",
+        "auto": "自動（依瀏覽器語言）",
+        "collected": "範圍內 {selected} 則 · 已擷取 {total} 則",
+        "messageCount": "訊息數：{count}",
+        "searchPlaceholder": "搜尋訊息或作者…",
+        "showing": "顯示 {visible} / {total}",
+        "backToTop": "返回頂端",
+        "language": "語言",
+        "startDate": "開始日期",
+        "endDate": "結束日期",
+        "format": "匯出格式",
+        "delay": "捲動間隔",
+        "autoDownload": "完成後自動下載",
+        "delayFast": "快速（400 毫秒）",
+        "delayNormal": "標準（700 毫秒）",
+        "delaySafe": "較慢（1200 毫秒）",
+        "scan": "擷取畫面上的訊息",
+        "fetch": "依日期擷取",
+        "cancel": "取消",
+        "copy": "複製",
+        "download": "下載",
+        "clear": "清除已擷取的訊息",
+        "minimize": "最小化",
+        "close": "隱藏",
+        "timezone": "日期依瀏覽器本地時區計算：{zone}",
+        "shortcut": "顯示/隱藏：Alt + Shift + D",
+        "idle": "可以開始擷取目前頻道的訊息。",
+        "scanning": "正在擷取畫面上的訊息…",
+        "seeking": "正在尋找所選日期的訊息…",
+        "collecting": "正在擷取訊息… {percent}%",
+        "done": "可匯出 {count} 則訊息。",
+        "cancelled": "已取消自動擷取。",
+        "noChannel": "請先開啟 Discord 文字頻道。",
+        "noScroller": "找不到訊息清單，請重新整理 Discord 後再試。",
+        "badDates": "請選擇有效的開始與結束日期，且開始日期不得晚於結束日期。",
+        "noMessages": "已擷取內容中沒有符合此日期範圍的訊息。",
+        "copied": "已複製 {count} 則訊息。",
+        "copyFailed": "無法寫入剪貼簿，請改用「下載」。",
+        "downloaded": "已下載 {count} 則訊息。",
+        "clearConfirm": "清除目前頻道已擷取的全部訊息？",
+        "cleared": "已清除在目前頻道擷取的訊息。",
+        "routeChanged": "偵測到頻道已切換，自動擷取已停止。",
+        "stalled": "無法確認已擷取完整的日期範圍，已擷取的訊息仍可匯出。",
+        "txt": "純文字（TXT）",
+        "json": "結構化資料（JSON）",
+        "csv": "試算表（CSV）",
+        "html": "網頁（HTML）",
+        "reply": "回覆",
+        "forwarded": "轉發訊息",
+        "embeds": "連結預覽與卡片",
+        "attachments": "附件",
+        "reactions": "反應",
+        "stickers": "貼圖",
+        "emptyText": "[無文字內容]",
+        "edited": "已編輯",
+        "source": "在 Discord 中查看",
+        "messageId": "訊息 ID",
+        "archiveLoading": "正在載入聊天記錄…",
+        "loadFailed": "無法開啟聊天記錄。",
+        "archiveTitle": "Discord 聊天匯出"
+      }
+    }
+  });
+  const VERSION = "1.6.0";
+  const discordLabels = createDiscordLabelParser(clean);
   const records = new Map();
   let settings = loadSettings();
   let host = null;
@@ -767,22 +1369,16 @@
     }
   }
 
-  function resolveLanguage(value = settings.language) {
-    if (value && value !== 'auto' && supportedLanguages.includes(value)) return value;
-
-    const browser = String(navigator.language || 'en').replace('_', '-');
-    if (/^zh-(TW|HK|MO|Hant)/i.test(browser)) return 'zh-TW';
-    if (/^zh/i.test(browser)) return 'zh-CN';
-    if (/^pt/i.test(browser)) return 'pt-BR';
-
-    const base = browser.split('-')[0].toLowerCase();
-    return supportedLanguages.includes(base) ? base : 'en';
+  function resolveLanguage() {
+    return i18n.resolveLanguage(settings.language, [...(navigator.languages || []), navigator.language]);
   }
 
-  function t(key, values = {}) {
-    const language = resolveLanguage();
-    const template = translations[language]?.[key] ?? translations.en[key] ?? key;
-    return String(template).replace(/\{(\w+)\}/g, (_, name) => String(values[name] ?? ''));
+  function t(key, values) {
+    return i18n.translate(resolveLanguage(), key, values);
+  }
+
+  function translator(language) {
+    return (key, values) => i18n.translate(language, key, values);
   }
 
   function clean(value) {
@@ -792,19 +1388,6 @@
       .replace(/[ \t]+\n/g, '\n')
       .replace(/\n{3,}/g, '\n\n')
       .trim();
-  }
-
-  function cleanAuthorLabel(value) {
-    let author = clean(value).replace(/\u00A0/g, ' ');
-    const serverTagPattern = /(?:,\s*)?(?:server\s*tag|服务器标签|伺服器標籤|サーバータグ|서버\s*태그|etiqueta\s+del\s+servidor|balise\s+du\s+serveur|server-tag|tag\s+do\s+servidor|тег\s+сервера|علامة\s+الخادم)\s*[:：].*$/i;
-    const containedServerTag = serverTagPattern.test(author);
-    author = author.replace(serverTagPattern, '').trim();
-
-    if (containedServerTag) {
-      author = author.replace(/\s*\[[^\]\n]{1,24}\]\s*,?\s*$/, '').trim();
-    }
-
-    return author;
   }
 
   function uniqueStrings(values) {
@@ -875,22 +1458,19 @@
         '[class*="clanTag"], [class*="guildTag"], [class*="chiplet"], [class*="roleIcon"], [class*="botTag"]'
       ).forEach((node) => node.remove());
       clone.querySelectorAll('[aria-label]').forEach((node) => {
-        if (cleanAuthorLabel(node.getAttribute('aria-label')) !== clean(node.getAttribute('aria-label'))) node.remove();
+        if (discordLabels.isServerTag(node.getAttribute('aria-label'))) node.remove();
       });
 
       const directText = [...clone.childNodes]
         .filter((node) => node.nodeType === Node.TEXT_NODE)
         .map((node) => node.textContent)
         .join(' ');
-      const author = cleanAuthorLabel(directText || clone.textContent);
+      const author = discordLabels.author(directText || clone.textContent);
       if (author) return author;
     }
 
     const avatar = findAvatar(item);
-    return avatar ? cleanAuthorLabel(avatar.alt).replace(
-      /,?\s*(?:avatar|头像|頭像|アバター|아바타|avatar\s+del\s+usuario|аватар)\s*$/i,
-      ''
-    ).trim() : '';
+    return avatar ? discordLabels.avatarAuthor(avatar.alt) : '';
   }
 
   function normalizeAssetUrl(value) {
@@ -1461,20 +2041,21 @@
   }
 
   function textExport(messages) {
+    const tr = translator(resolveLanguage());
     return messages.map((message) => {
-      const flags = message.edited ? ` · ${t('edited')}` : '';
+      const flags = message.edited ? ` · ${tr('edited')}` : '';
       const lines = [
-        `${message.timestamp} | ${message.author || '—'} | ${t('messageId')}: ${message.id}${flags}`,
-        message.text || (message.forwarded?.length ? '' : t('emptyText'))
+        `${message.timestamp} | ${message.author || '—'} | ${tr('messageId')}: ${message.id}${flags}`,
+        message.text || (message.forwarded?.length ? '' : tr('emptyText'))
       ];
 
-      if (message.reply) lines.push(`\n${t('reply')}:\n${message.reply}`);
-      if (message.forwarded?.length) lines.push(`\n${t('forwarded')}:\n${message.forwarded.join('\n\n')}`);
-      if (message.embeds.length) lines.push(`\n${t('embeds')}:\n${message.embeds.join('\n\n')}`);
-      if (message.stickers.length) lines.push(`\n${t('stickers')}:\n${message.stickers.join('\n')}`);
-      if (message.attachments.length) lines.push(`\n${t('attachments')}:\n${message.attachments.join('\n')}`);
-      if (message.reactions.length) lines.push(`\n${t('reactions')}:\n${message.reactions.map(reactionText).join('\n')}`);
-      lines.push(`\n${t('source')}: ${message.url}`);
+      if (message.reply) lines.push(`\n${tr('reply')}:\n${message.reply}`);
+      if (message.forwarded?.length) lines.push(`\n${tr('forwarded')}:\n${message.forwarded.join('\n\n')}`);
+      if (message.embeds.length) lines.push(`\n${tr('embeds')}:\n${message.embeds.join('\n\n')}`);
+      if (message.stickers.length) lines.push(`\n${tr('stickers')}:\n${message.stickers.join('\n')}`);
+      if (message.attachments.length) lines.push(`\n${tr('attachments')}:\n${message.attachments.join('\n')}`);
+      if (message.reactions.length) lines.push(`\n${tr('reactions')}:\n${message.reactions.map(reactionText).join('\n')}`);
+      lines.push(`\n${tr('source')}: ${message.url}`);
 
       return lines.join('\n');
     }).join('\n\n--------------------\n\n');
@@ -1550,7 +2131,7 @@
     };
 
     const authorIndex = (message) => {
-      const name = cleanAuthorLabel(message.author || '—');
+      const name = discordLabels.author(message.author || '—');
       const avatar = assetIndex({ url: message.avatar, type: 'avatar', alt: name });
       const identity = `${name}\u0000${avatar}`;
       if (authorLookup.has(identity)) return authorLookup.get(identity);
@@ -1620,7 +2201,7 @@
       }
     }
 
-    return { data: bytesToBase64(bytes), encoding, rawBytes: raw.byteLength, storedBytes: bytes.byteLength };
+    return { data: bytesToBase64(bytes), encoding };
   }
 
   function archiveBootstrapSource() {
@@ -1789,10 +2370,10 @@
         const messages = [...document.querySelectorAll('.message')];
         const dayGroups = [...document.querySelectorAll('.day-group')];
         const update = () => {
-          const query = input.value.trim().toLocaleLowerCase();
+          const query = input.value.trim().toLocaleLowerCase(locale);
           let visibleCount = 0;
           for (const message of messages) {
-            const match = !query || message.textContent.toLocaleLowerCase().includes(query);
+            const match = !query || message.textContent.toLocaleLowerCase(locale).includes(query);
             message.hidden = !match;
             if (match) visibleCount += 1;
           }
@@ -1807,37 +2388,32 @@
         input.addEventListener('input', update);
       };
 
-      loadDatabase().then(renderArchive).catch((error) => {
+      loadDatabase().then(renderArchive).catch(() => {
         loading.classList.add('error');
-        loading.textContent = labels.loadFailed + ' ' + error.message;
+        loading.textContent = labels.loadFailed;
       });
     })();`;
-  }
-
-  function formatBytes(bytes) {
-    if (bytes < 1024) return `${bytes} B`;
-    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   }
 
   async function compactHtmlExport(messages) {
     const route = getRoute();
     const language = resolveLanguage();
+    const tr = translator(language);
     const timeZone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'local';
     const generatedAt = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
     const payload = await encodeArchiveDatabase(buildArchiveDatabase(messages));
     const labels = JSON.stringify({
-      reply: t('reply'), forwarded: t('forwarded'), embeds: t('embeds'), attachments: t('attachments'), reactions: t('reactions'), stickers: t('stickers'),
-      emptyText: t('emptyText'), edited: t('edited'), source: t('source'),
-      showing: t('showing', { visible: '__VISIBLE__', total: '__TOTAL__' }),
-      loadFailed: t('loadFailed')
+      reply: tr('reply'), forwarded: tr('forwarded'), embeds: tr('embeds'), attachments: tr('attachments'), reactions: tr('reactions'), stickers: tr('stickers'),
+      emptyText: tr('emptyText'), edited: tr('edited'), source: tr('source'),
+      showing: tr('showing', { visible: '__VISIBLE__', total: '__TOTAL__' }),
+      loadFailed: tr('loadFailed')
     }).replace(/</g, '\\u003c');
 
     return `<!doctype html>
-<html lang="${escapeHtml(language)}" dir="${language === 'ar' ? 'rtl' : 'ltr'}" data-labels="${escapeHtml(labels)}">
+<html lang="${escapeHtml(language)}" dir="${i18n.direction(language)}" data-labels="${escapeHtml(labels)}">
 <head>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="referrer" content="no-referrer">
-  <title>${escapeHtml(route?.label || t('title'))}</title>
+  <title>${escapeHtml(route?.label || tr('title'))}</title>
   <style>
     :root{color-scheme:light dark;--bg:#f4f5f7;--surface:#fff;--surface-2:#f0f1f4;--text:#24252a;--muted:#656872;--border:#dfe1e6;--accent:#5865f2;--accent-soft:#eef0ff;--reply:#d6d9e0;--shadow:0 8px 28px #1f23290d;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;background:var(--bg);color:var(--text)}
     *{box-sizing:border-box}html{scroll-behavior:smooth}body{max-width:1040px;margin:0 auto;padding:36px 20px 80px;background:var(--bg);line-height:1.5}a{color:#4752c4;text-underline-offset:2px;overflow-wrap:anywhere}button,input{font:inherit}.archive-hero{padding:28px;border:1px solid var(--border);border-radius:18px;background:linear-gradient(135deg,var(--surface),var(--accent-soft));box-shadow:var(--shadow)}.eyebrow{margin:0 0 6px;color:var(--accent);font-size:12px;font-weight:800;letter-spacing:.1em;text-transform:uppercase}.archive-hero h1{margin:0;font-size:clamp(25px,4vw,38px);line-height:1.18;overflow-wrap:anywhere}.archive-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}.meta-pill{padding:6px 10px;border:1px solid var(--border);border-radius:999px;background:color-mix(in srgb,var(--surface) 78%,transparent);color:var(--muted);font-size:12px}.toolbar{position:sticky;top:10px;z-index:20;display:flex;align-items:center;gap:12px;margin:18px 0;padding:10px;border:1px solid var(--border);border-radius:12px;background:color-mix(in srgb,var(--surface) 90%,transparent);box-shadow:var(--shadow);backdrop-filter:blur(12px)}.search{min-width:0;flex:1;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);color:var(--text);padding:9px 11px;outline:none}.search:focus{border-color:var(--accent);box-shadow:0 0 0 3px color-mix(in srgb,var(--accent) 20%,transparent)}.result-count{color:var(--muted);font-size:12px;white-space:nowrap}.archive-loading{padding:28px;text-align:center;color:var(--muted)}.archive-loading.error{color:#c8323d}
@@ -1847,9 +2423,9 @@
   </style>
 </head>
 <body>
-  <header class="archive-hero"><p class="eyebrow">${escapeHtml(t('archiveTitle'))}</p><h1>${escapeHtml(route?.label || t('title'))}</h1><div class="archive-meta"><span class="meta-pill">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)}</span><span class="meta-pill">${messages.length} ${escapeHtml(t('messages'))}</span><span class="meta-pill">${escapeHtml(timeZone)}</span><span class="meta-pill">${escapeHtml(generatedAt)}</span><span class="meta-pill">${escapeHtml(payload.encoding === 'gzip-base64' ? `GZIP ${formatBytes(payload.storedBytes)} · raw ${formatBytes(payload.rawBytes)}` : `Data ${formatBytes(payload.storedBytes)}`)}</span></div></header>
-  <div class="toolbar" role="search"><input id="archive-search" class="search" type="search" placeholder="${escapeHtml(t('searchPlaceholder'))}" aria-label="${escapeHtml(t('searchPlaceholder'))}"><span id="result-count" class="result-count">${escapeHtml(t('showing', { visible: messages.length, total: messages.length }))}</span></div>
-  <main id="timeline" class="timeline"><div id="archive-loading" class="archive-loading">${escapeHtml(t('scanning'))}</div></main><a class="back-top" href="#" aria-label="${escapeHtml(t('backToTop'))}">↑ ${escapeHtml(t('backToTop'))}</a>
+  <header class="archive-hero"><p class="eyebrow">${escapeHtml(tr('archiveTitle'))}</p><h1>${escapeHtml(route?.label || tr('title'))}</h1><div class="archive-meta"><span class="meta-pill">${escapeHtml(settings.startDate)} — ${escapeHtml(settings.endDate)}</span><span class="meta-pill">${escapeHtml(tr('messageCount', { count: messages.length }))}</span><span class="meta-pill">${escapeHtml(timeZone)}</span><span class="meta-pill">${escapeHtml(generatedAt)}</span></div></header>
+  <div class="toolbar" role="search"><input id="archive-search" class="search" type="search" placeholder="${escapeHtml(tr('searchPlaceholder'))}" aria-label="${escapeHtml(tr('searchPlaceholder'))}"><span id="result-count" class="result-count">${escapeHtml(tr('showing', { visible: messages.length, total: messages.length }))}</span></div>
+  <main id="timeline" class="timeline"><div id="archive-loading" class="archive-loading">${escapeHtml(tr('archiveLoading'))}</div></main><a class="back-top" href="#" aria-label="${escapeHtml(tr('backToTop'))}">↑ ${escapeHtml(tr('backToTop'))}</a>
   <script id="archive-data" type="application/octet-stream" data-encoding="${payload.encoding}">${payload.data}</script>
   <script>${archiveBootstrapSource()}</script>
 </body>
@@ -2185,7 +2761,7 @@
           (covered / (bounds.endExclusiveMs - bounds.startMs)) * 100
         )));
         const overlapsRange = scan.maxMs >= bounds.startMs && scan.minMs < bounds.endExclusiveMs;
-        setStatus(overlapsRange ? 'collecting' : 'seeking', overlapsRange ? { percent, step } : { step });
+        setStatus(overlapsRange ? 'collecting' : 'seeking', overlapsRange ? { percent } : {});
 
         const atEdge = direction < 0 ? isAtTop(scroller) : isAtBottom(scroller);
         const waitingForLatest = atEdge && direction > 0 && isWaitingForLatest(scan.root, scroller);
@@ -2266,18 +2842,14 @@
 
   function option(value, text, selectedValue) {
     const selected = value === String(selectedValue) ? ' selected' : '';
-    return `<option value="${value}"${selected}>${text}</option>`;
+    return `<option value="${escapeHtml(value)}"${selected}>${escapeHtml(text)}</option>`;
   }
 
   function panelMarkup() {
+    const language = resolveLanguage();
     const languageOptions = [
-      option('auto', 'Auto / 自动', settings.language),
-      option('en', 'English', settings.language), option('zh-CN', '简体中文', settings.language),
-      option('zh-TW', '繁體中文', settings.language), option('ja', '日本語', settings.language),
-      option('ko', '한국어', settings.language), option('es', 'Español', settings.language),
-      option('fr', 'Français', settings.language), option('de', 'Deutsch', settings.language),
-      option('pt-BR', 'Português (Brasil)', settings.language), option('ru', 'Русский', settings.language),
-      option('ar', 'العربية', settings.language)
+      option('auto', t('auto'), settings.language),
+      ...i18n.locales.map((code) => option(code, i18n.label(code), settings.language))
     ].join('');
 
     return `
@@ -2286,11 +2858,11 @@
         *,*::before,*::after{box-sizing:border-box}
         .panel{width:min(370px,calc(100vw - 24px));background:#1e1f22;color:#dbdee1;border:1px solid #3f4147;border-radius:12px;box-shadow:0 12px 36px #0009;font:13px/1.35 system-ui,-apple-system,"Segoe UI",sans-serif;overflow:hidden}
         .header{display:flex;align-items:center;gap:8px;padding:10px 11px;background:#2b2d31;cursor:move;user-select:none}
-        .title{font-size:13px;font-weight:750;flex:1}.count{font-size:11px;color:#b5bac1;white-space:nowrap}
-        .icon{border:0;background:transparent;color:#b5bac1;width:25px;height:25px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1}.icon:hover{background:#3f4147;color:#fff}
+        .title{font-size:13px;font-weight:750;flex:1;overflow-wrap:anywhere}.count{max-width:45%;font-size:11px;color:#b5bac1;overflow-wrap:anywhere}
+        .icon{flex:0 0 25px;border:0;background:transparent;color:#b5bac1;width:25px;height:25px;border-radius:5px;cursor:pointer;font-size:16px;line-height:1}.icon:hover{background:#3f4147;color:#fff}
         .body{padding:11px;display:grid;gap:10px}.panel.minimized .body{display:none}.panel.minimized{width:min(330px,calc(100vw - 24px))}
-        .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}.field{display:grid;gap:4px}.field.wide{grid-column:1/-1}
-        label{font-size:11px;font-weight:700;color:#b5bac1;text-transform:uppercase;letter-spacing:.02em}
+        .grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.field{display:grid;gap:4px;min-width:0}.field.wide{grid-column:1/-1}
+        label{font-size:11px;font-weight:700;color:#b5bac1}
         input,select{width:100%;border:1px solid #4e5058;background:#111214;color:#f2f3f5;border-radius:6px;padding:7px 8px;font:12px system-ui,sans-serif;outline:none}
         input:focus,select:focus{border-color:#5865f2}input:disabled,select:disabled{opacity:.55}
         .check{grid-column:1/-1;display:flex;align-items:center;gap:7px;color:#dbdee1;font-size:12px;text-transform:none;letter-spacing:0;cursor:pointer}.check input{width:15px;height:15px;margin:0;accent-color:#5865f2}
@@ -2300,7 +2872,7 @@
         .button.primary{background:#5865f2}.button.danger{background:#da373c}.button.secondary{background:#383a40}.button[hidden]{display:none}.button:disabled{opacity:.5;cursor:not-allowed}
         @media(max-width:430px){.panel{width:calc(100vw - 16px)}.grid{grid-template-columns:1fr}.field.wide{grid-column:auto}}
       </style>
-      <section class="panel" dir="${resolveLanguage() === 'ar' ? 'rtl' : 'ltr'}">
+      <section class="panel" lang="${escapeHtml(language)}" dir="${i18n.direction(language)}">
         <div class="header">
           <div class="title">${t('title')}</div>
           <div class="count"></div>
