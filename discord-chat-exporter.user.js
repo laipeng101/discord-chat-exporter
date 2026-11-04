@@ -11,7 +11,7 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.5.0
+// @version      1.5.1
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动采集、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
 // @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
@@ -55,7 +55,8 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.5.0';
+  const VERSION = '1.5.1';
+  const CHANNEL_WELCOME_SELECTOR = 'div:has(> [class*="emptyChannelIcon_"])';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -840,9 +841,13 @@
   function getMessageRows(root) {
     return [...root.querySelectorAll('[id^="chat-messages-"]')].flatMap((row) => {
       const match = row.id.match(/^chat-messages-(\d{15,25})-(\d{15,25})$/);
-      return match && !row.parentElement.closest('[id^="chat-messages-"]')
-        ? [{ channelId: match[1], id: match[2], item: row.querySelector('[role="article"]') || row }]
-        : [];
+      if (!match || row.parentElement.closest('[id^="chat-messages-"]')) return [];
+      const [, channelId, id] = match;
+      const article = row.querySelector('[role="article"]');
+      // A welcome card can identify its list and mark the start of history,
+      // but its synthetic message ID is just the channel ID.
+      const isWelcome = id === channelId && row.parentElement === root && !article && row.matches(CHANNEL_WELCOME_SELECTOR);
+      return [{ channelId, id, item: article || row, isWelcome }];
     });
   }
 
@@ -1311,7 +1316,9 @@
     }
 
     const rows = getMessageRows(root);
-    const candidates = rows.length ? rows.filter((row) => row.channelId === route.channelId) : getLegacyRows(root);
+    const candidates = rows.length
+      ? rows.filter((row) => row.channelId === route.channelId && !row.isWelcome)
+      : getLegacyRows(root);
     const ids = [];
     const seen = new Set();
     let minMs = Infinity;
@@ -1971,7 +1978,7 @@
 
   function hasChannelBeginning(root) {
     return Boolean(root.querySelector(
-      ':scope > div:has(> [class*="emptyChannelIcon_"]), :scope > [class*="channelBeginning"], :scope > [class*="channelStart"]'
+      `:scope > ${CHANNEL_WELCOME_SELECTOR}, :scope > [class*="channelBeginning"], :scope > [class*="channelStart"]`
     ));
   }
 

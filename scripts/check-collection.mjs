@@ -6,6 +6,8 @@ import test from 'node:test';
 import vm from 'node:vm';
 
 const src = readFileSync(new URL('../discord-chat-exporter.user.js', import.meta.url), 'utf8');
+const welcomeSelector = src.match(/^  const CHANNEL_WELCOME_SELECTOR = .+;$/m)?.[0];
+assert.ok(welcomeSelector);
 const collection = src.slice(src.indexOf('  function exportFileStem('), src.indexOf('  function clearCurrentChannel('));
 
 function viewport({
@@ -115,7 +117,7 @@ function harness({ bounds = { startMs: 10, endExclusiveMs: 20 }, scan, onWait, o
       return { extension: format, mime: 'text/html', content: JSON.stringify(messages) };
     }
   });
-  const collect = vm.runInContext(`${collection}\n({ start: startAutomaticCollection, cancel: cancelAutomaticCollection })`, context);
+  const collect = vm.runInContext(`${welcomeSelector}\n${collection}\n({ start: startAutomaticCollection, cancel: cancelAutomaticCollection })`, context);
   return Object.assign(api, collect);
 }
 

@@ -56,8 +56,8 @@ function messageList(rows) {
   return `<div class="scroller_x" style="overflow-y:auto"><ol role="list" data-list-id="chat-messages">${rows}</ol></div>`;
 }
 
-function fixture({ withOtherList }) {
-  const targetRows = [
+function fixture({ withOtherList, rows }) {
+  const targetRows = rows ?? [
     row(ids.head, username(ids.head, 'Same Name', firstAvatar) + content(ids.head, 'First group')),
     row(ids.continuation, content(ids.continuation, 'Grouped continuation'), { group: ids.head }),
     row(ids.sameName, username(ids.sameName, 'Same Name', secondAvatar) + content(ids.sameName, 'Second group')),
@@ -93,8 +93,8 @@ function installBlobApis(window) {
   Object.assign(window, { Blob, CompressionStream, DecompressionStream, Response, TextDecoder, TextEncoder });
 }
 
-function openFixture(t, { withOtherList = false } = {}) {
-  const dom = new JSDOM(fixture({ withOtherList }), {
+function openFixture(t, { withOtherList = false, rows, startDate = date } = {}) {
+  const dom = new JSDOM(fixture({ withOtherList, rows }), {
     url: `https://discord.com/channels/${guildId}/${channelId}`,
     runScripts: 'outside-only',
     beforeParse: installBlobApis
@@ -103,7 +103,7 @@ function openFixture(t, { withOtherList = false } = {}) {
   t.after(() => window.close());
 
   window.localStorage.setItem('discord-chat-exporter:settings:v1', JSON.stringify({
-    language: 'en', startDate: date, endDate: date
+    language: 'en', startDate, endDate: date
   }));
   window.eval(source);
 
@@ -123,6 +123,29 @@ test('isolates the active channel and uses message rows even when they have no t
   assert.deepEqual(Array.from(attachment.attachments), [originalUrl]);
   assert.equal(getRecord(ids.reply).text, 'Reply fixture body');
   assert.match(getRecord(ids.reply).reply, /Quoted fixture body/);
+});
+
+test('excludes the channel welcome card while retaining the list and system messages', (t) => {
+  const welcomeCard = `<div id="chat-messages-${channelId}-${channelId}">
+    <div class="emptyChannelIcon__00de6 emptyChannelIconComponent__00de6"></div><h3>Welcome to #fixture</h3>
+  </div>`;
+  const { api } = openFixture(t, { withOtherList: true, rows: welcomeCard, startDate: '2020-01-01' });
+  const { root, ids: welcomeIds } = api.scan();
+  assert.equal(root.firstElementChild.id, `chat-messages-${channelId}-${channelId}`);
+  assert.equal(welcomeIds.length, 0);
+  assert.equal(api.count(), 0);
+
+  // A real system message may use a canonical row without an article wrapper.
+  root.insertAdjacentHTML('beforeend', `<li id="chat-messages-${channelId}-${ids.head}">
+    ${content(ids.head, 'A message was pinned')}
+  </li>`);
+  assert.deepEqual(Array.from(api.scan().ids), [ids.head]);
+  assert.equal(api.messages()[0].text, 'A message was pinned');
+
+  // In a thread the starter's real message ID can equal the thread ID.
+  root.firstElementChild.outerHTML = row(channelId, content(channelId, 'Thread starter'));
+  assert.deepEqual(Array.from(api.scan().ids), [channelId, ids.head]);
+  assert.equal(api.messages()[0].text, 'Thread starter');
 });
 
 test('keeps authors tied to their group and ignores an avatar in a quoted reply', (t) => {
