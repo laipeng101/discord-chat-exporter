@@ -11,7 +11,7 @@
 // @name:ru      Экспорт чата Discord — даты и языки
 // @name:ar      مُصدِّر محادثات Discord - نطاق التاريخ واللغات
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.4.2
+// @version      1.5.0
 // @description  Export messages visible to your Discord account from the current channel. Supports automatic date-range scrolling, TXT/JSON/CSV/HTML, attachments, embeds, replies, reactions, and a multilingual panel. Data stays in your browser.
 // @description:zh-CN 从当前 Discord 频道导出账号可见的消息。支持按日期自动滚动采集、TXT/JSON/CSV/HTML、附件、嵌入、回复、反应和多语言面板；数据仅在浏览器本地处理。
 // @description:zh-TW 從目前 Discord 頻道匯出帳號可見的訊息。支援依日期自動捲動擷取、TXT/JSON/CSV/HTML、附件、嵌入、回覆、反應及多語言面板；資料僅在瀏覽器本機處理。
@@ -55,7 +55,7 @@
   const STORAGE_KEY = 'discord-chat-exporter:settings:v1';
   const DISCORD_EPOCH = 1420070400000n;
   const PANEL_ID = 'discord-chat-exporter-host';
-  const VERSION = '1.4.2';
+  const VERSION = '1.5.0';
 
   if (window[GLOBAL_KEY]?.destroy) {
     window[GLOBAL_KEY].destroy();
@@ -104,12 +104,13 @@
       clearConfirm: 'Clear all collected messages for the current channel?',
       cleared: 'Current channel data cleared.',
       routeChanged: 'The channel changed, so automatic collection stopped.',
-      stalled: 'Discord stopped loading more messages. Kept everything collected so far.',
+      stalled: 'Could not confirm the full date range. Messages collected so far are still available.',
       txt: 'Plain text (TXT)',
       json: 'Structured data (JSON)',
       csv: 'Spreadsheet (CSV)',
       html: 'Web page (HTML)',
       reply: 'Reply',
+      forwarded: 'Forwarded message',
       embeds: 'Embeds',
       attachments: 'Attachments',
       reactions: 'Reactions',
@@ -163,12 +164,13 @@
       clearConfirm: '清除当前频道已经采集的全部消息？',
       cleared: '已清除当前频道数据。',
       routeChanged: '检测到频道已切换，自动采集已停止。',
-      stalled: 'Discord 未继续加载消息，已保留目前采集到的内容。',
+      stalled: '无法确认已采集完整日期范围，已采集的消息仍可导出。',
       txt: '纯文本（TXT）',
       json: '结构化数据（JSON）',
       csv: '表格（CSV）',
       html: '网页（HTML）',
       reply: '回复',
+      forwarded: '转发消息',
       embeds: '嵌入内容',
       attachments: '附件',
       reactions: '反应',
@@ -222,12 +224,13 @@
       clearConfirm: '清除目前頻道已擷取的全部訊息？',
       cleared: '已清除目前頻道資料。',
       routeChanged: '偵測到頻道已切換，自動擷取已停止。',
-      stalled: 'Discord 未繼續載入訊息，已保留目前擷取內容。',
+      stalled: '無法確認已擷取完整的日期範圍，已擷取的訊息仍可匯出。',
       txt: '純文字（TXT）',
       json: '結構化資料（JSON）',
       csv: '試算表（CSV）',
       html: '網頁（HTML）',
       reply: '回覆',
+      forwarded: '轉發訊息',
       embeds: '嵌入內容',
       attachments: '附件',
       reactions: '反應',
@@ -281,12 +284,13 @@
       clearConfirm: '現在のチャンネルの収集データを消去しますか？',
       cleared: '収集データを消去しました。',
       routeChanged: 'チャンネルが変わったため収集を停止しました。',
-      stalled: 'Discordの読み込みが停止しました。取得済みの履歴を保持します。',
+      stalled: '指定期間の取得が完了したか確認できませんでした。取得済みのメッセージは引き続き利用できます。',
       txt: 'テキスト（TXT）',
       json: '構造化データ（JSON）',
       csv: '表計算（CSV）',
       html: 'Webページ（HTML）',
       reply: '返信',
+      forwarded: '転送されたメッセージ',
       embeds: '埋め込み',
       attachments: '添付',
       reactions: 'リアクション',
@@ -340,12 +344,13 @@
       clearConfirm: '현재 채널에서 수집한 메시지를 모두 지울까요?',
       cleared: '현재 채널 데이터를 지웠습니다.',
       routeChanged: '채널이 바뀌어 자동 수집을 중지했습니다.',
-      stalled: 'Discord가 더 이상 불러오지 않아 현재까지의 내용을 보존했습니다.',
+      stalled: '지정한 날짜 범위 전체를 수집했는지 확인하지 못했습니다. 지금까지 수집한 메시지는 그대로 사용할 수 있습니다.',
       txt: '일반 텍스트(TXT)',
       json: '구조화 데이터(JSON)',
       csv: '스프레드시트(CSV)',
       html: '웹 페이지(HTML)',
       reply: '답글',
+      forwarded: '전달된 메시지',
       embeds: '임베드',
       attachments: '첨부 파일',
       reactions: '반응',
@@ -399,12 +404,13 @@
       clearConfirm: '¿Borrar los mensajes recopilados del canal actual?',
       cleared: 'Se borraron los datos del canal actual.',
       routeChanged: 'El canal cambió y se detuvo la recopilación.',
-      stalled: 'Discord dejó de cargar. Se conservó todo lo alcanzado.',
+      stalled: 'No se pudo confirmar el intervalo completo. Los mensajes recopilados siguen disponibles.',
       txt: 'Texto (TXT)',
       json: 'Datos estructurados (JSON)',
       csv: 'Hoja de cálculo (CSV)',
       html: 'Página web (HTML)',
       reply: 'Respuesta',
+      forwarded: 'Mensaje reenviado',
       embeds: 'Incrustaciones',
       attachments: 'Adjuntos',
       reactions: 'Reacciones',
@@ -458,12 +464,13 @@
       clearConfirm: 'Effacer les messages collectés pour ce salon ?',
       cleared: 'Données du salon effacées.',
       routeChanged: 'Le salon a changé, la collecte est arrêtée.',
-      stalled: 'Discord ne charge plus. Les messages atteints ont été conservés.',
+      stalled: 'Impossible de confirmer que toute la période a été couverte. Les messages recueillis restent disponibles.',
       txt: 'Texte brut (TXT)',
       json: 'Données structurées (JSON)',
       csv: 'Tableur (CSV)',
       html: 'Page web (HTML)',
       reply: 'Réponse',
+      forwarded: 'Message transféré',
       embeds: 'Intégrations',
       attachments: 'Pièces jointes',
       reactions: 'Réactions',
@@ -517,12 +524,13 @@
       clearConfirm: 'Erfasste Nachrichten dieses Kanals löschen?',
       cleared: 'Kanaldaten gelöscht.',
       routeChanged: 'Der Kanal wurde gewechselt; die Erfassung wurde beendet.',
-      stalled: 'Discord lädt nicht weiter. Alle erreichten Inhalte bleiben erhalten.',
+      stalled: 'Der vollständige Zeitraum konnte nicht bestätigt werden. Die bisher erfassten Nachrichten bleiben verfügbar.',
       txt: 'Text (TXT)',
       json: 'Strukturierte Daten (JSON)',
       csv: 'Tabelle (CSV)',
       html: 'Webseite (HTML)',
       reply: 'Antwort',
+      forwarded: 'Weitergeleitete Nachricht',
       embeds: 'Einbettungen',
       attachments: 'Anhänge',
       reactions: 'Reaktionen',
@@ -576,12 +584,13 @@
       clearConfirm: 'Limpar as mensagens coletadas deste canal?',
       cleared: 'Dados do canal limpos.',
       routeChanged: 'O canal mudou e a coleta foi interrompida.',
-      stalled: 'O Discord parou de carregar. Tudo que foi alcançado foi preservado.',
+      stalled: 'Não foi possível confirmar a coleta de todo o período. As mensagens já coletadas continuam disponíveis.',
       txt: 'Texto simples (TXT)',
       json: 'Dados estruturados (JSON)',
       csv: 'Planilha (CSV)',
       html: 'Página web (HTML)',
       reply: 'Resposta',
+      forwarded: 'Mensagem encaminhada',
       embeds: 'Embeds',
       attachments: 'Anexos',
       reactions: 'Reações',
@@ -635,12 +644,13 @@
       clearConfirm: 'Удалить собранные сообщения текущего канала?',
       cleared: 'Данные текущего канала удалены.',
       routeChanged: 'Канал изменился, сбор остановлен.',
-      stalled: 'Discord перестал загружать. Все полученные сообщения сохранены.',
+      stalled: 'Не удалось подтвердить полноту сбора за выбранный период. Собранные сообщения остаются доступны.',
       txt: 'Текст (TXT)',
       json: 'Структурированные данные (JSON)',
       csv: 'Таблица (CSV)',
       html: 'Веб-страница (HTML)',
       reply: 'Ответ',
+      forwarded: 'Пересланное сообщение',
       embeds: 'Встроенный контент',
       attachments: 'Вложения',
       reactions: 'Реакции',
@@ -694,12 +704,13 @@
       clearConfirm: 'هل تريد مسح الرسائل المجمعة للقناة الحالية؟',
       cleared: 'تم مسح بيانات القناة الحالية.',
       routeChanged: 'تغيرت القناة، لذلك توقف الجمع.',
-      stalled: 'توقف Discord عن التحميل. تم حفظ كل ما تم الوصول إليه.',
+      stalled: 'تعذّر التأكد من اكتمال جمع الرسائل ضمن النطاق الزمني. تظل الرسائل التي جُمعت متاحة.',
       txt: 'نص عادي (TXT)',
       json: 'بيانات منظمة (JSON)',
       csv: 'جدول (CSV)',
       html: 'صفحة ويب (HTML)',
       reply: 'رد',
+      forwarded: 'رسالة مُعاد توجيهها',
       embeds: 'تضمينات',
       attachments: 'مرفقات',
       reactions: 'تفاعلات',
@@ -715,7 +726,6 @@
 
   const supportedLanguages = Object.keys(translations);
   const records = new Map();
-  const authorAssets = new Map();
   let settings = loadSettings();
   let host = null;
   let shadow = null;
@@ -801,7 +811,7 @@
   }
 
   function getRoute() {
-    const match = location.pathname.match(/^\/channels\/([^/]+)\/([^/?#]+)/);
+    const match = location.pathname.match(/^\/channels\/(@me|\d{15,25})\/(\d{15,25})(?:\/|$)/);
     if (!match) return null;
 
     const title = clean(document.title)
@@ -827,26 +837,32 @@
     }
   }
 
-  function getMessageId(content, item) {
-    return (
-      content?.id?.match(/(\d{15,25})$/) ||
-      item?.id?.match(/(\d{15,25})$/) ||
-      []
-    )[1] || '';
+  function getMessageRows(root) {
+    return [...root.querySelectorAll('[id^="chat-messages-"]')].flatMap((row) => {
+      const match = row.id.match(/^chat-messages-(\d{15,25})-(\d{15,25})$/);
+      return match && !row.parentElement.closest('[id^="chat-messages-"]')
+        ? [{ channelId: match[1], id: match[2], item: row.querySelector('[role="article"]') || row }]
+        : [];
+    });
   }
 
-  function getMessageItem(content) {
-    return content.closest('[id^="chat-messages-"]') ||
-      content.closest('[role="article"]') ||
-      content.parentElement;
+  function getLegacyRows(root) {
+    return [...root.querySelectorAll('[role="article"]')].flatMap((item) => {
+      if (item.parentElement.closest('[role="article"]')) return [];
+      const content = [...item.querySelectorAll('[id^="message-content-"]')]
+        .find((node) => !node.closest('[id^="message-reply-context-"], [id^="message-accessories-"]'));
+      const id = item.getAttribute('aria-labelledby')?.match(/\bmessage-timestamp-(\d{15,25})\b/)?.[1] ||
+        content?.id.match(/^message-content-(\d{15,25})$/)?.[1];
+      return id ? [{ id, item }] : [];
+    });
   }
 
-  function getAuthor(item) {
+  function getAuthor(item, id) {
     if (!item) return '';
 
-    const username = item.querySelector('h3 [class*="username"]') ||
-      item.querySelector('[id^="message-username-"]') ||
-      item.querySelector('[class*="headerText"] [class*="username"]');
+    const header = item.querySelector(`[id="message-username-${id}"]`);
+    const username = header?.querySelector('[class*="username"]') || header ||
+      item.querySelector('h3 [class*="username"]');
 
     if (username) {
       const clone = username.cloneNode(true);
@@ -865,7 +881,7 @@
       if (author) return author;
     }
 
-    const avatar = item.querySelector('img[class*="avatar"][alt]');
+    const avatar = findAvatar(item);
     return avatar ? cleanAuthorLabel(avatar.alt).replace(
       /,?\s*(?:avatar|头像|頭像|アバター|아바타|avatar\s+del\s+usuario|аватар)\s*$/i,
       ''
@@ -877,8 +893,11 @@
 
     try {
       const parsed = new URL(value, location.href);
-      if (/discordapp\.(?:com|net)$/i.test(parsed.hostname)) {
-        ['size', 'width', 'height', 'quality'].forEach((key) => parsed.searchParams.delete(key));
+      if (/(?:^|\.)discordapp\.(?:com|net)$/i.test(parsed.hostname) &&
+          !/\/(?:ephemeral-)?attachments\//i.test(parsed.pathname)) {
+        ['size', 'width', 'height', 'quality'].forEach((key) => {
+          if (parsed.searchParams.has(key)) parsed.searchParams.delete(key);
+        });
       }
       return parsed.href;
     } catch (_) {
@@ -913,11 +932,13 @@
     }
   }
 
+  function findAvatar(item) {
+    return [...item.querySelectorAll('img[class*="avatar"], img[src*="cdn.discordapp.com/avatars/"], img[src*="cdn.discordapp.com/embed/avatars/"]')]
+      .find((image) => !image.closest('[id^="message-reply-context-"], [class*="repliedMessage"], [id^="message-accessories-"]'));
+  }
+
   function getAvatar(item) {
-    if (!item) return '';
-    const image = item.querySelector(
-      'img[class*="avatar"][src], img[src*="cdn.discordapp.com/avatars/"], img[src*="cdn.discordapp.com/embed/avatars/"]'
-    );
+    const image = findAvatar(item);
     return normalizeAssetUrl(image?.currentSrc || image?.src || '');
   }
 
@@ -968,11 +989,29 @@
     return parts;
   }
 
-  function getReply(item) {
+  function getReply(item, id) {
     if (!item) return '';
-    const reply = item.querySelector('[class*="repliedMessage"]') ||
+    const reply = item.querySelector(`[id="message-reply-context-${id}"]`) ||
+      item.querySelector('[class*="repliedMessage"]') ||
       item.querySelector('[class*="replying"]');
     return reply ? clean(reply.innerText || reply.textContent) : '';
+  }
+
+  function getMessageText(content, parts = getContentParts(content)) {
+    return clean(parts.length
+      ? parts.map((part) => typeof part === 'string' ? part : part.name).join('')
+      : content?.innerText || content?.textContent);
+  }
+
+  function getForwarded(accessories) {
+    if (!accessories) return [];
+    // Discord can reuse the forwarding row's ID for the nested snapshot.
+    // Its position inside a card under the accessories distinguishes it.
+    const cards = [...accessories.querySelectorAll('[class*="headerContainer_"]')]
+      .map((header) => header.parentElement);
+    return uniqueStrings(cards.flatMap((card) => [...card.querySelectorAll('[id^="message-content-"]')])
+      .filter((node) => !node.closest('[id^="message-reply-context-"]'))
+      .map((node) => getMessageText(node)));
   }
 
   function getEmbeds(item) {
@@ -992,6 +1031,7 @@
       'a[href*="cdn.discordapp.com/attachments/"]',
       'a[href*="media.discordapp.net/attachments/"]',
       'a[href*="cdn.discordapp.com/ephemeral-attachments/"]',
+      'a[href*="media.discordapp.net/ephemeral-attachments/"]',
       'a[download][href]',
       'img[src*="/attachments/"]',
       'video[src*="/attachments/"]',
@@ -999,6 +1039,7 @@
     ];
 
     item.querySelectorAll(selectors.join(',')).forEach((node) => {
+      if (node.closest('[id^="message-reply-context-"], [class*="repliedMessage"]')) return;
       const url = node.href || node.currentSrc || node.src || '';
       if (/^https?:\/\//i.test(url)) urls.push(url);
     });
@@ -1029,7 +1070,7 @@
         /\/(?:ephemeral-)?attachments\/(\d+)\/(\d+)\/([^/?]+)/i
       );
 
-      if (attachment) {
+      if (attachment && /(?:^|\.)discordapp\.(?:com|net)$/i.test(parsed.hostname)) {
         return `discord:${attachment.slice(1).map((part) => decodeURIComponent(part).toLowerCase()).join(':')}`;
       }
 
@@ -1054,6 +1095,25 @@
     return score;
   }
 
+  function attachmentExpiry(url) {
+    try {
+      const parsed = new URL(url, location.href);
+      if (!/(?:^|\.)discordapp\.(?:com|net)$/i.test(parsed.hostname) ||
+          !/\/(?:ephemeral-)?attachments\//i.test(parsed.pathname)) return 0;
+      const expiry = parsed.searchParams.get('ex');
+      return /^[\da-f]{1,12}$/i.test(expiry || '') ? Number.parseInt(expiry, 16) : 0;
+    } catch (_) {
+      return 0;
+    }
+  }
+
+  function preferMedia(candidate, existing) {
+    const candidateExpiry = attachmentExpiry(candidate.url);
+    const existingExpiry = attachmentExpiry(existing.url);
+    if (candidateExpiry && existingExpiry && candidateExpiry !== existingExpiry) return candidateExpiry > existingExpiry;
+    return mediaPreference(candidate) > mediaPreference(existing);
+  }
+
   function getMedia(item, attachments = []) {
     if (!item) return [];
 
@@ -1064,11 +1124,12 @@
     };
 
     item.querySelectorAll('img[src], video, audio').forEach((node) => {
+      if (node.closest('[id^="message-reply-context-"], [class*="repliedMessage"]')) return;
       const tag = node.tagName.toLowerCase();
       const url = node.currentSrc || node.src || node.querySelector?.('source[src]')?.src || '';
 
       if (tag === 'img') {
-        if (node.closest('[class*="avatar"], [class*="emoji"], [class*="reaction"]')) return;
+        if (node.closest('[class*="avatar"], [class*="emoji"], [class*="reaction"], [class*="imagePlaceholder"]')) return;
         if (node.closest('[class*="embedAuthorIcon"], [class*="embedProvider"], [class*="authorIcon"]')) return;
         if (/\/icon-default\.[^/?]+\.png(?:[?#]|$)/i.test(url)) return;
 
@@ -1098,25 +1159,23 @@
     return uniqueStrings(stickers.map((image) => image.alt));
   }
 
-  function getReactions(item) {
-    if (!item) return [];
+  function getReactions(item, id) {
+    const container = item.querySelector(`[id="message-reactions-${id}"]`) ||
+      item.querySelector('[class^="reactions_"]');
+    if (!container) return [];
 
-    let roots = [...item.querySelectorAll('button[class*="reaction"], [class*="reaction"][role="button"]')];
-    if (!roots.length) roots = [...item.querySelectorAll('[class*="reactionInner"]')];
-    roots = roots.filter((node, index) => roots.indexOf(node) === index);
-
-    const addReactionPattern = /(?:add|添加|新增|追加|추가|agregar|ajouter|hinzufügen|adicionar|добавить|إضافة).*?(?:reaction|反应|反應|リアクション|반응|reacción|réaction|reaktion|reação|реакц|تفاعل)/i;
+    const roots = container.querySelectorAll('[class*="reactionInner"], [class^="reaction_"], [class*="reaction"][aria-pressed], [class*="reaction"][aria-checked]');
     const reactions = [];
 
     for (const root of roots) {
+      if (root.querySelector('[class*="reactionInner"]')) continue;
       const label = clean(root.getAttribute('aria-label') || '').replace(/\s+/g, ' ');
-      if (addReactionPattern.test(label)) continue;
-
       const image = root.querySelector('img[class*="emoji"], img[alt]');
       const countNode = root.querySelector('[class*="reactionCount"], [class*="count"]');
       const directCount = clean(countNode?.textContent || '').replace(/[,\s]/g, '').match(/\d+/);
       const labelledCount = label.match(/[,，]\s*([\d,.]+)\s*(?:reactions?|个反应|個反應|件のリアクション|개의 반응|reacciones?|réactions?|reaktionen?|reações?|реакц|تفاعل)/i);
-      const count = Number((directCount?.[0] || labelledCount?.[1] || '1').replace(/[,\s]/g, '')) || 1;
+      if (!directCount && !labelledCount) continue;
+      const count = Number((directCount?.[0] || labelledCount[1]).replace(/[,\s]/g, '')) || 1;
       const emoji = clean(image?.alt || label.split(/[,，]\s*\d/)[0] || root.textContent)
         .replace(/^:+|:+$/g, '')
         .replace(/\s+/g, ' ');
@@ -1126,19 +1185,24 @@
       const url = normalizeEmojiAssetUrl(image?.currentSrc || image?.src || '');
 
       if (!emoji && !url) continue;
-      reactions.push({ emoji: emoji || 'reaction', count: Number.isFinite(count) ? count : 1, url, me: root.getAttribute('aria-pressed') === 'true' });
+      const me = root.closest('[aria-pressed="true"], [aria-checked="true"]');
+      reactions.push({ emoji: emoji || 'reaction', count: Number.isFinite(count) ? count : 1, url, me: Boolean(me && container.contains(me)) });
     }
 
     return mergeReactions(reactions, []);
   }
 
-  function findMessageRoot() {
-    const direct = document.querySelector('[data-list-id="chat-messages"]') ||
-      document.querySelector('[data-list-id^="chat-messages"]');
-    if (direct) return direct;
-
-    const lists = [...document.querySelectorAll('main ol[role="list"], main [role="list"]')];
-    return lists.find((list) => list.querySelector('[id^="message-content-"]')) || null;
+  function findMessageRoot(route = getRoute()) {
+    if (!route) return null;
+    const chatLists = [...document.querySelectorAll('[data-list-id^="chat-messages"]')];
+    const lists = (chatLists.length ? chatLists : [...document.querySelectorAll('main [role="list"]')]
+      .filter((list) => list.querySelector('[id^="chat-messages-"], [id^="message-content-"]')))
+      .filter((list) => !list.closest('[hidden], [aria-hidden="true"]'));
+    for (const list of lists) {
+      if (getMessageRows(list).some((row) => row.channelId === route.channelId)) return list;
+    }
+    // Unkeyed legacy/empty lists can only be used if the choice is unambiguous.
+    return lists.length === 1 && !getMessageRows(lists[0]).length ? lists[0] : null;
   }
 
   function findScroller(root = findMessageRoot()) {
@@ -1170,7 +1234,7 @@
       const identity = mediaIdentity(url);
       const candidate = { url, type: mediaTypeFromUrl(url, 'file') };
       const existing = merged.get(identity);
-      if (!existing || mediaPreference(candidate) > mediaPreference(existing)) merged.set(identity, candidate);
+      if (!existing || preferMedia(candidate, existing)) merged.set(identity, candidate);
     }
     return [...merged.values()].map((entry) => entry.url);
   }
@@ -1192,7 +1256,7 @@
 
       if (!existing ||
           ranks[normalized.type] > ranks[existing.type] ||
-          (ranks[normalized.type] === ranks[existing.type] && mediaPreference(normalized) > mediaPreference(existing))) {
+          (ranks[normalized.type] === ranks[existing.type] && preferMedia(normalized, existing))) {
         merged.set(identity, {
           ...existing,
           ...normalized,
@@ -1246,39 +1310,36 @@
       return { ids: [], minMs: NaN, maxMs: NaN, route, root };
     }
 
-    const contents = [...root.querySelectorAll('[id^="message-content-"]')];
+    const rows = getMessageRows(root);
+    const candidates = rows.length ? rows.filter((row) => row.channelId === route.channelId) : getLegacyRows(root);
     const ids = [];
-    let activeAuthor = '';
-    let activeAvatar = '';
+    const seen = new Set();
+    let minMs = Infinity;
+    let maxMs = -Infinity;
 
-    for (const content of contents) {
-      const item = getMessageItem(content);
-      const id = getMessageId(content, item);
+    for (const { id, item } of candidates) {
+      if (seen.has(id)) continue;
       const timestampMs = snowflakeToMilliseconds(id);
-      if (!id || !Number.isFinite(timestampMs)) continue;
+      if (!Number.isFinite(timestampMs) || timestampMs > 8.64e15) continue;
+      const content = [...item.querySelectorAll(`[id="message-content-${id}"]`)]
+        .find((node) => !node.closest('[id^="message-accessories-"], [id^="message-reply-context-"], [class*="repliedMessage"]'));
+      const accessories = item.querySelector(`[id="message-accessories-${id}"]`);
 
       const recordKey = `${route.key}:${id}`;
       const old = records.get(recordKey) || {};
-      const foundAuthor = getAuthor(item);
-      const author = foundAuthor || old.author || activeAuthor || '';
-      const foundAvatar = getAvatar(item);
-      const assetKey = `${route.key}:${author}`;
-      if (author && foundAvatar) authorAssets.set(assetKey, foundAvatar);
-      const avatar = foundAvatar || old.avatar || authorAssets.get(assetKey) || (author === activeAuthor ? activeAvatar : '') || '';
-      if (author) {
-        activeAuthor = author;
-        if (avatar) activeAvatar = avatar;
-      }
+      const author = getAuthor(item, id) || old.author || '';
+      const avatar = getAvatar(item) || old.avatar || '';
+      const authorGroupId = item.getAttribute('aria-labelledby')?.match(/\bmessage-username-(\d{15,25})\b/)?.[1] || old.authorGroupId;
 
       const contentParts = getContentParts(content);
-      const richText = clean(contentParts.map((part) => typeof part === 'string' ? part : part.name).join(''));
-      const text = richText || clean(content.innerText || content.textContent);
-      const reply = getReply(item);
-      const embeds = getEmbeds(item);
-      const attachments = getAttachments(item);
-      const media = getMedia(item, attachments);
-      const stickers = getStickers(item);
-      const reactions = getReactions(item);
+      const text = getMessageText(content, contentParts);
+      const reply = getReply(item, id);
+      const forwarded = getForwarded(accessories);
+      const embeds = getEmbeds(accessories || item);
+      const attachments = getAttachments(accessories || item);
+      const media = getMedia(accessories || item, attachments);
+      const stickers = getStickers(accessories || item);
+      const reactions = getReactions(item, id);
 
       records.set(recordKey, {
         id,
@@ -1287,30 +1348,34 @@
         channelLabel: route.label || old.channelLabel || route.channelId,
         author,
         avatar,
+        authorGroupId,
         timestamp: new Date(timestampMs).toISOString(),
         timestampMs,
-        text: text || old.text || '',
-        contentParts: contentParts.length ? contentParts : (old.contentParts || []),
+        text: content ? text : (old.text || ''),
+        contentParts: content ? contentParts : (old.contentParts || []),
         reply: reply || old.reply || '',
+        ...(forwarded.length || old.forwarded ? { forwarded: forwarded.length ? forwarded : old.forwarded } : {}),
         embeds: mergeArrays(embeds, old.embeds),
         attachments: mergeAttachments(attachments, old.attachments),
         media: mergeMedia(media, old.media),
         stickers: mergeArrays(stickers, old.stickers),
-        reactions: mergeReactions(reactions, old.reactions),
+        reactions,
         edited: Boolean(item?.querySelector('[class*="edited"]')) || Boolean(old.edited),
         url: `${route.url}/${id}`
       });
 
       ids.push(id);
+      seen.add(id);
+      minMs = Math.min(minMs, timestampMs);
+      maxMs = Math.max(maxMs, timestampMs);
     }
 
     updateCount();
 
-    const times = ids.map(snowflakeToMilliseconds).filter(Number.isFinite);
     return {
       ids,
-      minMs: times.length ? Math.min(...times) : NaN,
-      maxMs: times.length ? Math.max(...times) : NaN,
+      minMs: ids.length ? minMs : NaN,
+      maxMs: ids.length ? maxMs : NaN,
       route,
       root
     };
@@ -1351,21 +1416,13 @@
     const route = getRoute();
     if (!route) return [];
 
-    const result = [...records.values()]
+    return [...records.values()]
       .filter((record) => record.guildId === route.guildId && record.channelId === route.channelId)
-      .sort(compareSnowflakes);
-
-    let activeAuthor = '';
-    let activeAvatar = '';
-    return result.map((record) => {
-      const groupedContinuation = !record.author && Boolean(activeAuthor);
-      if (record.author) activeAuthor = record.author;
-      const author = record.author || activeAuthor;
-      const avatar = record.avatar || authorAssets.get(`${route.key}:${author}`) || (groupedContinuation ? activeAvatar : '') || '';
-      if (avatar) activeAvatar = avatar;
-      else if (record.author) activeAvatar = '';
-      return { ...record, author, avatar };
-    });
+      .sort(compareSnowflakes)
+      .map(({ authorGroupId, ...record }) => {
+        const group = authorGroupId && records.get(`${route.key}:${authorGroupId}`);
+        return { ...record, author: record.author || group?.author || '', avatar: record.avatar || group?.avatar || '' };
+      });
   }
 
   function selectedRecords() {
@@ -1378,8 +1435,15 @@
 
   function updateCount() {
     if (!elements.count) return;
-    const total = currentChannelRecords().length;
-    const selected = selectedRecords().length;
+    const route = getRoute();
+    const bounds = getDateBounds();
+    let total = 0;
+    let selected = 0;
+    for (const record of records.values()) {
+      if (!route || record.guildId !== route.guildId || record.channelId !== route.channelId) continue;
+      total++;
+      if (bounds && record.timestampMs >= bounds.startMs && record.timestampMs < bounds.endExclusiveMs) selected++;
+    }
     elements.count.textContent = t('collected', { selected, total });
   }
 
@@ -1394,10 +1458,11 @@
       const flags = message.edited ? ` · ${t('edited')}` : '';
       const lines = [
         `${message.timestamp} | ${message.author || '—'} | ${t('messageId')}: ${message.id}${flags}`,
-        message.text || t('emptyText')
+        message.text || (message.forwarded?.length ? '' : t('emptyText'))
       ];
 
       if (message.reply) lines.push(`\n${t('reply')}:\n${message.reply}`);
+      if (message.forwarded?.length) lines.push(`\n${t('forwarded')}:\n${message.forwarded.join('\n\n')}`);
       if (message.embeds.length) lines.push(`\n${t('embeds')}:\n${message.embeds.join('\n\n')}`);
       if (message.stickers.length) lines.push(`\n${t('stickers')}:\n${message.stickers.join('\n')}`);
       if (message.attachments.length) lines.push(`\n${t('attachments')}:\n${message.attachments.join('\n')}`);
@@ -1432,11 +1497,11 @@
   }
 
   function csvExport(messages) {
-    const header = ['id', 'timestamp', 'author', 'avatar', 'edited', 'text', 'reply', 'embeds', 'stickers', 'attachments', 'media', 'reactions', 'url'];
+    const header = ['id', 'timestamp', 'author', 'avatar', 'edited', 'text', 'reply', 'embeds', 'stickers', 'attachments', 'media', 'reactions', 'url', 'forwarded'];
     const rows = messages.map((message) => [
       message.id, message.timestamp, message.author, message.avatar, message.edited, message.text,
       message.reply, message.embeds, message.stickers, message.attachments,
-      (message.media || []).map((entry) => `[${entry.type}] ${entry.url}`), message.reactions.map(reactionText), message.url
+      (message.media || []).map((entry) => `[${entry.type}] ${entry.url}`), message.reactions.map(reactionText), message.url, message.forwarded
     ].map(csvCell).join(','));
 
     return `\uFEFF${header.map(csvCell).join(',')}\n${rows.join('\n')}`;
@@ -1465,6 +1530,8 @@
         const existingIndex = assetLookup.get(identity);
         const existing = assets[existingIndex];
         if (type === 'emoji' && /[?&]animated=true(?:&|$)/.test(url) && !/[?&]animated=true(?:&|$)/.test(existing[0])) {
+          existing[0] = url;
+        } else if (type !== 'emoji' && preferMedia({ url, type }, { url: existing[0], type })) {
           existing[0] = url;
         }
         return existingIndex;
@@ -1514,7 +1581,8 @@
         message.stickers || [],
         reactions,
         message.edited ? 1 : 0,
-        message.url || ''
+        message.url || '',
+        message.forwarded || []
       ];
     });
 
@@ -1681,7 +1749,7 @@
           const avatar = avatarAsset
             ? '<img class="avatar-image fallback-image" src="' + esc(avatarAsset[0]) + '" alt="" loading="lazy" decoding="async"><span class="avatar-fallback" hidden>' + esc(initial(author[0])) + '</span>'
             : '<span>' + esc(initial(author[0])) + '</span>';
-          const visible = row[3] || row[5] || row[6].length || row[7].length || row[8].length;
+          const visible = row[3] || row[5] || row[6].length || row[7].length || row[8].length || row[12]?.length;
           const body = row[3] || (!visible ? labels.emptyText : '');
           group.rows.push('<article class="message' + (compact ? ' compact' : '') + '" aria-label="' + esc(author[0] + ', ' + timeLabel(row[1])) + '">' +
             '<div class="avatar" style="--author-hue:' + hue(author[0]) + '" aria-hidden="true">' + avatar + '</div>' +
@@ -1689,7 +1757,8 @@
             '<time datetime="' + esc(row[1]) + '" title="' + esc(row[1]) + '">' + esc(timeLabel(row[1])) + '</time>' +
             (row[10] ? '<span class="edited-badge">' + esc(labels.edited) + '</span>' : '') + '</header>' +
             (body ? '<div class="message-body' + (row[3] ? '' : ' empty') + '">' + richText(row[4], body) + '</div>' : '') +
-            (row[5] ? section(labels.reply, [row[5]], 'reply-card') : '') + section(labels.embeds, row[6], 'embed-card') +
+            (row[5] ? section(labels.reply, [row[5]], 'reply-card') : '') + section(labels.forwarded, row[12], 'embed-card') +
+            section(labels.embeds, row[6], 'embed-card') +
             section(labels.stickers, row[8], 'sticker-card') + media(row[7]) + reactions(row[9]) +
             '<footer class="message-footer"><a href="' + esc(row[11]) + '" target="_blank" rel="noreferrer">↗ ' + esc(labels.source) + '</a><code>' + esc(row[0]) + '</code></footer></div></article>');
           previous = row;
@@ -1751,7 +1820,7 @@
     const generatedAt = new Intl.DateTimeFormat(language, { dateStyle: 'medium', timeStyle: 'short' }).format(new Date());
     const payload = await encodeArchiveDatabase(buildArchiveDatabase(messages));
     const labels = JSON.stringify({
-      reply: t('reply'), embeds: t('embeds'), attachments: t('attachments'), reactions: t('reactions'), stickers: t('stickers'),
+      reply: t('reply'), forwarded: t('forwarded'), embeds: t('embeds'), attachments: t('attachments'), reactions: t('reactions'), stickers: t('stickers'),
       emptyText: t('emptyText'), edited: t('edited'), source: t('source'),
       showing: t('showing', { visible: '__VISIBLE__', total: '__TOTAL__' }),
       loadFailed: t('loadFailed')
@@ -1787,7 +1856,7 @@
     return { content: textExport(messages), mime: 'text/plain;charset=utf-8', extension: 'txt' };
   }
 
-  function exportFileName(extension) {
+  function exportFileStem() {
     const route = getRoute();
     const channel = clean(route?.label || route?.channelId || 'channel')
       .replace(/[\\/:*?"<>|]+/g, '-')
@@ -1795,7 +1864,7 @@
       .replace(/-{2,}/g, '-')
       .replace(/^-|-$/g, '')
       .slice(0, 70) || 'channel';
-    return `discord-chat-${channel}-${settings.startDate}_${settings.endDate}.${extension}`;
+    return `discord-chat-${channel}-${settings.startDate}_${settings.endDate}`;
   }
 
   async function copyToClipboard(text) {
@@ -1839,12 +1908,19 @@
       return false;
     }
 
+    return downloadMessages(messages);
+  }
+
+  async function downloadMessages(messages, mayDownload = () => true) {
+    const fileStem = exportFileStem();
     const output = await buildExport(settings.format, messages);
+    if (!mayDownload()) return false;
+
     const blob = new Blob([output.content], { type: output.mime });
     const url = URL.createObjectURL(blob);
     const anchor = document.createElement('a');
     anchor.href = url;
-    anchor.download = exportFileName(output.extension);
+    anchor.download = `${fileStem}.${output.extension}`;
     document.body.appendChild(anchor);
     anchor.click();
     anchor.remove();
@@ -1852,6 +1928,19 @@
     setStatus('downloaded', { count: messages.length }, 'success');
     return true;
   }
+
+  const COLLECTION_STALL_MS = 12000;
+  const LATEST_SETTLE_MS = 4500;
+  const PAGINATION_ATTEMPTS = [
+    { depth: 0.65, pivotDwellMs: 800, settleMs: 800 },
+    { depth: 0.32, pivotDwellMs: 1200, settleMs: 1600 },
+    { depth: 0.80, pivotDwellMs: 2000, settleMs: 3200 },
+    { depth: 0.90, pivotDwellMs: 3200, settleMs: 6400 },
+    { depth: 0.96, pivotDwellMs: 4800, settleMs: 12000 },
+    { depth: 0.50, pivotDwellMs: 12000, settleMs: 12000 },
+    { depth: 0.65, pivotDwellMs: 24000, settleMs: 12000 }
+  ];
+  const SCROLL_STEP_RATIO = 0.72;
 
   function isAtTop(scroller) {
     return scroller.scrollTop <= 3;
@@ -1868,24 +1957,101 @@
   function scrollSignature(scroller, scan) {
     const first = scan.ids[0] || '';
     const last = scan.ids[scan.ids.length - 1] || '';
-    return `${first}:${last}:${Math.round(scroller.scrollTop)}:${scroller.scrollHeight}`;
+    return `${first}:${last}:${Math.round(scroller.scrollTop)}:${scroller.scrollHeight}:${scroller.clientHeight}`;
   }
 
-  async function moveScroller(scroller, direction) {
-    const distance = Math.max(280, Math.floor(scroller.clientHeight * 0.72));
+  function moveScroller(scroller, direction) {
+    const distance = Math.max(1, Math.floor(scroller.clientHeight * SCROLL_STEP_RATIO));
     scroller.scrollBy({ top: direction * distance, left: 0, behavior: 'auto' });
-    await sleep(Number(settings.delay) || 700);
   }
 
-  async function jumpToLoadedEdge(scroller, direction) {
+  function jumpToLoadedEdge(scroller, direction) {
     scroller.scrollTop = direction < 0 ? 0 : Math.max(0, scroller.scrollHeight - scroller.clientHeight);
-    await sleep(Number(settings.delay) || 700);
   }
 
-  function directionToStart(scan, startMs) {
-    if (startMs < scan.minMs) return -1;
-    if (startMs > scan.maxMs) return 1;
-    return 0;
+  function hasChannelBeginning(root) {
+    return Boolean(root.querySelector(
+      ':scope > div:has(> [class*="emptyChannelIcon_"]), :scope > [class*="channelBeginning"], :scope > [class*="channelStart"]'
+    ));
+  }
+
+  function hasMessagePlaceholders(node) {
+    return Boolean(node.querySelector(':scope > [class*="wrapper_"]:is([class*="cozy_"], [class*="compact_"])'));
+  }
+
+  function findPaginationBoundary(root, direction, rowId) {
+    const older = direction < 0;
+    let edgeMessage = older ? root.firstElementChild : root.lastElementChild;
+    let hasPlaceholders = false;
+    while (edgeMessage && !edgeMessage.id.startsWith('chat-messages-')) {
+      hasPlaceholders ||= hasMessagePlaceholders(edgeMessage);
+      edgeMessage = older ? edgeMessage.nextElementSibling : edgeMessage.previousElementSibling;
+    }
+    return hasPlaceholders && edgeMessage?.id === rowId ? edgeMessage : null;
+  }
+
+  function messageEdgePosition(scroller, edgeMessage, direction) {
+    const messageRect = edgeMessage.getBoundingClientRect();
+    return (direction < 0 ? messageRect.top : messageRect.bottom) -
+      scroller.getBoundingClientRect().top + scroller.scrollTop;
+  }
+
+  function advancePagination(scroller, edgeMessage, direction, state, now) {
+    if (state.scroller !== scroller) {
+      state.scroller = scroller;
+      state.reenter = false;
+      state.waitUntil = 0;
+    }
+    if (now < state.waitUntil) return true;
+
+    const older = direction < 0;
+    const viewport = scroller.clientHeight;
+    const messageEdge = messageEdgePosition(scroller, edgeMessage, direction);
+    const maxScrollTop = Math.max(0, scroller.scrollHeight - viewport);
+
+    if (!state.reenter) {
+      if (state.attempts >= PAGINATION_ATTEMPTS.length) return false;
+      const firstAttempt = state.attempts++ === 0;
+      const outsideTrigger = older ? scroller.scrollTop >= messageEdge
+        : scroller.scrollTop + viewport <= messageEdge;
+      if (!firstAttempt || !outsideTrigger) {
+        const pivot = older ? Math.min(messageEdge + viewport, maxScrollTop)
+          : Math.max(0, messageEdge - 2 * viewport);
+        const canRearm = older ? pivot > messageEdge : pivot + viewport < messageEdge;
+        if (canRearm) {
+          // Stay outside the trigger to give Discord time to release a
+          // pending request or reset its pagination state before retrying.
+          scroller.scrollTop = pivot;
+          state.reenter = true;
+          state.waitUntil = now + PAGINATION_ATTEMPTS[state.attempts - 1].pivotDwellMs;
+          return true;
+        }
+      }
+    }
+
+    // Mounted rows have already been scanned. Stop across the real row and
+    // placeholder while Discord loads, then require overlap on the next scan.
+    const { depth, settleMs } = PAGINATION_ATTEMPTS[state.attempts - 1];
+    const offset = viewport * (older ? depth : 1 - depth);
+    const approach = Math.max(0, Math.min(messageEdge - offset, maxScrollTop));
+    scroller.scrollTop = approach;
+    state.reenter = false;
+    state.waitUntil = now + settleMs;
+    return true;
+  }
+
+  function isWaitingForLatest(root, scroller) {
+    if (root.getAttribute('aria-busy') === 'true' ||
+        scroller.getAttribute('aria-busy') === 'true' ||
+        scroller.parentElement?.querySelector('[class*="jumpToPresentBar"]')) return true;
+
+    // Discord can render a placeholder group after the last message while
+    // filling newer history. Placeholders above it do not affect this edge.
+    for (let node = root.lastElementChild; node && !node.id.startsWith('chat-messages-'); node = node.previousElementSibling) {
+      if (node.matches('[role="progressbar"], [aria-busy="true"], [class*="spinner"]') ||
+          hasMessagePlaceholders(node)) return true;
+    }
+    return false;
   }
 
   function setRunning(running) {
@@ -1895,13 +2061,14 @@
     elements.startDate.disabled = running;
     elements.endDate.disabled = running;
     elements.delay.disabled = running;
+    elements.clear.disabled = running;
   }
 
   function initialTraversalDirection(scan, bounds) {
     if (scan.maxMs < bounds.startMs) return 1;
     if (scan.minMs >= bounds.endExclusiveMs) return -1;
 
-    const missingStart = scan.minMs > bounds.startMs;
+    const missingStart = scan.minMs >= bounds.startMs;
     const missingEnd = scan.maxMs < bounds.endExclusiveMs;
     if (missingStart && missingEnd) {
       const distanceToStart = scan.minMs - bounds.startMs;
@@ -1918,82 +2085,89 @@
 
     const bounds = getDateBounds(true);
     const route = getRoute();
-    const root = findMessageRoot();
-    const scroller = findScroller(root);
 
     if (!route) {
       setStatus('noChannel', {}, 'error');
       return;
     }
-    if (!root || !scroller) {
-      setStatus('noScroller', {}, 'error');
-      return;
-    }
     if (!bounds) return;
 
     const job = { cancelled: false, routeKey: route.key };
+    const interruption = () => {
+      if (job.cancelled || activeJob !== job) return 'cancelled';
+      return getRoute()?.key === job.routeKey ? '' : 'routeChanged';
+    };
     activeJob = job;
     setRunning(true);
 
+    const coverage = { '-1': 'pending', 1: 'pending' };
+    const paginationByEdge = new Map();
+    const delay = Number(settings.delay) || 700;
+    const maximumSteps = 5000;
     let step = 0;
     let direction = 0;
-    let reachedStart = false;
-    let reachedEnd = false;
     let observedMin = Infinity;
     let observedMax = -Infinity;
-    let edgeWaits = 0;
-    let stallCount = 0;
+    let previousView = null;
+    let missingSince = null;
+    let lastProgressAt = performance.now();
     let previousSignature = '';
-    const maximumSteps = 5000;
-
-    const finish = async () => {
-      scanVisible();
-      const count = selectedRecords().length;
-      setStatus('done', { count }, 'success');
-      if (settings.autoDownload && count) await downloadExport();
-    };
 
     try {
-      while (!job.cancelled && step < maximumSteps) {
-        if (getRoute()?.key !== job.routeKey) {
-          setStatus('routeChanged', {}, 'warning');
+      while (step < maximumSteps) {
+        const stopped = interruption();
+        if (stopped) {
+          setStatus(stopped, {}, 'warning');
           return;
         }
 
+        // Re-resolve the list after every wait. Discord can replace it while
+        // loading or opening a thread, even without changing the URL.
         const scan = scanVisible();
+        const scroller = scan.root && findScroller(scan.root);
+        const now = performance.now();
         step += 1;
 
-        if (!scan.ids.length || !Number.isFinite(scan.minMs) || !Number.isFinite(scan.maxMs)) {
+        const replaced = previousView && (scan.root !== previousView.root || scroller !== previousView.scroller);
+        // Jumping to a message can replace the rows without replacing the list.
+        const lostContinuity = previousView && !scan.ids.some((id) => previousView.ids.has(id));
+        if (!scroller?.clientHeight || !scan.ids.length || lostContinuity) {
+          missingSince ??= now;
+          if (now - missingSince >= COLLECTION_STALL_MS) {
+            if (previousView) setStatus('stalled', {}, 'warning');
+            else if (scroller?.clientHeight) setStatus('noMessages', {}, 'warning');
+            else setStatus('noScroller', {}, 'error');
+            return;
+          }
           setStatus('scanning');
-          await sleep(Number(settings.delay) || 700);
+          await sleep(delay);
           continue;
         }
 
+        if (missingSince !== null || replaced) previousSignature = '';
+        missingSince = null;
+        previousView = { root: scan.root, scroller, ids: new Set(scan.ids) };
         observedMin = Math.min(observedMin, scan.minMs);
         observedMax = Math.max(observedMax, scan.maxMs);
-        if (scan.minMs <= bounds.startMs) reachedStart = true;
-        if (scan.maxMs >= bounds.endExclusiveMs) reachedEnd = true;
+        // Multiple snowflakes can have the exact start millisecond.
+        if (scan.minMs < bounds.startMs) coverage[-1] = 'covered';
+        if (scan.maxMs >= bounds.endExclusiveMs) coverage[1] = 'covered';
 
-        if (reachedStart && reachedEnd) {
-          await finish();
+        if (coverage[-1] === 'covered' && coverage[1] === 'covered') {
+          const messages = selectedRecords();
+          setStatus('done', { count: messages.length }, 'success');
+          if (settings.autoDownload && messages.length) {
+            await downloadMessages(messages, () => !interruption());
+            const interrupted = interruption();
+            if (interrupted) setStatus(interrupted, {}, 'warning');
+          }
           return;
         }
 
-        if (!direction) direction = initialTraversalDirection(scan, bounds);
-        if (direction < 0 && reachedStart) {
-          direction = 1;
-          edgeWaits = 0;
-          stallCount = 0;
-          previousSignature = '';
-        } else if (direction > 0 && reachedEnd) {
-          direction = -1;
-          edgeWaits = 0;
-          stallCount = 0;
-          previousSignature = '';
-        }
-
-        if (!direction) {
-          await finish();
+        direction ||= initialTraversalDirection(scan, bounds);
+        if (coverage[direction] !== 'pending') direction = -direction;
+        if (coverage[direction] !== 'pending') {
+          setStatus('stalled', {}, 'warning');
           return;
         }
 
@@ -2007,56 +2181,51 @@
         setStatus(overlapsRange ? 'collecting' : 'seeking', overlapsRange ? { percent, step } : { step });
 
         const atEdge = direction < 0 ? isAtTop(scroller) : isAtBottom(scroller);
-        if (atEdge) {
-          const previousBoundary = direction < 0 ? scan.minMs : scan.maxMs;
-          await jumpToLoadedEdge(scroller, direction);
-          const retry = scanVisible();
-          const changed = direction < 0
-            ? Number.isFinite(retry.minMs) && retry.minMs < previousBoundary
-            : Number.isFinite(retry.maxMs) && retry.maxMs > previousBoundary;
-
-          if (changed) {
-            edgeWaits = 0;
-            continue;
-          }
-
-          edgeWaits += 1;
-          if (edgeWaits < 3) continue;
-
-          if (direction < 0) reachedStart = true;
-          else reachedEnd = true;
-          direction = direction < 0 ? 1 : -1;
-          edgeWaits = 0;
-          stallCount = 0;
-          previousSignature = '';
-
-          if (reachedStart && reachedEnd) {
-            await finish();
-            return;
-          }
+        const waitingForLatest = atEdge && direction > 0 && isWaitingForLatest(scan.root, scroller);
+        const signature = `${direction}:${waitingForLatest}:${scrollSignature(scroller, scan)}`;
+        if (signature !== previousSignature) {
+          previousSignature = signature;
+          lastProgressAt = now;
+        }
+        const stableFor = now - lastProgressAt;
+        if (atEdge && (direction < 0
+          ? hasChannelBeginning(scan.root) || scan.ids.includes(route.channelId)
+          : !waitingForLatest && stableFor >= LATEST_SETTLE_MS)) {
+          coverage[direction] = 'covered';
           continue;
         }
 
-        edgeWaits = 0;
-        await moveScroller(scroller, direction);
-
-        const nextScan = scanVisible();
-        const signature = scrollSignature(scroller, nextScan);
-        stallCount = signature === previousSignature ? stallCount + 1 : 0;
-        previousSignature = signature;
-
-        if (stallCount >= 8) {
-          setStatus('stalled', {}, 'warning');
-          return;
+        const edgeId = direction < 0 ? scan.ids[0] : scan.ids.at(-1);
+        const edgeKey = `${direction}:${edgeId}`;
+        const boundary = findPaginationBoundary(scan.root, direction, `chat-messages-${route.channelId}-${edgeId}`);
+        if (boundary) {
+          let state = paginationByEdge.get(edgeKey);
+          if (!state) {
+            state = { attempts: 0, reenter: false, waitUntil: 0, scroller };
+            paginationByEdge.set(edgeKey, state);
+          }
+          if (advancePagination(scroller, boundary, direction, state, now)) await sleep(delay);
+          else coverage[direction] = 'incomplete';
+          continue;
         }
+
+        if (stableFor >= COLLECTION_STALL_MS) {
+          coverage[direction] = 'incomplete';
+          continue;
+        }
+
+        if (atEdge) jumpToLoadedEdge(scroller, direction);
+        else moveScroller(scroller, direction);
+        await sleep(delay);
       }
 
-      if (job.cancelled) setStatus('cancelled', {}, 'warning');
-      else setStatus('stalled', {}, 'warning');
+      setStatus(interruption() || 'stalled', {}, 'warning');
     } finally {
-      if (activeJob === job) activeJob = null;
-      setRunning(false);
-      updateCount();
+      if (activeJob === job) {
+        activeJob = null;
+        setRunning(false);
+        updateCount();
+      }
     }
   }
 

@@ -13,7 +13,7 @@ Export Discord messages you can already view by date range to TXT, JSON, CSV, or
 
 - Automatic date-range collection that picks the cheaper scroll direction (up or down) based on the current viewport.
 - Exports TXT, JSON, CSV, and a readable single-file HTML archive.
-- Preserves available authors, avatars, message text, replies, embeds, attachments, stickers, emoji, and structured reactions.
+- Preserves available authors, avatars, message text, replies, forwarded text, embeds, attachments, stickers, emoji, and structured reactions.
 - HTML archives: local-date grouping, compact consecutive posts, text/author search, and media preview.
 - Reuses author/media/emoji dictionaries and compresses the embedded archive database with native gzip when supported.
 - Standard emoji stored as Unicode; custom Discord emoji deduplicated by stable emoji ID with a `:name:` fallback.
@@ -43,6 +43,8 @@ If the panel is hidden, press `Alt/Option + Shift + D` to show it again.
 
 Dates use your browser's local time zone; the end date includes the whole selected day.
 
+The exporter follows the channel in the browser address. To export a thread, open the thread as its own channel page. If Discord stops providing enough history to verify the selected range, the panel warns you and keeps the messages it has already collected available for manual export.
+
 ## Export formats
 
 | Format | Best for |
@@ -53,6 +55,8 @@ Dates use your browser's local time zone; the end date includes the whole select
 | HTML | Browsing conversations and media |
 
 HTML exports are single-file archives with the message data embedded. Images, avatars, and custom emoji are still loaded from remote URLs, so remote resources may become unavailable later. Standard Unicode emoji do not depend on remote images.
+
+Forwarded text appears inside the forwarding message. In JSON, `forwarded` is an optional array of strings; CSV adds a `forwarded` column at the end.
 
 ## Languages
 
@@ -68,6 +72,8 @@ HTML exports are single-file archives with the message data embedded. Images, av
 
 ## Development / Documentation
 
+- Run `node --check discord-chat-exporter.user.js`, `node scripts/check-locales.mjs`, and `node --test scripts/check-collection.mjs` for syntax, localization, and date traversal checks.
+- With Node.js 22+ and `jsdom`, run `node scripts/check-current-dom.mjs` for the message and export fixtures. The script accepts a directory containing `jsdom` in `node_modules` as an optional argument.
 - [GitHub Releases](https://github.com/laipeng101/discord-chat-exporter/releases) — version history
 - [Publishing guide](docs/greasyfork/PUBLISHING_GUIDE.md) — maintainer release workflow
 - [Greasy Fork localized additional info](docs/greasyfork/locales/) — multilingual description sources
