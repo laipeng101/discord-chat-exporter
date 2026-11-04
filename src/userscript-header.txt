@@ -1,6 +1,6 @@
 // ==UserScript==
 // @namespace    https://greasyfork.org/scripts/discord-chat-exporter
-// @version      1.6.1
+// @version      1.6.2
 // @match        https://discord.com/channels/*
 // @match        https://ptb.discord.com/channels/*
 // @match        https://canary.discord.com/channels/*

@@ -94,6 +94,7 @@ export function installExporter(catalog, version) {
   const formats = createExportFormats(version, discordLabels, mediaTools);
   const settings = loadSettings();
   let scanTimer = null;
+  let structuralScanPending = false;
   let lastScan = null;
   let destroyed = false;
 
@@ -157,12 +158,17 @@ export function installExporter(catalog, version) {
     panel.setCount(currentCount(route));
   }
 
+  function cancelQueuedScan() {
+    clearTimeout(scanTimer);
+    scanTimer = null;
+    structuralScanPending = false;
+  }
+
   function scanVisible() {
     // This scan supersedes earlier notifications, including a pending debounce.
     observer.takeRecords();
     contentObserver.takeRecords();
-    clearTimeout(scanTimer);
-    scanTimer = null;
+    cancelQueuedScan();
     const route = getRoute();
     const scan = reader.scan(route, (observed, hasContent) => records.save(route, observed, hasContent));
     if (!destroyed) {
@@ -184,14 +190,18 @@ export function installExporter(catalog, version) {
     setStatus('done', { count: currentCount().selected }, 'success');
   }
 
-  function scheduleScan(mutations) {
+  function scheduleStructuralScan(mutations) {
     const routeChanged = !lastScan || lastScan.path !== location.pathname || lastScan.title !== document.title;
     if (!routeChanged && (!lastScan.route || !affectsMessageList(lastScan.root, mutations))) return;
-    queueScan();
+    queueScan(true);
   }
 
-  function queueScan() {
+  function queueScan(structural = false) {
+    // Attribute changes and media events must not postpone a structural scan:
+    // Discord might unmount the newly rendered preview before the next scan.
+    if (!structural && structuralScanPending) return;
     clearTimeout(scanTimer);
+    structuralScanPending = structural;
     scanTimer = setTimeout(scanVisible, 150);
   }
 
@@ -324,9 +334,9 @@ export function installExporter(catalog, version) {
   }
 
   panel.mount();
-  const observer = new MutationObserver(scheduleScan);
+  const observer = new MutationObserver(scheduleStructuralScan);
   // Watch in-place edits and media/reaction attributes only in the selected list.
-  const contentObserver = new MutationObserver(scheduleScan);
+  const contentObserver = new MutationObserver(() => queueScan());
   observer.observe(document.body, { childList: true, subtree: true });
   scanVisible();
 
@@ -348,7 +358,7 @@ export function installExporter(catalog, version) {
       observer.disconnect();
       watchMessageList(null);
       lastScan = null;
-      clearTimeout(scanTimer);
+      cancelQueuedScan();
       panel.destroy();
       delete window[GLOBAL_KEY];
     }

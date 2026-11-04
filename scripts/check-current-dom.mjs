@@ -235,6 +235,52 @@ test('scans message changes and replacement lists while ignoring unrelated DOM c
   assert.equal(getRecord(ids.head).text, 'Scanned explicitly');
 });
 
+test('retains lazy previews before the row unmounts despite in-place updates', async (t) => {
+  const { window, api, getRecord } = openFixture(t, {
+    rows: row(ids.head, content(ids.head, 'A message with a lazy preview') + accessories(ids.head, ''))
+  });
+  const timers = new Map();
+  let timerId = 0;
+  window.setTimeout = (callback) => {
+    timers.set(++timerId, callback);
+    return timerId;
+  };
+  window.clearTimeout = (id) => timers.delete(id);
+
+  const item = window.document.getElementById(`chat-messages-${channelId}-${ids.head}`);
+  const preview = 'https://images-ext-1.discordapp.net/external/hash/https/example.com/preview.mp4';
+  const container = item.querySelector(`#message-accessories-${ids.head}`);
+  container.innerHTML = `<div class="inlineMediaEmbed_x"><video src="${preview}" aria-label="Preview"></video></div>`;
+  await Promise.resolve();
+  assert.equal(timers.size, 1);
+  const [scheduled] = timers.keys();
+
+  // These signals arrive between the preview mounting and the list virtualizing the row.
+  item.style.setProperty('--row-offset', '12px');
+  container.querySelector('video').dispatchEvent(new window.Event('loadedmetadata'));
+  await Promise.resolve();
+  assert.deepEqual([...timers.keys()], [scheduled]);
+  const scan = timers.get(scheduled);
+  timers.delete(scheduled);
+  scan();
+
+  // When there is no pending structural scan, in-place changes still debounce.
+  item.style.setProperty('--row-offset', '16px');
+  await Promise.resolve();
+  assert.equal(timers.size, 1);
+  const [contentOnly] = timers.keys();
+  item.style.setProperty('--row-offset', '20px');
+  await Promise.resolve();
+  assert.equal(timers.size, 1);
+  assert.equal(timers.has(contentOnly), false);
+
+  item.remove();
+  api.scan();
+  assert.deepEqual(Array.from(getRecord(ids.head).media, ({ url, type, alt }) => [url, type, alt]), [
+    [preview, 'video', 'Preview']
+  ]);
+});
+
 test('keeps range counts and grouped authors across rescans, date changes, and clear', (t) => {
   const before = String(firstSnowflake - (86400000n << 22n));
   const { window, api, getRecord } = openFixture(t, {
